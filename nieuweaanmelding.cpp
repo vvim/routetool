@@ -3,6 +3,7 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <math.h>
+#include <QMessageBox>
 
 NieuweAanmelding::NieuweAanmelding(QWidget *parent) :
     QWidget(parent)
@@ -174,10 +175,13 @@ void NieuweAanmelding::accept()
     // volgorde wordt pas ingevuld als aanmelding is geselecteerd voor een ophaalronde
 
     if(!query.exec())
-        qDebug() << "INSERT aanmelding FAILED!" << query.lastError();
-
-
-    this->close();
+    {
+        QMessageBox::critical(this, tr("INSERT aanmelding voor ophaalpunt %1 FAALT!").arg(locationEdit->text()),
+                    query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
+        qCritical(QString(tr("INSERT aanmelding voor ophaalpunt %1 FAALT!").arg(locationEdit->text()).append(query.lastError().text())).toStdString().c_str());
+    }
+    else
+        this->close();
 }
 
 void NieuweAanmelding::reject()

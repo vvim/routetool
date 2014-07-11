@@ -4,6 +4,7 @@
 #include <QSqlError>
 #include <math.h>
 #include <QFormLayout>
+#include <QMessageBox>
 
 #define CODE_INTERCOMMUNALE 1
 
@@ -24,7 +25,7 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     QSqlQuery query;
     query.prepare("SELECT * FROM soort_ophaalpunt ORDER by code");
     if(!query.exec())
-        qDebug() << "SELECT for soort_ophaalpunt FAILED!" << query.lastError();
+        qCritical(QString(tr("SELECT for soort_ophaalpunt FAILED!").append(query.lastError().text())).toStdString().c_str());
 
     while(query.next())
     {
@@ -83,7 +84,8 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
 
     query.prepare("SELECT * FROM talen ORDER by id");
     if(!query.exec())
-        qDebug() << "SELECT for talen FAILED!" << query.lastError();
+        qCritical(QString(tr("SELECT for talen FAILED!").append(query.lastError().text())).toStdString().c_str());
+
 
     while(query.next())
     {
@@ -101,7 +103,7 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
 
     query.prepare("SELECT * FROM contacteren ORDER by id");
     if(!query.exec())
-        qDebug() << "SELECT for contacteren FAILED!" << query.lastError();
+        qCritical(QString(tr("SELECT for contacteren FAILED!").append(query.lastError().text())).toStdString().c_str());
 
     while(query.next())
     {
@@ -120,7 +122,8 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
 
     query.prepare("SELECT * FROM frequentie ORDER by id");
     if(!query.exec())
-        qDebug() << "SELECT for frequentie FAILED!" << query.lastError();
+        qCritical(QString(tr("SELECT for frequentie FAILED!").append(query.lastError().text())).toStdString().c_str());
+
 
     while(query.next())
     {
@@ -230,9 +233,18 @@ void InfoOphaalpunt::accept()
         query.bindValue(":extra_informatie",extra_informatieEdit->toPlainText());
         query.bindValue(":id",id);
 
-
         if(!query.exec())
-            qDebug() << "UPDATE ophaalpunten FAILED!" << query.lastError();
+        {
+            QMessageBox::critical(this, tr("UPDATE informatie voor ophaalpunt %1 FAALT!").arg(ophaalpuntEdit->text()),
+                        query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
+            qCritical(QString(tr("UPDATE informatie voor ophaalpunt %1 FAALT!").arg(ophaalpuntEdit->text()).append(query.lastError().text())).toStdString().c_str());
+        }
+        else
+        {
+            this->close();
+            emit infoChanged();
+        }
+
     }
     else
     {
@@ -268,11 +280,17 @@ void InfoOphaalpunt::accept()
 
 
         if(!query.exec())
-            qDebug() << "INSERT INTO ophaalpunten FAILED!" << query.lastError();
+        {
+            QMessageBox::critical(this, tr("AANMAKEN nieuw ophaalpunt %1 FAALT!").arg(ophaalpuntEdit->text()),
+                        query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
+            qCritical(QString(tr("AANMAKEN ophaalpunt %1 FAALT!").arg(ophaalpuntEdit->text()).append(query.lastError().text())).toStdString().c_str());
+        }
+        else
+        {
+            this->close();
+            emit infoChanged();
+        }
     }
-
-    this->close();
-    emit infoChanged();
 }
 
 void InfoOphaalpunt::reject()

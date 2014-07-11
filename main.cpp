@@ -12,6 +12,7 @@
 #include <QDateTime>
 #include <QSettings>
 #include <QSqlError>
+#include <QMessageBox>
 
 FILE *debuglogfile;
 
@@ -85,9 +86,10 @@ bool connectToDatabase()
 
     if( !db.open() )
     {
-        qDebug() << db.lastError();
-        qDebug() << db.lastError().text();
-        qFatal( "Failed to connect to database" );
+        QMessageBox::critical(0, qApp->tr("Cannot open database"),
+            qApp->tr("Unable to establish a database connection.\n"
+                     "This is the error recieved: \n\n").append(db.lastError().text()), QMessageBox::Cancel);
+        qCritical( "Failed to connect to database" );
         return false;
     }
 
