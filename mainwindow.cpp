@@ -52,32 +52,36 @@ MainWindow::MainWindow(QWidget *parent) :
     centralButtons->setLayout(layout);
     setCentralWidget(centralButtons);
     setWindowTitle(tr("Bow for your central buttons overlord!"));
-    setMinimumWidth(400);
-    setMinimumHeight(400);
+    setMinimumWidth(850);
+    setMinimumHeight(700);
 }
 
 
 void MainWindow::startRouteTool()
 {
-    routetool->show();
+    setCentralWidget(routetool);
+    //routetool->show();
 }
 
 
 void MainWindow::startNieuweaanmelding()
 {
-    nieuweaanmelding->show();
+    setCentralWidget(nieuweaanmelding);
+    //nieuweaanmelding->show();
 }
 
 
 void MainWindow::startNieuwophaalpunt()
 {
-    nieuwophaalpunt->show();
+    setCentralWidget(nieuwophaalpunt);
+    //nieuwophaalpunt->show();
 }
 
 
 void MainWindow::startConfiguration()
 {
-    configuration->show();
+    setCentralWidget(configuration);
+    //configuration->show();
 }
 
 
