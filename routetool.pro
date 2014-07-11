@@ -47,7 +47,8 @@ SOURCES += main.cpp\
     documentwriter.cpp \
     configuration.cpp \
     nieuweaanmelding.cpp \
-    infoophaalpunt.cpp
+    infoophaalpunt.cpp \
+    mainwindow.cpp
 
 HEADERS  += routetool.h \
     form.h \
@@ -58,7 +59,8 @@ HEADERS  += routetool.h \
     documentwriter.h \
     configuration.h \
     nieuweaanmelding.h \
-    infoophaalpunt.h
+    infoophaalpunt.h \
+    mainwindow.h
 
 FORMS    += routetool.ui \
     form.ui

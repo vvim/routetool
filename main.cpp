@@ -2,6 +2,7 @@
 #include <QSqlDatabase>
 #include "routetool.h"
 #include "configuration.h"
+#include "mainwindow.h"
 
 #include <QDebug>
 #include <QJson/Parser>
@@ -101,15 +102,14 @@ bool connectToDatabase()
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    qDebug() << "form.cpp line 85 for autocompletionquery";
 
     checkSettings();
 
 //    if (!startLoggingToFile()) exit(0);
     if (!connectToDatabase()) exit(0);
 
-    RouteTool rt;
-    rt.show();
+    MainWindow motu;
+    motu.show();
 
     a.exec();
 

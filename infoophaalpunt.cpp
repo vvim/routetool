@@ -192,6 +192,7 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     setLayout(mainLayout);
 
     setMinimumWidth(600);
+    setWindowTitle("Nieuw ophaalpunt");
 }
 
 InfoOphaalpunt::~InfoOphaalpunt()

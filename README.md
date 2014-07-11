@@ -8,11 +8,9 @@ prerequisites
 
 see the information at https://code.google.com/p/qt-google-maps/w/list .
 
-1. QJSON
+# QJSON
 
-On QJSON: all I get is a textfile containing
-
-    The project has been moved to github: https://github.com/flavio/qjson/ git config remote.origin.url git://github.com/flavio/qjson.git 
+On QJSON: all I get is a textfile containing `The project has been moved to github: https://github.com/flavio/qjson/ git config remote.origin.url git://github.com/flavio/qjson.git`
 
 so I simply ran "git clone git://github.com/flavio/qjson.git" instead of the above mentioned 'gitorious'-link .
 
@@ -26,22 +24,25 @@ Then you need to compile qjson library first. We count that qjson library is in 
 
 Then the qt-google-maps project will be compiled OK. To run it you need to adjust LD_LIBRARY_PATH on Linux (or PATH on Windows) so that variable points to the qjson/build/lib directory. 
 
-2. GOOGLE MAPS API KEY
+# GOOGLE MAPS API KEY
 
 Just as the 'qt-google-maps' example from https://code.google.com/p/qt-google-maps/ , routetool uses Google Maps API v3. To use API you need to register your own application on Google. Do not worry: the procedure is very simple.
 
 Details:
 
-You need to login to Google, so first you need to create simple Google account. Then you can visit the page
-
-https://code.google.com/apis/console
+You need to login to Google, so first you need to create simple Google account. Then you can visit the page https://code.google.com/apis/console
 
 there you can create your application. You need to check access to Google Maps API v3 in tab "Services".
 
 Then you need create client ID in tab "API Access".
 
-Create the file 'routetool.ini' and add the line "apiKey=.............." where the dots resemble the key given to you by the Google Api Console.
+Create the file `routetool.ini` and add the line `apiKey=..............` where the dots resemble the key given to you by the Google Api Console.
 
 After that you can compile and run routetool.
 
+
+
 Any problem? Please contact me directly.
+
+
+<<< on MarkDown markup, see https://help.github.com/articles/writing-on-github and http://daringfireball.net/linked/2014/01/08/markdown-extension >>>
