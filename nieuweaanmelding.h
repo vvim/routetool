@@ -31,6 +31,7 @@ class NieuweAanmelding : public QWidget
 public:
     explicit NieuweAanmelding(QWidget *parent = 0);
     ~NieuweAanmelding();
+    void resetValues();
     
 private:
     QLabel *locationLabel;

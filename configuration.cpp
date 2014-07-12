@@ -59,7 +59,6 @@ Configuration::Configuration(QWidget *parent) :
 
 void Configuration::accept()
 {
-     qDebug() << "SAVE it";
      settings.setValue("apiKey", apiKeyEdit->text());
      settings.setValue("db/host", db_hostEdit->text());
      settings.setValue("db/username", db_usernameEdit->text());
@@ -76,7 +75,6 @@ void Configuration::accept()
 
 void Configuration::reject()
 {
-    qDebug() << "forget it";
     this->close();
 }
 

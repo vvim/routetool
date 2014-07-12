@@ -108,8 +108,8 @@ int main(int argc, char *argv[])
 //    if (!startLoggingToFile()) exit(0);
     if (!connectToDatabase()) exit(0);
 
-    MainWindow motu;
-    motu.show();
+    RouteTool r;
+    r.show();
 
     a.exec();
 

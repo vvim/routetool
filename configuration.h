@@ -16,6 +16,9 @@ class Configuration : public QWidget
     Q_OBJECT
 public:
     explicit Configuration(QWidget *parent = 0);
+
+public slots:
+    void setOriginalValues();
     
 private:
     QLineEdit *apiKeyEdit;
@@ -33,7 +36,6 @@ private:
 private slots:
     void accept();
     void reject();
-    void setOriginalValues();
 };
 
 #endif // CONFIGURATION_H

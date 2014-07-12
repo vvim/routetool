@@ -23,13 +23,10 @@
      <height>23</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="actionQuit"/>
-   </widget>
-   <addaction name="menuFile"/>
+   <addaction name="nieuweAanmeldingMenuButton"/>
+   <addaction name="nieuwOphaalpuntMenuButton"/>
+   <addaction name="configurationMenuButton"/>
+   <addaction name="actionQuit"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -40,55 +37,24 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="nieuweAanmeldingMenuButton">
+   <property name="text">
+    <string>Nieuwe aanmelding</string>
+   </property>
+  </action>
+  <action name="nieuwOphaalpuntMenuButton">
+   <property name="text">
+    <string>Nieuw ophaalpunt</string>
+   </property>
+  </action>
+  <action name="configurationMenuButton">
+   <property name="text">
+    <string>Instellingen</string>
+   </property>
+  </action>
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
-   </property>
-  </action>
-  <action name="actionMoscow">
-   <property name="text">
-    <string>Moscow</string>
-   </property>
-  </action>
-  <action name="actionNewYork">
-   <property name="text">
-    <string>New York</string>
-   </property>
-  </action>
-  <action name="actionLondon">
-   <property name="text">
-    <string>London</string>
-   </property>
-  </action>
-  <action name="actionSanJose_CA">
-   <property name="text">
-    <string>San Jose CA</string>
-   </property>
-  </action>
-  <action name="actionBedford_MA">
-   <property name="text">
-    <string>Bedford MA</string>
-   </property>
-  </action>
-  <action name="actionSky">
-   <property name="text">
-    <string>Sky</string>
-   </property>
-  </action>
-  <action name="actionBorders">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Borders and Names</string>
-   </property>
-  </action>
-  <action name="actionRoads">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Roads</string>
    </property>
   </action>
  </widget>

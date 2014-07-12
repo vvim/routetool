@@ -135,8 +135,30 @@ NieuweAanmelding::NieuweAanmelding(QWidget *parent) :
     **/
 }
 
+void NieuweAanmelding::resetValues()
+{
+    locationEdit->setText("");
+    nameEdit->setText("");
+    dateEdit->setDate(QDate::currentDate());
+
+    zakkenkurkSpinBox->setValue(0);
+    kgkurkSpinBox->setValue(0);
+
+    zakkenkaarsenSpinBox->setValue(0);
+    kgkaarsenSpinBox->setValue(0);
+
+    opmerkingenEdit->setText("");
+
+    locationEdit->setFocus(); // always setFocus() as last action: http://stackoverflow.com/questions/526761/set-qlineedit-focus-in-qt
+
+    toonOphaalpunt->setEnabled(false);
+
+    setMinimumWidth(600);
+}
+
 NieuweAanmelding::~NieuweAanmelding()
 {
+    delete info;
 }
 
 void NieuweAanmelding::accept()

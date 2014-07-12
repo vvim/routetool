@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 #include <QSettings>
+#include "nieuweaanmelding.h"
+#include "infoophaalpunt.h"
+#include "configuration.h"
 
 extern QSettings settings;
 
@@ -24,6 +27,14 @@ public:
 private:
     Ui::RouteTool *ui;
     Form* m_pForm;
+    NieuweAanmelding nieuweAanmeldingWidget;
+    InfoOphaalpunt nieuwOphaalpuntWidget;
+    Configuration configurationWidget;
+
+private slots:
+    void showNieuweAanmelding();
+    void showNieuwOphaalpunt();
+    void showConfiguration();
 };
 
 #endif // ROUTETOOL_H
