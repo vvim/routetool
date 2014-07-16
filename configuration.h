@@ -30,6 +30,8 @@ private:
     QLineEdit *zak_kaarsresten_volumeEdit;
     QLineEdit *zak_kurk_naar_kgEdit;
     QLineEdit *zak_kurk_volumeEdit;
+    QLineEdit *max_gewicht_vrachtwagenEdit;
+    QLineEdit *max_volume_vrachtwagenEdit;
     QLineEdit *startpuntEdit;
     QPushButton *resetButton;
 

@@ -15,10 +15,10 @@ Configuration::Configuration(QWidget *parent) :
 
     // bekijk? http://stackoverflow.com/questions/13828657/qspaceritem-in-qformlayout-vertical-expand
     apiKeyEdit = new QLineEdit();
-    db_databasenameEdit= new QLineEdit();
-    db_hostEdit= new QLineEdit();
-    db_passwordEdit= new QLineEdit();
-    db_usernameEdit= new QLineEdit();
+    db_databasenameEdit = new QLineEdit();
+    db_hostEdit = new QLineEdit();
+    db_passwordEdit = new QLineEdit();
+    db_usernameEdit = new QLineEdit();
     startpuntEdit = new QLineEdit();
     zak_kaarsresten_naar_kgEdit= new QLineEdit();
     zak_kaarsresten_naar_kgEdit->setValidator( new QDoubleValidator(0, 1000, 2, this) );
@@ -28,6 +28,10 @@ Configuration::Configuration(QWidget *parent) :
     zak_kurk_naar_kgEdit->setValidator( new QDoubleValidator(0, 1000, 2, this) );
     zak_kurk_volumeEdit= new QLineEdit();
     zak_kurk_volumeEdit->setValidator( new QDoubleValidator(0, 1000, 2, this) );
+    max_gewicht_vrachtwagenEdit = new QLineEdit();
+    max_gewicht_vrachtwagenEdit->setValidator( new QDoubleValidator(0, 100000, 2, this) );
+    max_volume_vrachtwagenEdit = new QLineEdit();
+    max_volume_vrachtwagenEdit->setValidator( new QDoubleValidator(0, 100000, 2, this) );
     setOriginalValues();
 
 
@@ -45,6 +49,9 @@ Configuration::Configuration(QWidget *parent) :
     layout->addRow(tr("Volume zak kaarsresten in liter:"), zak_kaarsresten_volumeEdit);
     layout->addRow(tr("Gewicht zak kurk in kg:"), zak_kurk_naar_kgEdit);
     layout->addRow(tr("Volume zak kurk in liter:"), zak_kurk_volumeEdit);
+    // line: capaciteit vrachtwagen
+    layout->addRow(tr("Maximum capaciteit vrachtwagen in kg:"), max_gewicht_vrachtwagenEdit);
+    layout->addRow(tr("Maximum capaciteit vrachtwagen in liter:"), max_volume_vrachtwagenEdit);
 
 
 
@@ -54,7 +61,7 @@ Configuration::Configuration(QWidget *parent) :
     setLayout(mainLayout);
     //w->setMinimumHeight(600);
     setMinimumWidth(600);
-    setWindowTitle("Settings");
+    setWindowTitle("Instellingen");
 }
 
 void Configuration::accept()
@@ -69,6 +76,8 @@ void Configuration::accept()
      settings.setValue("zak_kurk_naar_kg", zak_kurk_naar_kgEdit->text().toDouble());
      settings.setValue("zak_kaarsresten_volume", zak_kaarsresten_volumeEdit->text().toDouble()); // in liter
      settings.setValue("zak_kurk_volume", zak_kurk_volumeEdit->text().toDouble()); // in liter
+     settings.setValue("max_gewicht_vrachtwagen", max_gewicht_vrachtwagenEdit->text().toDouble()); // in liter
+     settings.setValue("max_volume_vrachtwagen", max_volume_vrachtwagenEdit->text().toDouble()); // in liter
 
      this->close();
 }
@@ -90,4 +99,6 @@ void Configuration::setOriginalValues()
     zak_kaarsresten_volumeEdit->setText(settings.value("zak_kaarsresten_volume").toString());
     zak_kurk_naar_kgEdit->setText(settings.value("zak_kurk_naar_kg").toString());
     zak_kurk_volumeEdit->setText(settings.value("zak_kurk_volume").toString());
+    max_gewicht_vrachtwagenEdit->setText(settings.value("max_gewicht_vrachtwagen").toString());
+    max_volume_vrachtwagenEdit->setText(settings.value("max_volume_vrachtwagen").toString());
 }
