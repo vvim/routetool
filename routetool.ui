@@ -25,6 +25,7 @@
    </property>
    <addaction name="nieuweAanmeldingMenuButton"/>
    <addaction name="nieuwOphaalpuntMenuButton"/>
+   <addaction name="kiesOphaalpuntenMenuButton"/>
    <addaction name="configurationMenuButton"/>
    <addaction name="actionQuit"/>
   </widget>
@@ -45,6 +46,11 @@
   <action name="nieuwOphaalpuntMenuButton">
    <property name="text">
     <string>Nieuw ophaalpunt</string>
+   </property>
+  </action>
+  <action name="kiesOphaalpuntenMenuButton">
+   <property name="text">
+    <string>Kies ophaalpunten</string>
    </property>
   </action>
   <action name="configurationMenuButton">

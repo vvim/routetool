@@ -6,6 +6,7 @@
 #include "nieuweaanmelding.h"
 #include "infoophaalpunt.h"
 #include "configuration.h"
+#include "kiesophaalpunten.h"
 
 extern QSettings settings;
 
@@ -30,11 +31,13 @@ private:
     NieuweAanmelding nieuweAanmeldingWidget;
     InfoOphaalpunt nieuwOphaalpuntWidget;
     Configuration configurationWidget;
+    KiesOphaalpunten kiesOphaalpuntenWidget;
 
 private slots:
     void showNieuweAanmelding();
     void showNieuwOphaalpunt();
     void showConfiguration();
+    void showKiesOphaalpunten();
 };
 
 #endif // ROUTETOOL_H
