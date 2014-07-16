@@ -14,6 +14,7 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(ui->nieuweAanmeldingMenuButton, SIGNAL(triggered()), this, SLOT(showNieuweAanmelding()));
     connect(ui->nieuwOphaalpuntMenuButton, SIGNAL(triggered()), this, SLOT(showNieuwOphaalpunt()));
     connect(ui->configurationMenuButton, SIGNAL(triggered()), this, SLOT(showConfiguration()));
+    connect(ui->kiesOphaalpuntenMenuButton, SIGNAL(triggered()), this, SLOT(showKiesOphaalpunten()));
 
     m_pForm = new Form(this);
     setCentralWidget(m_pForm);
@@ -22,6 +23,7 @@ RouteTool::RouteTool(QWidget *parent) :
 
 RouteTool::~RouteTool()
 {
+    delete m_pForm;
     delete ui;
 }
 
@@ -48,4 +50,13 @@ void RouteTool::showConfiguration()
     configurationWidget.setOriginalValues();
     configurationWidget.show();
     // here the information stays the same, so it shouldn't matter
+}
+
+
+
+void RouteTool::showKiesOphaalpunten()
+{
+    kiesOphaalpuntenWidget.initialise();
+    kiesOphaalpuntenWidget.show();
+    // always re-initialise the list of 'aanmeldingen' as the user might have given new input since last time
 }
