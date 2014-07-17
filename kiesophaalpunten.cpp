@@ -1,10 +1,9 @@
-#include <QStringList>
-
 #include <QDebug>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QApplication>
 #include "kiesophaalpunten.h"
 
 /** userroles to store data from QListWidgetItem
@@ -191,25 +190,36 @@ void KiesOphaalpunten::setTotalWeightTotalVolume()
 
 void KiesOphaalpunten::populateLegeAanmeldingen()
 {
-    // TODO neem dit uit de databank
+    // TODO neem dit uit de databank : mysql> select * from aanmelding where ophaalronde_nr is NULL;
+
+#ifndef QT_NO_CURSOR
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
 
     legeAanmeldingenList->clear();
-
     legeAanmeldingenList->setSortingEnabled(true);
-    QStringList joris;
-    joris << "Oak" << "Banana" << "Apple" << "Orange" << "Grapes" << "Jayesh" << "Pineapple" << "Groundnut" << "Sugarcane" << "Coconut" << "Remote" << "Mango";
-    foreach (QString j, joris)
+
+    QSqlQuery query("select ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
+
+    while (query.next())
     {
-        QListWidgetItem * item = new QListWidgetItem(j);
-        item->setData(Qt::DisplayRole,QString(j).append(" (%1 kg , %2 liter)").arg(1000.4).arg(2000.5));
-        item->setData(OPHAALPUNT,j);
-        item->setData(WEIGHT,1000.4);
-        item->setData(VOLUME,2000.5);
+        QString ophaalpunt = query.value(0).toString();
+        double weight = query.value(1).toDouble()+query.value(2).toDouble();
+        double volume = (query.value(3).toDouble() * settings.value("zak_kurk_volume").toDouble()) +(query.value(4).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
+        QListWidgetItem * item = new QListWidgetItem();
+        item->setData(Qt::DisplayRole,QString("%1 (%2 kg , %3 liter)").arg(ophaalpunt).arg(weight).arg(volume));
+        item->setData(OPHAALPUNT,ophaalpunt);
+        item->setData(WEIGHT,weight);
+        item->setData(VOLUME,volume);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setFlags(item->flags() &~ Qt::ItemIsSelectable);
         item->setCheckState(Qt::Unchecked); // http://www.qtcentre.org/threads/7032-QListWidget-with-check-box-s , thank you J-P Nurmi
         legeAanmeldingenList->addItem(item);
     }
+
+#ifndef QT_NO_CURSOR
+    QApplication::restoreOverrideCursor();
+#endif
 }
 
 
