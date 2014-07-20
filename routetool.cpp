@@ -19,6 +19,8 @@ RouteTool::RouteTool(QWidget *parent) :
     m_pForm = new Form(this);
     setCentralWidget(m_pForm);
 
+    connect(&kiesOphaalpuntenWidget, SIGNAL(aanmelding_for_route(QList<QString> *)), m_pForm, SLOT(add_aanmeldingen(QList<QString>*)));
+
 }
 
 RouteTool::~RouteTool()

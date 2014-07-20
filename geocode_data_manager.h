@@ -13,18 +13,24 @@ class GeocodeDataManager : public QObject
     Q_OBJECT
 public:
     explicit GeocodeDataManager(QObject *parent = 0);
+    ~GeocodeDataManager();
 
     void getCoordinates(const QString& address);
+    void pushListOfMarkers(QList<QString> *);
 
 signals:
     void errorOccured(const QString&);
-    void coordinatesReady(double east, double north);
+    void coordinatesReady(double east, double north, QString markername);
+    void markerDone();
 
 private slots:
     void replyFinished(QNetworkReply* reply);
+    void giveNextMarker();
 
 private:
     QNetworkAccessManager* m_pNetworkAccessManager;
+    QList<QString> *markersToBeDone;
+    QString name_of_marker;
 
 
 };

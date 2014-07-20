@@ -18,7 +18,7 @@ Form::Form(QWidget *parent) :
     connect(ui->goButton, SIGNAL(clicked()), this, SLOT(goClicked()));
     connect(ui->lePostalAddress, SIGNAL(returnPressed()), this, SLOT(goClicked()));
 
-    connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double)), this, SLOT(showCoordinates(double,double)));
+    connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,QString)), this, SLOT(showCoordinates(double,double,QString)));
     connect(&m_geocodeDataManager, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
 
     connect(&m_distanceMatrix, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
@@ -111,7 +111,7 @@ Form::~Form()
 }
 
 
-void Form::showCoordinates(double east, double north, bool saveMarker)
+void Form::showCoordinates(double east, double north, QString markername, bool saveMarker)
 {
     qDebug() << "Form, showCoordinates" << east << north;
 
@@ -125,7 +125,8 @@ void Form::showCoordinates(double east, double north, bool saveMarker)
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 
     if (saveMarker)
-        setMarker(east, north, ui->lePostalAddress->text());
+        setMarker(east, north, markername);
+        //setMarker(east, north, ui->lePostalAddress->text());
 }
 
 void Form::setMarker(double east, double north, QString caption)
@@ -184,7 +185,7 @@ void Form::on_lwMarkers_currentRowChanged(int currentRow)
 void Form::on_pbRemoveMarker_clicked()
 {
     //<vvim> TODO: programma crasht als er maar 2 markers zijn en je wil de tweede verwijderen. Waarom?
-    qDebug() << "<vvim> TODO: programma crasht als er maar 2 markers zijn en je wil de tweede verwijderen. Waarom?";
+    qDebug() << "<vvim> TODO: BUG: programma crasht als er maar 2 markers zijn en je wil de tweede verwijderen. Waarom?";
 
     if (ui->lwMarkers->currentRow() < 0) return;
 
@@ -291,8 +292,15 @@ void Form::adapt_order_smarkers(QList<int> *tsp_order_smarkers)
             // ui->lwMarkers : enable dragging!!! QListWidgetItem
 }
 
+void Form::add_aanmeldingen(QList<QString> *aanmeldingen)
+{
+    m_geocodeDataManager.pushListOfMarkers(aanmeldingen);
+}
+
 QAbstractItemModel *Form::modelFromFile(const QString& fileName)
 {
+    // <vvim> is this function ever used???
+    qDebug() << "\n\n++++++++" << "<vvim> is this function ever used???" << "QAbstractItemModel *Form::modelFromFile(const QString& fileName) in form.cpp" << "++++++++\n\n";
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly))
         return new QStringListModel(completer);

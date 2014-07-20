@@ -23,6 +23,7 @@ public:
 
     
 signals:
+    void aanmelding_for_route(QList<QString> *);
     
 public slots:
 private:

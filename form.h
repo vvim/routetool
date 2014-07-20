@@ -8,6 +8,7 @@
 #include <QCompleter>
 #include "mylineedit.h" // not my personal code, where is it from? (forum on QCompleter)
 #include <QSettings>
+#include <QList>
 
 extern QSettings settings;
 
@@ -25,16 +26,15 @@ public:
     explicit Form(QWidget *parent = 0);
     ~Form();
 
-
-
 private slots:
     void goClicked();
 
-    void showCoordinates(double east, double north, bool saveMarker = true);
+    void showCoordinates(double east, double north, QString markername, bool saveMarker = true);
     //set marker to map and save marker in markers list
     void setMarker(double east, double north, QString caption);
     void errorOccured(const QString&);
     void adapt_order_smarkers(QList<int> *);
+    void add_aanmeldingen(QList<QString> *);
 
     void keyPressEvent( QKeyEvent *k );
 

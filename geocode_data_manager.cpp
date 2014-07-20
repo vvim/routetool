@@ -9,13 +9,18 @@ GeocodeDataManager::GeocodeDataManager(QObject *parent) :
     QObject(parent)
 {
     m_pNetworkAccessManager = new QNetworkAccessManager(this);
+    markersToBeDone = new QList<QString>();
     connect(m_pNetworkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+    connect(this, SIGNAL(coordinatesReady(double, double, QString)), this, SLOT(giveNextMarker()));
 }
 
 void GeocodeDataManager::getCoordinates(const QString& address)
 {
 //    QString url = QString("http://maps.google.com/maps/geo?q=%1&key=%2&output=json&oe=utf8&sensor=false").arg(address).arg(apiKey);
     QString url = QString("https://maps.googleapis.com/maps/api/geocode/json?address=%1&key=%2&oe=utf8&sensor=false").arg(address).arg(settings.value("apiKey").toString());
+    name_of_marker = address;
+    name_of_marker.replace("+", " ");
+qDebug() << "<vvim>" << "would the distance matrix work if we would only put the NAME of the ophaalpunt here, and NOT the address? based on the coordinates???";
     m_pNetworkAccessManager->get(QNetworkRequest(QUrl(url)));
 }
 
@@ -81,8 +86,54 @@ void GeocodeDataManager::replyFinished(QNetworkReply* reply)
     }
     QVariantMap locationOfResult = (*it).toMap()["geometry"].toMap()["location"].toMap();
     qDebug() << "location" << locationOfResult["lng"].toDouble() << locationOfResult["lat"].toDouble();
+/**
+    QVariantMap address_name = (*it).toMap();
+    QString markerName = address_name["formatted_address"].toString();
+    qDebug() << "<vvim>: markername: " << markerName << "dit is enkel het adres, ook nog de naam van het opaahlpunt invullen!! Best met Inherited Classes? en een int om te differentiëren: 1) ophaalpunt 2) leveringsadres 3) gewoon een adres";
+    emit coordinatesReady(locationOfResult["lng"].toDouble(), locationOfResult["lat"].toDouble(),markerName); // <vvim: handel omdraaien :-) eerst lng dan lat>
+**/
 
-    emit coordinatesReady(locationOfResult["lng"].toDouble(), locationOfResult["lat"].toDouble()); // <vvim: handel omdraaien :-) eerst lng dan lat>
+    emit coordinatesReady(locationOfResult["lng"].toDouble(), locationOfResult["lat"].toDouble(),name_of_marker); // <vvim: handel omdraaien :-) eerst lng dan lat>
+//    qDebug() << "\n\n  * * do we ever reach here??? * * \n\n";
+//    emit markerDone();
     // </vvim>
+}
 
+void GeocodeDataManager::pushListOfMarkers(QList<QString> *list_of_markers)
+{
+    markersToBeDone = list_of_markers;
+
+    qDebug() << "markers to be done:" << markersToBeDone->size();
+    foreach(QString marker, *markersToBeDone)
+    {
+        qDebug() << marker;
+    }
+
+    if(!markersToBeDone->empty())
+    {
+        QString firstmarker = markersToBeDone->takeFirst(); // Removes the first item in the list and returns it.
+        getCoordinates(firstmarker);
+    }
+}
+
+void GeocodeDataManager::giveNextMarker()
+{
+    if(!markersToBeDone->empty()) // markersToBeDone: not declared yet???
+    {
+        qDebug() << "markers to be done:" << markersToBeDone->size();
+        foreach(QString marker, *markersToBeDone)
+        {
+            qDebug() << marker;
+        }
+        qDebug() << "<vvim>: hier een korte pauze inlassen zodat de naam van de marker correct blijft?";
+        QString firstmarker = markersToBeDone->takeFirst(); // Removes the first item in the list and returns it.
+        getCoordinates(firstmarker);
+    }
+    else
+        qDebug() << "shit is empty, nuttin' to see here boy!";
+}
+
+GeocodeDataManager::~GeocodeDataManager()
+{
+    delete markersToBeDone;
 }

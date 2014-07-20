@@ -24,9 +24,6 @@ DistanceMatrix::DistanceMatrix(QObject *parent) :
     m_pNetworkAccessManager = new QNetworkAccessManager(this);
     connect(m_pNetworkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
 
-
-    // <vvim> TODO: maak dat de eerste city_name altijd Vlaspit is!!!! En voeg deze automatisch toe bij het opstarten
-    qDebug() << "<vvim> TODO: maak dat de eerste city_name altijd Vlaspit is!!!! En voeg deze automatisch toe bij het opstarten aub";
     citynames = new QList<QString>;
     tsp_solution = new QList<int>();
     all_cities_marked = new QList<int>();

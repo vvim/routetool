@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QApplication>
+#include <QMessageBox>
 #include "kiesophaalpunten.h"
 
 /** userroles to store data from QListWidgetItem
@@ -20,6 +21,7 @@
 #define OPHAALPUNT Qt::UserRole
 #define WEIGHT OPHAALPUNT+1
 #define VOLUME WEIGHT+1
+#define ADRES VOLUME+1
 
 
 KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
@@ -199,18 +201,20 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
     legeAanmeldingenList->clear();
     legeAanmeldingenList->setSortingEnabled(true);
 
-    QSqlQuery query("select ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
+    QSqlQuery query("select ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
 
     while (query.next())
     {
         QString ophaalpunt = query.value(0).toString();
         double weight = query.value(1).toDouble()+query.value(2).toDouble();
         double volume = (query.value(3).toDouble() * settings.value("zak_kurk_volume").toDouble()) +(query.value(4).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
+        QString ophaalpunt_adres = query.value(5).toString();
         QListWidgetItem * item = new QListWidgetItem();
         item->setData(Qt::DisplayRole,QString("%1 (%2 kg , %3 liter)").arg(ophaalpunt).arg(weight).arg(volume));
         item->setData(OPHAALPUNT,ophaalpunt);
         item->setData(WEIGHT,weight);
         item->setData(VOLUME,volume);
+        item->setData(ADRES,ophaalpunt_adres);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setFlags(item->flags() &~ Qt::ItemIsSelectable);
         item->setCheckState(Qt::Unchecked); // http://www.qtcentre.org/threads/7032-QListWidget-with-check-box-s , thank you J-P Nurmi
@@ -225,20 +229,45 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
 
 void KiesOphaalpunten::accept()
 {
+    /**
+
+      ALS ER MEER DAN één OPHAALPUNT MET DEZELFDE NAAM (en informatie???) STAAT EN ER WORDT ER EENTJE AANGEKLIKT
+      WORDT AUTOMATISCH DE EERSTE GEKOZEN.
+
+      KOMT DIT DOOR DEZELFDE NAAM???
+
+    **/
+
     //recalculate total weight and total volume: see BUG
           // <vvim> BUG: als een item geselecteerd wordt met SPATIE, dan wordt er niets bijgeteld?????";
           setTotalWeightTotalVolume();
 
-    for(int i = 0 ; i < legeAanmeldingenList->count(); i++)
+    if((total_weight > maximum_weight) || (total_volume > maximum_volume))
     {
-        QListWidgetItem *aanmelding = legeAanmeldingenList->item(i);
-        aanmelding->setData(1, 15 * i);
-        if(aanmelding->checkState() == Qt::Checked)
-            qDebug() << "yes" << aanmelding->data(OPHAALPUNT).toString() << ":" << aanmelding->data(WEIGHT).toDouble() << "kg" << aanmelding->data(VOLUME).toDouble() << "liter";
-        else
-            qDebug() << "NO" << aanmelding->data(OPHAALPUNT).toString() << "!";
+          QMessageBox::critical(this, tr("Overgewicht of overvolume!"),
+                      tr("De voorgestelde ophaalpunten geven overgewicht of overvolume: %1kg (maximum %2kg) en %3 liter (maximum %4 liter).").arg(total_weight).arg(maximum_weight).arg(total_volume).arg(maximum_volume), QMessageBox::Cancel);
     }
-    this->close();
+    else
+    {
+        qDebug() << "TODO: Insert into DB";
+        QList<QString> *listOfAanmeldingen = new QList<QString>();
+        qDebug() << "<vvim> TODO: maak een klasse waarin we de naam, het adres en het gewicht/volume kurk/kaars kunnen opslaan. Ook beter voor QListWidget!";
+        for(int i = 0 ; i < legeAanmeldingenList->count(); i++)
+        {
+            QListWidgetItem *aanmelding = legeAanmeldingenList->item(i);
+            if(aanmelding->checkState() == Qt::Checked)
+            {
+                QString aanmelding_string = aanmelding->data(OPHAALPUNT).toString().append(", %1").arg(aanmelding->data(ADRES).toString());
+                aanmelding_string.replace("&","%26");
+                listOfAanmeldingen->push_back(aanmelding_string);
+                //qDebug() << "yes" << aanmelding->data(OPHAALPUNT).toString() << ":" << aanmelding->data(WEIGHT).toDouble() << "kg" << aanmelding->data(VOLUME).toDouble() << "liter";
+            }
+        }
+        emit aanmelding_for_route(listOfAanmeldingen);
+        qDebug() << "do we reach this code???" << "\n\nwe should add this data to the database as well so that we can reconstruct 'ophaalrondes'.";
+        this->close();
+    }
+
 }
 
 void KiesOphaalpunten::reject()

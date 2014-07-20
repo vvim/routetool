@@ -40,7 +40,7 @@ void checkSettings()
         c->show();
     }
 
-    qDebug() << "Configuration checkSettings(): OK! All settings are filled in";
+    qDebug() << "Configuration checkSettings(): OK! All settings are filled in.";
 }
 
 void myMessageOutput(QtMsgType type, const char *msg)
