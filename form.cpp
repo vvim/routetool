@@ -157,8 +157,10 @@ void Form::setMarker(double east, double north, QString caption)
 void Form::goClicked()
 {
     QString address = ui->lePostalAddress->text();
-    m_geocodeDataManager.getCoordinates(address.replace(" ", "+"));
-    //ui->lePostalAddress->clear(); // <vvim> toegevoegd om textedit automatisch te wissen
+    m_geocodeDataManager.getCoordinates(address.replace(" ", "+")); // !! move this replace action to geocode_data_manager
+    //ui->lePostalAddress->clear(); // <vvim> this can maybe be re-instated?
+
+
 }
 
 
@@ -218,6 +220,14 @@ void Form::on_pbDistanceMatrix_clicked()
 {
     qDebug() << "<vvim> Button 'Route Planner' pressed";
     m_distanceMatrix.getDistances(m_markers);
+
+    //ui->webView->setHtml("<!DOCTYPE html><h1>Hi mom!</h1></html>");
+    /*  --> change HTML to forget the previous markers, but the put the route instead.
+            Then new markers will be added as "markers", but not yet in the route.
+
+            What will happen when we try to remove markers that are already in the route? Error?
+    */
+
 }
 
 void Form::adapt_order_smarkers(QList<int> *tsp_order_smarkers)
