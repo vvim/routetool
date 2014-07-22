@@ -18,6 +18,18 @@ Form::Form(QWidget *parent) :
     connect(ui->goButton, SIGNAL(clicked()), this, SLOT(goClicked()));
     connect(ui->lePostalAddress, SIGNAL(returnPressed()), this, SLOT(goClicked()));
 
+    //ui: buttons should be disabled until optimal route has been calculated:
+    ui->pbPrintMap->setEnabled(false);
+    ui->pbRouteOmdraaien->setEnabled(false);
+    ui->pbShowRouteAsDefined->setEnabled(false);
+
+    /*
+    connect(ui->lwMarkers, SIGNAL(itemPressed(QListWidgetItem*)), this, SLOT(reorderroute()));
+        could be used to identify a drag/drop from ui->lwMarkers:
+        but I prefer to use a dedicated button:
+    */
+    connect(ui->pbShowRouteAsDefined, SIGNAL(clicked()), this, SLOT(drawRoute()));
+
     connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,QString)), this, SLOT(showCoordinates(double,double,QString)));
     connect(&m_geocodeDataManager, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
 
@@ -185,6 +197,14 @@ void Form::on_lwMarkers_currentRowChanged(int currentRow)
 
 void Form::on_pbRemoveMarker_clicked()
 {
+    // !! door Drag and Drop mogelijkheid, klopt de JavaScript benadering in deze functie niet meer.
+    // best dus om WebView helemaal te herladen!!!
+
+    // misschien is de crash dan ook opgelost?
+
+
+
+
     //<vvim> TODO: programma crasht als er maar 2 markers zijn en je wil de tweede verwijderen. Waarom?
     qDebug() << "<vvim> TODO: BUG: programma crasht als er maar 2 markers zijn en je wil de tweede verwijderen. Waarom?";
 
@@ -205,6 +225,8 @@ qDebug() << "<vvim> DEBUG: ui->lwMarkerslength" << ui->lwMarkers->size();
     delete ui->lwMarkers->takeItem(ui->lwMarkers->currentRow());
 qDebug() << "<vvim> DEBUG: lwmarkers deleted";
 
+    if(ui->pbShowRouteAsDefined->isEnabled())
+        drawRoute();
 }
 
 void Form::on_zoomSpinBox_valueChanged(int arg1)
@@ -220,13 +242,10 @@ void Form::on_pbDistanceMatrix_clicked()
     qDebug() << "<vvim> Button 'Route Planner' pressed";
     m_distanceMatrix.getDistances(m_markers);
 
-    //ui->webView->setHtml("<!DOCTYPE html><h1>Hi mom!</h1></html>");
-    /*  --> change HTML to forget the previous markers, but the put the route instead.
-            Then new markers will be added as "markers", but not yet in the route.
-
-            What will happen when we try to remove markers that are already in the route? Error?
-    */
-
+    //extra funcationalities
+    ui->pbPrintMap->setEnabled(true);
+    ui->pbRouteOmdraaien->setEnabled(true);
+    ui->pbShowRouteAsDefined->setEnabled(true);
 }
 
 void Form::adapt_order_smarkers(QList<int> *tsp_order_smarkers)
@@ -296,15 +315,17 @@ void Form::adapt_order_smarkers(QList<int> *tsp_order_smarkers)
 
         //hier de route-aanduiding op baseren
 
-        //teken_route.clicked();
-
-            // ui->lwMarkers : enable dragging!!! QListWidgetItem
+        drawRoute();
 }
 
 void Form::add_aanmeldingen(QList<QString> *aanmeldingen)
 {
     m_geocodeDataManager.pushListOfMarkers(aanmeldingen);
 }
+
+/**
+
+    I believe this function is a copy/paste accident, must try out. Was already included in version 20140519
 
 QAbstractItemModel *Form::modelFromFile(const QString& fileName)
 {
@@ -331,6 +352,7 @@ QAbstractItemModel *Form::modelFromFile(const QString& fileName)
     return new QStringListModel(words, completer);
 }
 
+**/
 
 void Form::keyPressEvent( QKeyEvent *k )
 {
@@ -338,3 +360,52 @@ void Form::keyPressEvent( QKeyEvent *k )
         on_pbRemoveMarker_clicked();
 }
 
+
+void Form::drawRoute()
+{
+    //info: https://www.youtube.com/watch?v=nN85QMYZzQQ
+
+
+    // this only makes sense when there is more than 1 marker in m_markers
+    // (as the first marker is the STARTING POINT and DESTINATION POINT of the route)
+    if(m_markers.length() > 1)
+    {
+        QString html = QString("<!DOCTYPE html> <html> <head> <meta name=\"viewport\" content=\"initial-scale=1.0, user-scalable=no\" /> <style type=\"text/css\"> html { height: 100% } body { height: 100%; margin: 0; padding: 0 } #map_canvas { height: 100% } </style> <script type=\"text/javascript\" src=\"http://maps.googleapis.com/maps/api/js?key=")+
+                settings.value("apiKey").toString()+
+                QString("&sensor=false\"> </script> <script type=\"text/javascript\"> var map; var markers = []; var directionDisplay; var directionsService = new google.maps.DirectionsService(); var waypts = []; function initialize() { var myOptions = { center: new google.maps.LatLng(50.9801, 4.97517), zoom: 15, mapTypeId: google.maps.MapTypeId.ROADMAP, panControl: true }; map = new google.maps.Map(document.getElementById(\"map_canvas\"), myOptions); directionsDisplay = new google.maps.DirectionsRenderer(); directionsDisplay.setMap(map); var request = { origin:\"")+
+                settings.value("startpunt").toString()+
+                QString("\", destination:\"")+
+                settings.value("startpunt").toString()+
+                QString("\", waypoints: waypts, travelMode: google.maps.DirectionsTravelMode.DRIVING }; directionsService.route(request, function(response, status) { if (status == google.maps.DirectionsStatus.OK) { directionsDisplay.setDirections(response); } }); ");
+
+        /*  --> change HTML to forget the previous markers, but the put the route instead.
+                Then new markers will be added as "markers", but not yet in the route.
+
+                What will happen when we try to remove markers that are already in the route? Error?
+        */
+
+        QList <SMarker*> m_markers_minus_startingpoint = m_markers;
+        m_markers_minus_startingpoint.removeFirst();
+
+        qDebug() << m_markers.length() << m_markers_minus_startingpoint.length();
+
+        foreach(SMarker* m, m_markers_minus_startingpoint)
+        {
+            QString str =
+                    QString("waypts.push({") +
+                    QString("location: new google.maps.LatLng(%1,%2),").arg(m->north).arg(m->east) +
+//                    QString("location: \"%1\",").arg(m->caption) +
+                    QString("stopover: true") +
+                    QString("});");
+
+            qDebug() << str;
+            html += str;
+        }
+
+        html += QString("} </script> </head> <body onload=\"initialize()\"> <div id=\"map_canvas\" style=\"width:100%;height:100%\"> </div> </body> </html> ");
+
+        ui->webView->setHtml(html);
+    }
+
+
+}

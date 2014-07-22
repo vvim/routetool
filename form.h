@@ -28,27 +28,21 @@ public:
 
 private slots:
     void goClicked();
-
     void showCoordinates(double east, double north, QString markername, bool saveMarker = true);
     //set marker to map and save marker in markers list
     void setMarker(double east, double north, QString caption);
     void errorOccured(const QString&);
     void adapt_order_smarkers(QList<int> *);
     void add_aanmeldingen(QList<QString> *);
-
     void keyPressEvent( QKeyEvent *k );
-
     void on_lwMarkers_currentRowChanged(int currentRow);
-
     void on_pbRemoveMarker_clicked();
-
     void on_zoomSpinBox_valueChanged(int arg1);
-
     void on_pbDistanceMatrix_clicked();
+    void drawRoute();
 
 private:
     void getCoordinates(const QString& address);
-
 
 private:
     Ui::Form *ui;
@@ -57,9 +51,13 @@ private:
     //markers list
     QList <SMarker*> m_markers;
 
+    MyCompleter *completer;
+
+    /**    I believe this member is a copy/paste accident, must try out. Was already included in version 20140519
+
     QAbstractItemModel *modelFromFile(const QString& fileName);
 
-    MyCompleter *completer;
+    **/
 };
 
 #endif // FORM_H
