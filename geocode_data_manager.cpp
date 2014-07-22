@@ -16,10 +16,14 @@ GeocodeDataManager::GeocodeDataManager(QObject *parent) :
 
 void GeocodeDataManager::getCoordinates(const QString& address)
 {
-//    QString url = QString("http://maps.google.com/maps/geo?q=%1&key=%2&output=json&oe=utf8&sensor=false").arg(address).arg(apiKey);
-    QString url = QString("https://maps.googleapis.com/maps/api/geocode/json?address=%1&key=%2&oe=utf8&sensor=false").arg(address).arg(settings.value("apiKey").toString());
     name_of_marker = address;
-    name_of_marker.replace("+", " ");
+    name_of_marker.replace("&","+");
+    name_of_marker.replace("\n",",");
+
+    QString address_encoded = name_of_marker;
+    address_encoded.replace(" ","+");
+    QString url = QString("https://maps.googleapis.com/maps/api/geocode/json?address=%1&key=%2&oe=utf8&sensor=false").arg(address_encoded).arg(settings.value("apiKey").toString());
+
 qDebug() << "<vvim>" << "would the distance matrix work if we would only put the NAME of the ophaalpunt here, and NOT the address? based on the coordinates???";
     m_pNetworkAccessManager->get(QNetworkRequest(QUrl(url)));
 }

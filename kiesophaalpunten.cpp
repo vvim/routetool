@@ -258,13 +258,12 @@ void KiesOphaalpunten::accept()
             if(aanmelding->checkState() == Qt::Checked)
             {
                 QString aanmelding_string = aanmelding->data(OPHAALPUNT).toString().append(", %1").arg(aanmelding->data(ADRES).toString());
-                aanmelding_string.replace("&","%26");
                 listOfAanmeldingen->push_back(aanmelding_string);
-                //qDebug() << "yes" << aanmelding->data(OPHAALPUNT).toString() << ":" << aanmelding->data(WEIGHT).toDouble() << "kg" << aanmelding->data(VOLUME).toDouble() << "liter";
             }
         }
         emit aanmelding_for_route(listOfAanmeldingen);
-        qDebug() << "do we reach this code???" << "\n\nwe should add this data to the database as well so that we can reconstruct 'ophaalrondes'.";
+
+        qDebug() << "<vvim> add data to the database so that we can reconstruct 'ophaalrondes'.";
         this->close();
     }
 

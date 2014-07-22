@@ -157,10 +157,8 @@ void Form::setMarker(double east, double north, QString caption)
 void Form::goClicked()
 {
     QString address = ui->lePostalAddress->text();
-    m_geocodeDataManager.getCoordinates(address.replace(" ", "+")); // !! move this replace action to geocode_data_manager
-    //ui->lePostalAddress->clear(); // <vvim> this can maybe be re-instated?
-
-
+    m_geocodeDataManager.getCoordinates(address);
+    ui->lePostalAddress->clear();
 }
 
 
