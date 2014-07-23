@@ -14,10 +14,11 @@ struct SMarker
         east = 0;
         north = 0;
         caption = "";
+        distancematrixindex = -1;
     };
     SMarker(double _east, double _north, QString _caption)
     {
-        east = _east; north = _north; caption = _caption;
+        east = _east; north = _north; caption = _caption; distancematrixindex = -1;
     };
 
     double east;
