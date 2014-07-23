@@ -24,10 +24,11 @@ Form::Form(QWidget *parent) :
     ui->pbShowRouteAsDefined->setEnabled(false);
 
     /*
-    connect(ui->lwMarkers, SIGNAL(itemPressed(QListWidgetItem*)), this, SLOT(reorderroute()));
+    connect(ui->lwMarkers, SIGNAL(itemPressed(QListWidgetItem*)), this, SLOT(reorderMarkers()));
         could be used to identify a drag/drop from ui->lwMarkers:
         but I prefer to use a dedicated button:
     */
+
     connect(ui->pbShowRouteAsDefined, SIGNAL(clicked()), this, SLOT(drawRoute()));
 
     connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,QString)), this, SLOT(showCoordinates(double,double,QString)));
@@ -165,6 +166,7 @@ void Form::setMarker(double east, double north, QString caption)
 
     //adding capton to ListWidget
     ui->lwMarkers->addItem(caption);
+    link_lwMarkers_mmarkers[caption] = _marker;
 }
 
 void Form::goClicked()
@@ -268,7 +270,12 @@ void Form::on_zoomSpinBox_valueChanged(int arg1)
 
 void Form::on_pbDistanceMatrix_clicked()
 {
-    qDebug() << "<vvim> Button 'Route Planner' pressed";
+    //reorder Markers:: see BUG
+          // <vvim> BUG: er is geen SIGNAL voor Drag/Drop vanuit QListWidget. Het programma weet dus niet
+          //             of er markers van plaats zijn veranderd. Zeer vervelend.
+          //             Bestaat er een extensie voor Qt die deze SIGNAL wel heeft?
+    // reorderMarkers(); -> not necessary, the order will be changed any way
+
     m_distanceMatrix.getDistances(m_markers);
 
     //extra funcationalities
@@ -396,6 +403,13 @@ void Form::keyPressEvent( QKeyEvent *k )
 
 void Form::drawRoute()
 {
+    //reorder Markers:: see BUG
+          // <vvim> BUG: er is geen SIGNAL voor Drag/Drop vanuit QListWidget. Het programma weet dus niet
+          //             of er markers van plaats zijn veranderd. Zeer vervelend.
+          //             Bestaat er een extensie voor Qt die deze SIGNAL wel heeft?
+    reorderMarkers();
+
+
     //info: https://www.youtube.com/watch?v=nN85QMYZzQQ
 
 
@@ -443,6 +457,12 @@ void Form::drawRoute()
 
 void Form::on_pbRouteOmdraaien_clicked()
 {
+    //reorder Markers:: see BUG
+          // <vvim> BUG: er is geen SIGNAL voor Drag/Drop vanuit QListWidget. Het programma weet dus niet
+          //             of er markers van plaats zijn veranderd. Zeer vervelend.
+          //             Bestaat er een extensie voor Qt die deze SIGNAL wel heeft?
+    reorderMarkers();
+
     if(m_markers.length() > 0) // has no use without markers, right?
     {
         QList<SMarker*> temp;
@@ -466,4 +486,32 @@ void Form::on_pbRouteOmdraaien_clicked()
     }
 
     drawRoute();
+}
+
+
+void Form::reorderMarkers()
+{
+    QList<SMarker*> temp;
+    //qDebug() << "write out of m_markers BEFORE the reordering";
+    //logOutputMarkers();
+
+    for(int i = 0; i < ui->lwMarkers->count(); i++)
+    {
+        temp.push_back(link_lwMarkers_mmarkers[ui->lwMarkers->item(i)->text()]);
+    }
+
+    m_markers = temp; // does this leave garbage in memory? should I delete something??
+                      // TODO <vvim> ask StackOverflow
+
+    //qDebug() << "write out of m_markers AFTER the reordering";
+    //logOutputMarkers();
+}
+
+void Form::logOutputMarkers()
+{
+    // function used for debugging
+    for(int i = 0; i < m_markers.length(); i++)
+    {
+        qDebug() << m_markers[i]->caption;
+    }
 }

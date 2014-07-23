@@ -41,6 +41,7 @@ private slots:
     void on_pbDistanceMatrix_clicked();
     void drawRoute();
     void on_pbRouteOmdraaien_clicked();
+    void reorderMarkers();
 
 private:
     /**    I believe this member is a copy/paste accident, must try out.
@@ -49,6 +50,9 @@ private:
     int **distance_matrix_in_meters;
     int **distance_matrix_in_seconds;
     int matrix_dimensions;
+
+    QMap<QString, SMarker*> link_lwMarkers_mmarkers;
+
 
 private:
     Ui::Form *ui;
@@ -64,6 +68,8 @@ private:
     QAbstractItemModel *modelFromFile(const QString& fileName);
 
     **/
+
+    void logOutputMarkers();
 };
 
 #endif // FORM_H
