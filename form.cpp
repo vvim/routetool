@@ -198,7 +198,7 @@ void Form::on_lwMarkers_currentRowChanged(int currentRow)
 void Form::on_pbRemoveMarker_clicked()
 {
     // !! door Drag and Drop mogelijkheid, klopt de JavaScript benadering in deze functie niet meer.
-    // best dus om WebView helemaal te herladen!!!
+    // best dus om die verwijdering in JavaScript te herzien, of de WebView helemaal te herladen!
 
     // misschien is de crash dan ook opgelost?
 
@@ -216,14 +216,11 @@ void Form::on_pbRemoveMarker_clicked()
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 
     //deleteing caption from markers list
+    /** THIS LINE GIVES THE TROUBLE, some sort of interaction with lwMarkers? **/
     delete m_markers.takeAt(ui->lwMarkers->currentRow());
-qDebug() << "<vvim> DEBUG: ui->lwMarkerslength" << ui->lwMarkers->size();
 
     //deleteing caption from ListWidget
-//<vvim> THIS ONE GOES WRONG when it is the next-to-last marker. why??
-//""var newLoc = new google.maps.LatLng(50.9896, 5.05016); map.setCenter(newLoc);" " -> currentRowChanged
     delete ui->lwMarkers->takeItem(ui->lwMarkers->currentRow());
-qDebug() << "<vvim> DEBUG: lwmarkers deleted";
 
     /**  I believed this one worked, but I was mistaking: ( http://stackoverflow.com/questions/24895977/qt-c-removing-next-to-last-item-from-qlistwidget-makes-program-crash )
 
