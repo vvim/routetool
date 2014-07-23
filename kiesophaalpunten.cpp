@@ -137,20 +137,7 @@ void KiesOphaalpunten::itemSelected(QListWidgetItem* aanmelding)
 void KiesOphaalpunten::itemSelected()
 {
     QListWidgetItem* aanmelding = legeAanmeldingenList->currentItem();
-    if(aanmelding->checkState() == Qt::Unchecked)
-    {
-        aanmelding->setCheckState(Qt::Checked);
-        total_weight += aanmelding->data(WEIGHT).toDouble();
-        total_volume += aanmelding->data(VOLUME).toDouble();
-    }
-    else
-    {
-        aanmelding->setCheckState(Qt::Unchecked);
-        total_weight -= aanmelding->data(WEIGHT).toDouble();
-        total_volume -= aanmelding->data(VOLUME).toDouble();
-    }
-
-    setTotalWeightTotalVolume();
+    itemSelected(aanmelding);
 }
 
 void KiesOphaalpunten::setTotalWeightTotalVolume()
