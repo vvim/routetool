@@ -250,34 +250,6 @@ void Form::on_pbRemoveMarker_clicked()
 
 
 
-    /**  I believed this one worked, but I was mistaking: ( http://stackoverflow.com/questions/24895977/qt-c-removing-next-to-last-item-from-qlistwidget-makes-program-crash )
-
-
-    I might have found an answer, but it seems so counter-intuitive. Can someone comment on this?
-
-    I changed the "takeItem" and broke it up into:
-
-        void Form::on_pbRemoveMarker_clicked()
-        {
-            if (ui->lwMarkers->currentRow() < 0) return;
-
-            QListWidgetItem *item_to_be_deleted = ui->lwMarkers->item(ui->lwMarkers->currentRow());
-            ui->lwMarkers->removeItemWidget(item_to_be_deleted);
-            delete item_to_be_deleted;
-        }
-
-    So instead of the takeItem(), which basically should remove the item whilst taking it, I now create a QListWidgetItem-pointer to the item and ask to remove it from the list through removeItem (but I guess this takes some extra calculation, locating the correct item?), before I finally remove the item itself.
-
-    Now, the crash no longer happens. Is my code correct now? Am I missing something?
-
-    Any comment is welcome, I am really not sure about this and require a second opinion.
-
-    Thank you.
-
-    **/
-
-
-
     if(ui->pbShowRouteAsDefined->isEnabled())
         drawRoute();
 }
@@ -429,7 +401,7 @@ void Form::drawRoute()
                 settings.value("startpunt").toString()+
                 QString("\", destination:\"")+
                 settings.value("startpunt").toString()+
-                QString("\", waypoints: waypts, travelMode: google.maps.DirectionsTravelMode.DRIVING }; directionsService.route(request, function(response, status) { if (status == google.maps.DirectionsStatus.OK) { directionsDisplay.setDirections(response); } }); ");
+                QString("\", waypoints: waypts, travelMode: google.maps.DirectionsTravelMode.DRIVING, avoidHighways: true }; directionsService.route(request, function(response, status) { if (status == google.maps.DirectionsStatus.OK) { directionsDisplay.setDirections(response); } }); ");
 
         /*  --> change HTML to forget the previous markers, but the put the route instead.
                 Then new markers will be added as "markers", but not yet in the route.
