@@ -34,7 +34,7 @@ Form::Form(QWidget *parent) :
     connect(&m_geocodeDataManager, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
 
     connect(&m_distanceMatrix, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
-    connect(&m_distanceMatrix, SIGNAL(new_order_smarkers(QList<int> *)), this, SLOT(adapt_order_smarkers(QList<int> *)));
+    connect(&m_distanceMatrix, SIGNAL(new_order_smarkers(QList<int> *, int**, int**)), this, SLOT(adapt_order_smarkers(QList<int> *, int**, int**)));
 
     QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled, true);
     ui->lePostalAddress->setText("");
@@ -277,7 +277,7 @@ void Form::on_pbDistanceMatrix_clicked()
     ui->pbShowRouteAsDefined->setEnabled(true);
 }
 
-void Form::adapt_order_smarkers(QList<int> *tsp_order_smarkers)
+void Form::adapt_order_smarkers(QList<int> *tsp_order_smarkers, int** matrix_in_meters, int ** matrix_in_seconds)
 {
         /**********************************************************************************
           function to re-arrange the QList<SMarker *>
@@ -305,6 +305,10 @@ void Form::adapt_order_smarkers(QList<int> *tsp_order_smarkers)
 
         */
         /////////////////
+
+        distance_matrix_in_meters = matrix_in_meters;
+        distance_matrix_in_seconds = matrix_in_seconds;
+        matrix_dimensions = m_markers.length();
 
         QList<SMarker*> temp;
         ui->lwMarkers->clear();
@@ -415,8 +419,6 @@ void Form::drawRoute()
 
         QList <SMarker*> m_markers_minus_startingpoint = m_markers;
         m_markers_minus_startingpoint.removeFirst();
-
-        qDebug() << m_markers.length() << m_markers_minus_startingpoint.length();
 
         foreach(SMarker* m, m_markers_minus_startingpoint)
         {
