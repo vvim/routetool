@@ -197,6 +197,10 @@ void Form::on_lwMarkers_currentRowChanged(int currentRow)
 
 void Form::on_pbRemoveMarker_clicked()
 {
+    qDebug() << "<vvim> TODO: na Drag en Drop is de volgorde van ui->lwMarkers veranderd, maar NIET" <<
+                "die van m_markers of de markers[] in JavaScript." <<
+                "What to do? WebView() herschrijven?";
+
     // !! door Drag and Drop mogelijkheid, klopt de JavaScript benadering in deze functie niet meer.
     // best dus om die verwijdering in JavaScript te herzien, of de WebView helemaal te herladen!
 
@@ -398,9 +402,9 @@ void Form::drawRoute()
         QString html = QString("<!DOCTYPE html> <html> <head> <meta name=\"viewport\" content=\"initial-scale=1.0, user-scalable=no\" /> <style type=\"text/css\"> html { height: 100% } body { height: 100%; margin: 0; padding: 0 } #map_canvas { height: 100% } </style> <script type=\"text/javascript\" src=\"http://maps.googleapis.com/maps/api/js?key=")+
                 settings.value("apiKey").toString()+
                 QString("&sensor=false\"> </script> <script type=\"text/javascript\"> var map; var markers = []; var directionDisplay; var directionsService = new google.maps.DirectionsService(); var waypts = []; function initialize() { var myOptions = { center: new google.maps.LatLng(50.9801, 4.97517), zoom: 15, mapTypeId: google.maps.MapTypeId.ROADMAP, panControl: true }; map = new google.maps.Map(document.getElementById(\"map_canvas\"), myOptions); directionsDisplay = new google.maps.DirectionsRenderer(); directionsDisplay.setMap(map); var request = { origin:\"")+
-                settings.value("startpunt").toString()+
+                m_markers.first()->caption + //settings.value("startpunt").toString()+
                 QString("\", destination:\"")+
-                settings.value("startpunt").toString()+
+                m_markers.first()->caption + //settings.value("startpunt").toString()+
                 QString("\", waypoints: waypts, travelMode: google.maps.DirectionsTravelMode.DRIVING, avoidHighways: true }; directionsService.route(request, function(response, status) { if (status == google.maps.DirectionsStatus.OK) { directionsDisplay.setDirections(response); } }); ");
 
         /*  --> change HTML to forget the previous markers, but the put the route instead.
@@ -433,4 +437,31 @@ void Form::drawRoute()
     }
 
 
+}
+
+void Form::on_pbRouteOmdraaien_clicked()
+{
+    if(m_markers.length() > 0) // has no use without markers, right?
+    {
+        QList<SMarker*> temp;
+        ui->lwMarkers->clear();
+
+        // reverse the route, but keep the same starting point!
+        temp.push_front(m_markers.front());
+        ui->lwMarkers->addItem(m_markers.front()->caption);
+
+        for(int i = m_markers.length() - 1; i > 0; i--)
+        {
+            temp.push_back(m_markers.at(i));
+            ui->lwMarkers->addItem(m_markers.at(i)->caption);
+            qDebug()<< m_markers.at(i)->caption;
+        }
+
+
+        m_markers = temp; // does this leave garbage in memory? should I delete something??
+                          // TODO <vvim> ask StackOverflow
+        ui->lwMarkers->update();
+    }
+
+    drawRoute();
 }

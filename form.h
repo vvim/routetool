@@ -40,6 +40,7 @@ private slots:
     void on_zoomSpinBox_valueChanged(int arg1);
     void on_pbDistanceMatrix_clicked();
     void drawRoute();
+    void on_pbRouteOmdraaien_clicked();
 
 private:
     void getCoordinates(const QString& address);
