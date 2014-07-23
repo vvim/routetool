@@ -32,7 +32,7 @@ private slots:
     //set marker to map and save marker in markers list
     void setMarker(double east, double north, QString caption);
     void errorOccured(const QString&);
-    void adapt_order_smarkers(QList<int> *, int**, int**);
+    void process_result_distancematrix(QList<int> *, int**, int**);
     void add_aanmeldingen(QList<QString> *);
     void keyPressEvent( QKeyEvent *k );
     void on_lwMarkers_currentRowChanged(int currentRow);
@@ -50,6 +50,7 @@ private:
     int **distance_matrix_in_meters;
     int **distance_matrix_in_seconds;
     int matrix_dimensions;
+    bool matrices_up_to_date;
 
     QMap<QString, SMarker*> link_lwMarkers_mmarkers;
 

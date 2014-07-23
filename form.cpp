@@ -37,7 +37,7 @@ Form::Form(QWidget *parent) :
     connect(&m_geocodeDataManager, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
 
     connect(&m_distanceMatrix, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
-    connect(&m_distanceMatrix, SIGNAL(new_order_smarkers(QList<int> *, int**, int**)), this, SLOT(adapt_order_smarkers(QList<int> *, int**, int**)));
+    connect(&m_distanceMatrix, SIGNAL(new_order_smarkers(QList<int> *, int**, int**)), this, SLOT(process_result_distancematrix(QList<int> *, int**, int**)));
 
     QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled, true);
     ui->lePostalAddress->setText("");
@@ -289,7 +289,7 @@ void Form::on_pbDistanceMatrix_clicked()
     ui->pbShowRouteAsDefined->setEnabled(true);
 }
 
-void Form::adapt_order_smarkers(QList<int> *tsp_order_smarkers, int** matrix_in_meters, int ** matrix_in_seconds)
+void Form::process_result_distancematrix(QList<int> *tsp_order_smarkers, int** matrix_in_meters, int ** matrix_in_seconds)
 {
         /**********************************************************************************
           function to re-arrange the QList<SMarker *>
