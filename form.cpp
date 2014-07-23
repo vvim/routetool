@@ -14,6 +14,8 @@ Form::Form(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Form)
 {
+    matrices_up_to_date = false;
+
     ui->setupUi(this);
     connect(ui->goButton, SIGNAL(clicked()), this, SLOT(goClicked()));
     connect(ui->lePostalAddress, SIGNAL(returnPressed()), this, SLOT(goClicked()));
@@ -25,8 +27,8 @@ Form::Form(QWidget *parent) :
 
     /*
     connect(ui->lwMarkers, SIGNAL(itemPressed(QListWidgetItem*)), this, SLOT(reorderMarkers()));
-        could be used to identify a drag/drop from ui->lwMarkers:
-        but I prefer to use a dedicated button:
+        can only be used to identify the START of a drag/drop from ui->lwMarkers:
+        it cannot SIGNAL the drop itself.
     */
 
     connect(ui->pbShowRouteAsDefined, SIGNAL(clicked()), this, SLOT(drawRoute()));
@@ -167,6 +169,7 @@ void Form::setMarker(double east, double north, QString caption)
     //adding capton to ListWidget
     ui->lwMarkers->addItem(caption);
     link_lwMarkers_mmarkers[caption] = _marker;
+    matrices_up_to_date = false;
 }
 
 void Form::goClicked()
@@ -199,6 +202,8 @@ void Form::on_lwMarkers_currentRowChanged(int currentRow)
 
 void Form::on_pbRemoveMarker_clicked()
 {
+    //matrices_up_to_date = false; -> doesn't matter, the information in the distance_matrices stays relevant
+
     qDebug() << "<vvim> TODO: na Drag en Drop is de volgorde van ui->lwMarkers veranderd, maar NIET" <<
                 "die van m_markers of de markers[] in JavaScript." <<
                 "What to do? WebView() herschrijven?";
@@ -316,13 +321,17 @@ void Form::adapt_order_smarkers(QList<int> *tsp_order_smarkers, int** matrix_in_
         distance_matrix_in_meters = matrix_in_meters;
         distance_matrix_in_seconds = matrix_in_seconds;
         matrix_dimensions = m_markers.length();
+        matrices_up_to_date = true;
 
         QList<SMarker*> temp;
         ui->lwMarkers->clear();
 
         for(int i = 0; i < m_markers.length(); i++)
         {
-            temp.push_back(m_markers.at(tsp_order_smarkers->at(i)));
+            SMarker * _marker = m_markers.at(tsp_order_smarkers->at(i));
+            _marker->distancematrixindex = tsp_order_smarkers->at(i);
+            qDebug() << _marker->caption << _marker->distancematrixindex;
+            temp.push_back(_marker);
             ui->lwMarkers->addItem(m_markers.at(tsp_order_smarkers->at(i))->caption);
             //qDebug()<< m_markers.at(tsp_order_smarkers->at(i))->caption;
         }

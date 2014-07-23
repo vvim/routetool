@@ -23,6 +23,7 @@ struct SMarker
     double east;
     double north;
     QString caption;
+    int distancematrixindex;
 };
 
 
