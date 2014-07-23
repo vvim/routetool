@@ -25,13 +25,14 @@ class DistanceMatrix : public QObject
     Q_OBJECT
 public:
     explicit DistanceMatrix(QObject *parent = 0);
+    ~DistanceMatrix();
 
     void getDistances(QList <SMarker*> markers);
 
 signals:
     void errorOccured(const QString&);
     //void coordinatesReady(double east, double north);
-    void new_order_smarkers(QList<int> *);
+    void new_order_smarkers(QList<int> *, int**, int**);
 
 private slots:
     void replyFinished(QNetworkReply* reply);
@@ -57,6 +58,7 @@ private:
     QList<QString>* citynames;
 
     QString seconds_human_readable(int totalseconds);
+    void deleteTheMatrices();
 
     // tsp help-functions
     int initialize_current_minimum_cost(int size);

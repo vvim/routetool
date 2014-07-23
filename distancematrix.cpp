@@ -145,6 +145,14 @@ QString DistanceMatrix::buildQjsonUrl(QList <SMarker*> markers)
 
 void DistanceMatrix::getDistances(QList <SMarker*> markers)
 {
+    if(m_markers.length() > 0)
+    {
+
+        qDebug() << "DistanceMatrix has been called before, so we must delete the matrices!";
+        deleteTheMatrices();
+
+    }
+
     m_markers = markers;
 
     qDebug() << "<vvim> TODO: mag dit, of moeten we een nieuwe m_markers creëren en deze laten invullen met 'markers'???";
@@ -741,7 +749,7 @@ qDebug() << "<vvim> TODO: totale afstand én totale tijd tesamen berekenen";
 
     QApplication::restoreOverrideCursor(); // set cursor back to "Arrow cursor"
 
-    emit new_order_smarkers(tsp_solution); // geef de voorgestelde route door aan de class Form zodat die ook in de GUI kan worden aangepast
+    emit new_order_smarkers(tsp_solution, distance_matrix_in_meters, distance_matrix_in_seconds); // geef de voorgestelde route door aan de class Form zodat die ook in de GUI kan worden aangepast
 
     //QString("vervoerslijst-(%1).odt".arg(currentdate)); -> no const char[23]
     vervoersLijst.write("vervoerslijst.odt");
@@ -750,18 +758,8 @@ qDebug() << "<vvim> TODO: totale afstand én totale tijd tesamen berekenen";
     msg.setText(path_string);
     msg.exec();
 
-
-   // <vvim> TODO : NAAR DESTRUCTOR!!
-   qDebug() << "<vvim> TODO : NAAR DESTRUCTOR!! : clean it up: afstanden_matrix";
-   for(int i = 0; i < nr_of_cities; i++) {
-       delete [] distance_matrix_in_meters[i];
-       delete [] distance_matrix_in_seconds[i];
-   }
-   delete [] distance_matrix_in_meters;
-   delete [] distance_matrix_in_seconds;
-
-   qDebug() << "destroy path!";
-   delete path;
+    qDebug() << "destroy path!";
+    delete path;
 
 }
 
@@ -984,4 +982,21 @@ void DistanceMatrix::logOutputCitynamesDistanceMatrices()
           fprintf(matrixlogfile, "\n%s", glob.toStdString().c_str());
       }
       fclose(matrixlogfile);
+}
+
+void DistanceMatrix::deleteTheMatrices()
+{
+    int nr_of_cities = m_markers.length();
+
+    for(int i = 0; i < nr_of_cities; i++) {
+        delete [] distance_matrix_in_meters[i];
+        delete [] distance_matrix_in_seconds[i];
+    }
+    delete [] distance_matrix_in_meters;
+    delete [] distance_matrix_in_seconds;
+}
+
+DistanceMatrix::~DistanceMatrix()
+{
+    deleteTheMatrices();
 }
