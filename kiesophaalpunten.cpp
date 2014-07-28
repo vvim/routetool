@@ -24,6 +24,7 @@
 #define WEIGHT_KAARS ZAK_KURK+1
 #define ZAK_KAARS WEIGHT_KAARS+1
 #define ADRES ZAK_KAARS+1
+#define AANMELDING_ID ADRES+1
 
 
 KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
@@ -190,7 +191,7 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
     legeAanmeldingenList->clear();
     legeAanmeldingenList->setSortingEnabled(true);
 
-    QSqlQuery query("select ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
+    QSqlQuery query("select ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
 
     while (query.next())
     {
@@ -206,6 +207,7 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
         item->setData(ZAK_KURK,query.value(3).toDouble());
         item->setData(ZAK_KAARS,query.value(4).toDouble());
         item->setData(ADRES,ophaalpunt_adres);
+        item->setData(AANMELDING_ID,query.value(6).toInt());
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setFlags(item->flags() &~ Qt::ItemIsSelectable);
         item->setCheckState(Qt::Unchecked); // http://www.qtcentre.org/threads/7032-QListWidget-with-check-box-s , thank you J-P Nurmi
@@ -244,20 +246,35 @@ void KiesOphaalpunten::accept()
 ////// <vvim> HERE!!! in plaats van hier QStrings door te geven, beter sophaalpunt.h!!!
 
         qDebug() << "TODO: Insert into DB";
-        QList<QString> *listOfAanmeldingen = new QList<QString>();
-        qDebug() << "<vvim> TODO: maak een klasse waarin we de naam, het adres en het gewicht/volume kurk/kaars kunnen opslaan. Ook beter voor QListWidget!";
+        QList<SOphaalpunt> *listOfAanmeldingen = new QList<SOphaalpunt>();
         for(int i = 0 ; i < legeAanmeldingenList->count(); i++)
         {
+            // could be done better by using a new member of KiesOphaalpunten
+            //      QMap <int, SOphaalpunt *> m_map_aanmeldingen
+            // we fill m_map_aanmeldingen in 'populateLegeAanmeldingen' with the id number of the aanmeldingen and the information in SOphaalpunt
+            // therefore we do not need all the SetData() in the QListWidgetItems, only the id for the QMap.
+            // We can let this id be the same as the id in the table 'aanmelding'.
+            //
+            // Then this code will be simply Qt::Checked() => listOfAanmeldingen->append(m_map_aanmeldingen[aanmelding->data(AANMELDING_ID).toInt()];
             QListWidgetItem *aanmelding = legeAanmeldingenList->item(i);
             if(aanmelding->checkState() == Qt::Checked)
             {
-                QString aanmelding_string = aanmelding->data(OPHAALPUNT).toString().append(", %1").arg(aanmelding->data(ADRES).toString());
-                listOfAanmeldingen->push_back(aanmelding_string);
+                SOphaalpunt _ophaalpunt(
+                                aanmelding->data(OPHAALPUNT).toString(),   // naam
+                                aanmelding->data(WEIGHT_KURK).toDouble(),  // kg_kurk
+                                aanmelding->data(WEIGHT_KAARS).toDouble(), // kg_kaarsresten
+                                aanmelding->data(ZAK_KURK).toDouble(),     // zakken_kurk
+                                aanmelding->data(ZAK_KAARS).toDouble(),    // zakken_kaarsresten
+                                aanmelding->data(ADRES).toString(),        // adres
+                                aanmelding->data(AANMELDING_ID).toInt()    // id
+                            );
+
+                listOfAanmeldingen->append(_ophaalpunt);
             }
         }
         emit aanmelding_for_route(listOfAanmeldingen);
 
-        qDebug() << "<vvim> add data to the database so that we can reconstruct 'ophaalrondes'.";
+        qDebug() << "<vvim> TODO add data to the database so that we can reconstruct 'ophaalrondes'.";
         this->close();
     }
 

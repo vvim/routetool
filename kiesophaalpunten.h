@@ -9,6 +9,7 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QSettings>
+#include "sophaalpunt.h"
 
 extern QSettings settings;
 
@@ -23,7 +24,7 @@ public:
 
     
 signals:
-    void aanmelding_for_route(QList<QString> *);
+    void aanmelding_for_route(QList<SOphaalpunt> *);
     
 public slots:
 private:
