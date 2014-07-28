@@ -5,6 +5,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QSettings>
+#include "sophaalpunt.h"
 
 extern QSettings settings;
 
@@ -16,7 +17,7 @@ public:
     ~GeocodeDataManager();
 
     void getCoordinates(const QString& address);
-    void pushListOfMarkers(QList<QString> *);
+    void pushListOfMarkers(QList<SOphaalpunt> *);
 
 signals:
     void errorOccured(const QString&);
@@ -29,7 +30,7 @@ private slots:
 
 private:
     QNetworkAccessManager* m_pNetworkAccessManager;
-    QList<QString> *markersToBeDone;
+    QList<SOphaalpunt> *markersToBeDone;
     QString name_of_marker;
 
 

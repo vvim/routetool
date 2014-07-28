@@ -9,6 +9,7 @@
 #include "mylineedit.h" // not my personal code, where is it from? (forum on QCompleter)
 #include <QSettings>
 #include <QList>
+#include "sophaalpunt.h"
 
 extern QSettings settings;
 
@@ -33,7 +34,7 @@ private slots:
     void setMarker(double east, double north, QString caption);
     void errorOccured(const QString&);
     void process_result_distancematrix(QList<int> *, int**, int**);
-    void add_aanmeldingen(QList<QString> *);
+    void add_aanmeldingen(QList<SOphaalpunt> *);
     void keyPressEvent( QKeyEvent *k );
     void on_lwMarkers_currentRowChanged(int currentRow);
     void on_pbRemoveMarker_clicked();

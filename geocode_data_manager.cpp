@@ -9,7 +9,7 @@ GeocodeDataManager::GeocodeDataManager(QObject *parent) :
     QObject(parent)
 {
     m_pNetworkAccessManager = new QNetworkAccessManager(this);
-    markersToBeDone = new QList<QString>();
+    markersToBeDone = new QList<SOphaalpunt>();
     connect(m_pNetworkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
     connect(this, SIGNAL(coordinatesReady(double, double, QString)), this, SLOT(giveNextMarker()));
 }
@@ -103,21 +103,26 @@ void GeocodeDataManager::replyFinished(QNetworkReply* reply)
     // </vvim>
 }
 
-void GeocodeDataManager::pushListOfMarkers(QList<QString> *list_of_markers)
+void GeocodeDataManager::pushListOfMarkers(QList<SOphaalpunt> *list_of_markers)
 {
     markersToBeDone = list_of_markers;
 
+    /*
+        // functionally the same code as 'giveNextMarker()', so why repeat?
     qDebug() << "markers to be done:" << markersToBeDone->size();
-    foreach(QString marker, *markersToBeDone)
+    foreach(SOphaalpunt marker, *markersToBeDone)
     {
-        qDebug() << marker;
+        qDebug() << marker.naam;
     }
 
     if(!markersToBeDone->empty())
     {
-        QString firstmarker = markersToBeDone->takeFirst(); // Removes the first item in the list and returns it.
-        getCoordinates(firstmarker);
+        SOphaalpunt firstmarker = markersToBeDone->takeFirst(); // Removes the first item in the list and returns it.
+        QString te_markeren = QString("%1, %2").arg(firstmarker.naam).arg(firstmarker.adres);
+        getCoordinates(te_markeren);
     }
+    */
+    giveNextMarker();
 }
 
 void GeocodeDataManager::giveNextMarker()
@@ -125,13 +130,15 @@ void GeocodeDataManager::giveNextMarker()
     if(!markersToBeDone->empty()) // markersToBeDone: not declared yet???
     {
         qDebug() << "markers to be done:" << markersToBeDone->size();
-        foreach(QString marker, *markersToBeDone)
+        foreach(SOphaalpunt marker, *markersToBeDone)
         {
-            qDebug() << marker;
+            qDebug() << marker.naam;
         }
+
         qDebug() << "<vvim>: hier een korte pauze inlassen zodat de naam van de marker correct blijft?";
-        QString firstmarker = markersToBeDone->takeFirst(); // Removes the first item in the list and returns it.
-        getCoordinates(firstmarker);
+        SOphaalpunt firstmarker = markersToBeDone->takeFirst(); // Removes the first item in the list and returns it.
+        QString te_markeren = QString("%1, %2").arg(firstmarker.naam).arg(firstmarker.adres);
+        getCoordinates(te_markeren);
     }
     else
         qDebug() << "shit is empty, nuttin' to see here boy!";

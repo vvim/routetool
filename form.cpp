@@ -357,17 +357,10 @@ void Form::process_result_distancematrix(QList<int> *tsp_order_smarkers, int** m
 
         */
 
-        //<vvim> TODO:
-        qDebug() << "<vvim> TODO: route tekenen: teken_route.clicked";
-        qDebug() << "<vvim> TODO: ui->lwMarkers : enable dragging!!! QListWidgetItem";
-        qDebug() << "<vvim> TODO: http://www.qtcentre.org/threads/40611-Accessing-and-changing-the-order-index-of-QListWidget-items";
-
-        //hier de route-aanduiding op baseren
-
         drawRoute();
 }
 
-void Form::add_aanmeldingen(QList<QString> *aanmeldingen)
+void Form::add_aanmeldingen(QList<SOphaalpunt> *aanmeldingen)
 {
     m_geocodeDataManager.pushListOfMarkers(aanmeldingen);
 }
