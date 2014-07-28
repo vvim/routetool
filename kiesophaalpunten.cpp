@@ -19,9 +19,11 @@
 **/
 
 #define OPHAALPUNT Qt::UserRole
-#define WEIGHT OPHAALPUNT+1
-#define VOLUME WEIGHT+1
-#define ADRES VOLUME+1
+#define WEIGHT_KURK OPHAALPUNT+1
+#define ZAK_KURK WEIGHT_KURK+1
+#define WEIGHT_KAARS ZAK_KURK+1
+#define ZAK_KAARS WEIGHT_KAARS+1
+#define ADRES ZAK_KAARS+1
 
 
 KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
@@ -94,8 +96,8 @@ void KiesOphaalpunten::checkAll()
     {
         QListWidgetItem * aanmelding = legeAanmeldingenList->item(i);
         aanmelding->setCheckState(Qt::Checked);
-        total_weight += aanmelding->data(WEIGHT).toDouble();
-        total_volume += aanmelding->data(VOLUME).toDouble();
+        total_weight += aanmelding->data(WEIGHT_KAARS).toDouble() + aanmelding->data(WEIGHT_KURK).toDouble();
+        total_volume += (aanmelding->data(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->data(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
     }
 
     //foreach (QListWidgetItem *aanmelding, legeAanmeldingenList)
@@ -120,14 +122,14 @@ void KiesOphaalpunten::itemSelected(QListWidgetItem* aanmelding)
     if(aanmelding->checkState() == Qt::Unchecked)
     {
         aanmelding->setCheckState(Qt::Checked);
-        total_weight += aanmelding->data(WEIGHT).toDouble();
-        total_volume += aanmelding->data(VOLUME).toDouble();
+        total_weight += aanmelding->data(WEIGHT_KAARS).toDouble() + aanmelding->data(WEIGHT_KURK).toDouble();
+        total_volume += (aanmelding->data(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->data(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
     }
     else
     {
         aanmelding->setCheckState(Qt::Unchecked);
-        total_weight -= aanmelding->data(WEIGHT).toDouble();
-        total_volume -= aanmelding->data(VOLUME).toDouble();
+        total_weight -= aanmelding->data(WEIGHT_KAARS).toDouble() + aanmelding->data(WEIGHT_KURK).toDouble();
+        total_volume -= (aanmelding->data(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->data(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
     }
 
     setTotalWeightTotalVolume();
@@ -151,8 +153,8 @@ void KiesOphaalpunten::setTotalWeightTotalVolume()
                 QListWidgetItem * aanmelding = legeAanmeldingenList->item(i);
                 if(aanmelding->checkState() == Qt::Checked)
                 {
-                    total_weight += aanmelding->data(WEIGHT).toDouble();
-                    total_volume += aanmelding->data(VOLUME).toDouble();
+                    total_weight += aanmelding->data(WEIGHT_KAARS).toDouble() + aanmelding->data(WEIGHT_KURK).toDouble();
+                    total_volume += (aanmelding->data(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->data(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
                 }
             }
             ///////////////// dit zou niet nodig moeten zijn
@@ -199,8 +201,10 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
         QListWidgetItem * item = new QListWidgetItem();
         item->setData(Qt::DisplayRole,QString("%1 (%2 kg , %3 liter)").arg(ophaalpunt).arg(weight).arg(volume));
         item->setData(OPHAALPUNT,ophaalpunt);
-        item->setData(WEIGHT,weight);
-        item->setData(VOLUME,volume);
+        item->setData(WEIGHT_KURK,query.value(1).toDouble());
+        item->setData(WEIGHT_KAARS,query.value(2).toDouble());
+        item->setData(ZAK_KURK,query.value(3).toDouble());
+        item->setData(ZAK_KAARS,query.value(4).toDouble());
         item->setData(ADRES,ophaalpunt_adres);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setFlags(item->flags() &~ Qt::ItemIsSelectable);
@@ -236,6 +240,9 @@ void KiesOphaalpunten::accept()
     }
     else
     {
+
+////// <vvim> HERE!!! in plaats van hier QStrings door te geven, beter sophaalpunt.h!!!
+
         qDebug() << "TODO: Insert into DB";
         QList<QString> *listOfAanmeldingen = new QList<QString>();
         qDebug() << "<vvim> TODO: maak een klasse waarin we de naam, het adres en het gewicht/volume kurk/kaars kunnen opslaan. Ook beter voor QListWidget!";
