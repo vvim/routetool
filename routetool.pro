@@ -62,7 +62,8 @@ HEADERS  += routetool.h \
     nieuweaanmelding.h \
     infoophaalpunt.h \
     mainwindow.h \
-    kiesophaalpunten.h
+    kiesophaalpunten.h \
+    sophaalpunt.h
 
 FORMS    += routetool.ui \
     form.ui
