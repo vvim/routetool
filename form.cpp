@@ -566,8 +566,31 @@ void Form::reorderMarkers()
 void Form::logOutputMarkers()
 {
     // function used for debugging
+    qDebug() << "Debug information: output markers. Length: " << m_markers.length();
+    qDebug() << "Are the distance matrices up to date?" << matrices_up_to_date;
     for(int i = 0; i < m_markers.length(); i++)
     {
-        qDebug() << m_markers[i]->caption;
+        qDebug() << "Marker" << i << ":";
+        qDebug() << "." << m_markers[i]->caption << "(" << m_markers[i]->east << m_markers[i]->north << ")" << "matrix:" << m_markers[i]->distancematrixindex;
+        if(m_markers[i]->marker_type == Adres)
+        {
+            qDebug() << ". type: Adres";
+        }
+        else if(m_markers[i]->marker_type == Ophaalpunt)
+        {
+            qDebug() << ". type: Ophaalpunt ( aanmelding:" << m_markers[i]->ophaalpunt.id << ")";
+            qDebug() << "..." << m_markers[i]->ophaalpunt.naam;
+            qDebug() << "..." << m_markers[i]->ophaalpunt.adres;
+            qDebug() << "... kurk: " << m_markers[i]->ophaalpunt.kg_kurk << "kg, "<< m_markers[i]->ophaalpunt.zakken_kurk << "zakken";
+            qDebug() << "... kaars: " << m_markers[i]->ophaalpunt.kg_kaarsresten << "kg, "<< m_markers[i]->ophaalpunt.zakken_kaarsresten << "zakken";
+        }
+        else if(m_markers[i]->marker_type == Levering)
+        {
+            qDebug() << ". type: Levering";
+        }
+        else
+        {
+            qDebug() << ". type: UNKNOWN";
+        }
     }
 }
