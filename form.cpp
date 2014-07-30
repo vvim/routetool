@@ -15,6 +15,7 @@ Form::Form(QWidget *parent) :
     ui(new Ui::Form)
 {
     matrices_up_to_date = false;
+    after_calculating_distance_matrix_continue_to_tsp = false;
 
     normal = new QPalette();
     normal->setColor(QPalette::Text,Qt::AutoColor);
@@ -348,7 +349,18 @@ void Form::on_pbOptimizeRoute_clicked()
           //             Bestaat er een extensie voor Qt die deze SIGNAL wel heeft?
     // reorderMarkers(); -> not necessary, the order will be changed any way
 
-    m_distanceMatrix.getDistances(m_markers);
+    if(matrices_up_to_date)
+    {
+        // no need to recalculate the distance matrices, just go straight to TSP:
+        after_calculating_distance_matrix_continue_to_tsp = false;
+        m_distanceMatrix.calculateOptimalRoute();
+    }
+    else
+    {
+        // we need to first calculate the distance matrices
+        after_calculating_distance_matrix_continue_to_tsp = true;
+        m_distanceMatrix.getDistances(m_markers);
+    }
 
     //extra funcationalities
     ui->pbPrintMap->setEnabled(true);
@@ -363,6 +375,13 @@ void Form::reload_distancematrix(int** matrix_in_meters, int ** matrix_in_second
     matrix_dimensions = m_markers.length();
 
     matrices_up_to_date = true;
+
+    if(after_calculating_distance_matrix_continue_to_tsp)
+    {
+        // continue to TSP:
+        after_calculating_distance_matrix_continue_to_tsp = false;
+        m_distanceMatrix.calculateOptimalRoute();
+    }
 }
 
 void Form::process_result_distancematrix(QList<int> *tsp_order_smarkers)

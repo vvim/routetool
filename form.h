@@ -56,6 +56,7 @@ private:
     int **distance_matrix_in_seconds;
     int matrix_dimensions;
     bool matrices_up_to_date;
+    bool after_calculating_distance_matrix_continue_to_tsp;
 
     QMap<QString, SMarker*> link_lwMarkers_mmarkers;
     QPalette *warning, *normal;
