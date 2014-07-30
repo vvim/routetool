@@ -136,12 +136,9 @@ void GeocodeDataManager::giveNextMarker()
         }
 
         qDebug() << "<vvim>: hier een korte pauze inlassen zodat de naam van de marker correct blijft?";
-        SOphaalpunt firstmarker = markersToBeDone->takeFirst(); // Removes the first item in the list and returns it.
-        QString te_markeren = QString("%1, %2").arg(firstmarker.naam).arg(firstmarker.adres);
-        getCoordinates(te_markeren);
+        ophaalpunt_to_mark = markersToBeDone->takeFirst(); // Removes the first item in the list and returns it.
+        getCoordinates(QString("%1, %2").arg(ophaalpunt_to_mark.naam).arg(ophaalpunt_to_mark.adres));
     }
-    else
-        qDebug() << "shit is empty, nuttin' to see here boy!";
 }
 
 GeocodeDataManager::~GeocodeDataManager()
