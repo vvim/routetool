@@ -237,47 +237,48 @@ void KiesOphaalpunten::accept()
 
     if((total_weight > maximum_weight) || (total_volume > maximum_volume))
     {
-          QMessageBox::critical(this, tr("Overgewicht of overvolume!"),
-                      tr("De voorgestelde ophaalpunten geven overgewicht of overvolume: %1kg (maximum %2kg) en %3 liter (maximum %4 liter).").arg(total_weight).arg(maximum_weight).arg(total_volume).arg(maximum_volume), QMessageBox::Cancel);
+        // if overweight or overvolume: request feedback from user
+
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, tr("Overgewicht of overvolume!"),
+                      tr("De voorgestelde ophaalpunten geven overgewicht of overvolume: %1kg (maximum %2kg) en %3 liter (maximum %4 liter).\n\nWeet u zeker dat u deze ophaalpunten aan de route wilt toevoegen?").arg(total_weight).arg(maximum_weight).arg(total_volume).arg(maximum_volume),
+                                QMessageBox::Yes|QMessageBox::No);
+
+        if(reply == QMessageBox::No)
+            return;
     }
-    else
+
+    qDebug() << "TODO: Insert into DB";
+    QList<SOphaalpunt> *listOfAanmeldingen = new QList<SOphaalpunt>();
+    for(int i = 0 ; i < legeAanmeldingenList->count(); i++)
     {
-
-////// <vvim> HERE!!! in plaats van hier QStrings door te geven, beter sophaalpunt.h!!!
-
-        qDebug() << "TODO: Insert into DB";
-        QList<SOphaalpunt> *listOfAanmeldingen = new QList<SOphaalpunt>();
-        for(int i = 0 ; i < legeAanmeldingenList->count(); i++)
+        // could be done better by using a new member of KiesOphaalpunten
+        //      QMap <int, SOphaalpunt *> m_map_aanmeldingen
+        // we fill m_map_aanmeldingen in 'populateLegeAanmeldingen' with the id number of the aanmeldingen and the information in SOphaalpunt
+        // therefore we do not need all the SetData() in the QListWidgetItems, only the id for the QMap.
+        // We can let this id be the same as the id in the table 'aanmelding'.
+        //
+        // Then this code will be simply Qt::Checked() => listOfAanmeldingen->append(m_map_aanmeldingen[aanmelding->data(AANMELDING_ID).toInt()];
+        QListWidgetItem *aanmelding = legeAanmeldingenList->item(i);
+        if(aanmelding->checkState() == Qt::Checked)
         {
-            // could be done better by using a new member of KiesOphaalpunten
-            //      QMap <int, SOphaalpunt *> m_map_aanmeldingen
-            // we fill m_map_aanmeldingen in 'populateLegeAanmeldingen' with the id number of the aanmeldingen and the information in SOphaalpunt
-            // therefore we do not need all the SetData() in the QListWidgetItems, only the id for the QMap.
-            // We can let this id be the same as the id in the table 'aanmelding'.
-            //
-            // Then this code will be simply Qt::Checked() => listOfAanmeldingen->append(m_map_aanmeldingen[aanmelding->data(AANMELDING_ID).toInt()];
-            QListWidgetItem *aanmelding = legeAanmeldingenList->item(i);
-            if(aanmelding->checkState() == Qt::Checked)
-            {
-                SOphaalpunt _ophaalpunt(
-                                aanmelding->data(OPHAALPUNT).toString(),   // naam
-                                aanmelding->data(WEIGHT_KURK).toDouble(),  // kg_kurk
-                                aanmelding->data(WEIGHT_KAARS).toDouble(), // kg_kaarsresten
-                                aanmelding->data(ZAK_KURK).toDouble(),     // zakken_kurk
-                                aanmelding->data(ZAK_KAARS).toDouble(),    // zakken_kaarsresten
-                                aanmelding->data(ADRES).toString(),        // adres
-                                aanmelding->data(AANMELDING_ID).toInt()    // id
-                            );
+            SOphaalpunt _ophaalpunt(
+                            aanmelding->data(OPHAALPUNT).toString(),   // naam
+                            aanmelding->data(WEIGHT_KURK).toDouble(),  // kg_kurk
+                            aanmelding->data(WEIGHT_KAARS).toDouble(), // kg_kaarsresten
+                            aanmelding->data(ZAK_KURK).toDouble(),     // zakken_kurk
+                            aanmelding->data(ZAK_KAARS).toDouble(),    // zakken_kaarsresten
+                            aanmelding->data(ADRES).toString(),        // adres
+                            aanmelding->data(AANMELDING_ID).toInt()    // id
+                        );
 
-                listOfAanmeldingen->append(_ophaalpunt);
-            }
+            listOfAanmeldingen->append(_ophaalpunt);
         }
-        emit aanmelding_for_route(listOfAanmeldingen);
-
-        qDebug() << "<vvim> TODO add data to the database so that we can reconstruct 'ophaalrondes'.";
-        this->close();
     }
+    emit aanmelding_for_route(listOfAanmeldingen);
 
+    qDebug() << "<vvim> TODO add data to the database so that we can reconstruct 'ophaalrondes'.";
+    this->close();
 }
 
 void KiesOphaalpunten::reject()
