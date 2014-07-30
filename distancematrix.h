@@ -28,6 +28,7 @@ public:
     ~DistanceMatrix();
 
     void getDistances(QList <SMarker*> markers);
+    void calculateOptimalRoute();
 
 signals:
     void errorOccured(const QString&);
@@ -60,7 +61,6 @@ private:
     QString seconds_human_readable(int totalseconds);
     QString prepareForUrl(QString string);
     void deleteTheMatrices();
-    void calculateOptimalRoute();
 
     // tsp help-functions
     int initialize_current_minimum_cost(int size);
