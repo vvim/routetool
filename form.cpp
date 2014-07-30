@@ -34,6 +34,7 @@ Form::Form(QWidget *parent) :
     connect(ui->pbShowRouteAsDefined, SIGNAL(clicked()), this, SLOT(drawRoute()));
 
     connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,QString)), this, SLOT(showCoordinates(double,double,QString)));
+    connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,SOphaalpunt)), this, SLOT(showOphaalpunt(double,double,SOphaalpunt)));
     connect(&m_geocodeDataManager, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
 
     connect(&m_distanceMatrix, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
@@ -126,6 +127,24 @@ Form::~Form()
     delete ui;
 }
 
+void Form::showOphaalpunt(double east, double north, SOphaalpunt ophaalpunt, bool saveMarker)
+{
+    qDebug() << "Form, showOphaalpunt" << east << north;
+
+    QString str =
+            QString("var newLoc = new google.maps.LatLng(%1, %2); ").arg(north).arg(east) +
+            QString("map.setCenter(newLoc);") +
+            QString("map.setZoom(%1);").arg(ui->zoomSpinBox->value());
+
+     qDebug() << str;
+
+    ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
+
+    if (saveMarker)
+        setMarker(east, north, ophaalpunt);
+        //setMarker(east, north, ui->lePostalAddress->text());
+}
+
 
 void Form::showCoordinates(double east, double north, QString markername, bool saveMarker)
 {
@@ -164,6 +183,36 @@ void Form::setMarker(double east, double north, QString caption)
 
 
     SMarker *_marker = new SMarker(east, north, caption);
+    m_markers.append(_marker);
+
+    //adding capton to ListWidget
+    ui->lwMarkers->addItem(caption);
+    link_lwMarkers_mmarkers[caption] = _marker;
+    matrices_up_to_date = false;
+}
+
+void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
+{
+    QString caption = QString("%1, %2").arg(ophaalpunt.naam).arg(ophaalpunt.adres);
+    for (int i=0; i<m_markers.size(); i++)
+    {
+        if (m_markers[i]->caption == caption) return;
+
+        // overschrijven met info ophaalpunt???
+    }
+
+    QString str =
+            QString("var marker = new google.maps.Marker({") +
+            QString("position: new google.maps.LatLng(%1, %2),").arg(north).arg(east) +
+            QString("map: map,") +
+            QString("title: %1").arg("\""+caption+"\"") +
+            QString("});") +
+            QString("markers.push(marker);");
+    qDebug() << str;
+    ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
+
+
+    SMarker *_marker = new SMarker(east, north, ophaalpunt);
     m_markers.append(_marker);
 
     //adding capton to ListWidget

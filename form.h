@@ -30,8 +30,10 @@ public:
 private slots:
     void goClicked();
     void showCoordinates(double east, double north, QString markername, bool saveMarker = true);
+    void showOphaalpunt(double east, double north, SOphaalpunt ophaalpunt, bool saveMarker = true);
     //set marker to map and save marker in markers list
     void setMarker(double east, double north, QString caption);
+    void setMarker(double east, double north, SOphaalpunt ophaalpunt);
     void errorOccured(const QString&);
     void process_result_distancematrix(QList<int> *, int**, int**);
     void add_aanmeldingen(QList<SOphaalpunt> *);
