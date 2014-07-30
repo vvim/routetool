@@ -84,11 +84,14 @@ QString DistanceMatrix::buildQjsonUrl(QList <SMarker*> markers, int origins_star
 
     while(it != markers.end())  // <vvim> markers.at(end) ?
     {
+        QString address_to_look_up = prepareForUrl((*it)->caption);
+        qDebug() << "!! !!" << address_to_look_up << "!! !!";
+
         if( (i >= origins_start) && (i <= origins_end) )
-            origins += (*it)->caption + "|";
+            origins += address_to_look_up + "|";
 
         if((i >= destinations_start) && (i <= destinations_end) )
-            destinations += (*it)->caption + "|";
+            destinations += address_to_look_up + "|";
 
         ++it;
         ++i;
@@ -123,7 +126,8 @@ QString DistanceMatrix::buildQjsonUrl(QList <SMarker*> markers)
         //origins += QString::number((*it)->north) + "," + QString::number((*it)->east) + "|";
 
         // op naam : zoals gevraagd, maar url is langer
-        origins += (*it)->caption + "|";
+        QString address_to_look_up = prepareForUrl((*it)->caption);
+        origins += address_to_look_up + "|";
         ++it;
     }
 
@@ -999,4 +1003,13 @@ void DistanceMatrix::deleteTheMatrices()
 DistanceMatrix::~DistanceMatrix()
 {
     deleteTheMatrices();
+}
+
+QString DistanceMatrix::prepareForUrl(QString string)
+{
+    QString return_string = QString(string);
+    return_string.replace("&","+");
+    return_string.replace("\n",",");
+    return_string.replace(" ","+");
+    return return_string;
 }

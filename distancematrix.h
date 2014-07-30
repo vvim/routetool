@@ -58,6 +58,7 @@ private:
     QList<QString>* citynames;
 
     QString seconds_human_readable(int totalseconds);
+    QString prepareForUrl(QString string);
     void deleteTheMatrices();
 
     // tsp help-functions
