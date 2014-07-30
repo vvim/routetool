@@ -340,7 +340,7 @@ void Form::on_zoomSpinBox_valueChanged(int arg1)
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 }
 
-void Form::on_pbDistanceMatrix_clicked()
+void Form::on_pbOptimizeRoute_clicked()
 {
     //reorder Markers:: see BUG
           // <vvim> BUG: er is geen SIGNAL voor Drag/Drop vanuit QListWidget. Het programma weet dus niet

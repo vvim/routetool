@@ -99,7 +99,7 @@
    <item row="3" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QPushButton" name="pbDistanceMatrix">
+      <widget class="QPushButton" name="pbOptimizeRoute">
        <property name="text">
         <string>Optimize Route</string>
        </property>
