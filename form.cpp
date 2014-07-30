@@ -151,7 +151,6 @@ void Form::showOphaalpunt(double east, double north, SOphaalpunt ophaalpunt, boo
 
     if (saveMarker)
         setMarker(east, north, ophaalpunt);
-        //setMarker(east, north, ui->lePostalAddress->text());
 }
 
 
@@ -209,8 +208,8 @@ void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
         {
             // overschrijven met info ophaalpunt???
             qDebug() << "<vvim> TODO: wat als OPHAALPUNT & LEVERING ?";
-            qDebug() << "found marker with the same caption" << caption << "of the type" << m_markers[i]->marker_type << ". Overwriting with SOphaalpunt data.";
-            m_markers[i]->marker_type = Ophaalpunt;
+            qDebug() << "found marker with the same caption" << caption << "ophaling" << m_markers[i]->ophaling << ", levering" << m_markers[i]->levering << ". Overwriting with SOphaalpunt data.";
+            m_markers[i]->ophaling = true;
             m_markers[i]->ophaalpunt = ophaalpunt;
             setTotalWeightTotalVolume();
             return;
@@ -585,11 +584,11 @@ void Form::logOutputMarkers()
     {
         qDebug() << "Marker" << i << ":";
         qDebug() << "." << m_markers[i]->caption << "(" << m_markers[i]->east << m_markers[i]->north << ")" << "matrix:" << m_markers[i]->distancematrixindex;
-        if(m_markers[i]->marker_type == Adres)
+        if((!m_markers[i]->ophaling) && (!m_markers[i]->levering))
         {
             qDebug() << ". type: Adres";
         }
-        else if(m_markers[i]->marker_type == Ophaalpunt)
+        if(m_markers[i]->ophaling)
         {
             qDebug() << ". type: Ophaalpunt ( aanmelding:" << m_markers[i]->ophaalpunt.id << ")";
             qDebug() << "..." << m_markers[i]->ophaalpunt.naam;
@@ -597,13 +596,10 @@ void Form::logOutputMarkers()
             qDebug() << "... kurk: " << m_markers[i]->ophaalpunt.kg_kurk << "kg, "<< m_markers[i]->ophaalpunt.zakken_kurk << "zakken";
             qDebug() << "... kaars: " << m_markers[i]->ophaalpunt.kg_kaarsresten << "kg, "<< m_markers[i]->ophaalpunt.zakken_kaarsresten << "zakken";
         }
-        else if(m_markers[i]->marker_type == Levering)
+        if(m_markers[i]->levering)
         {
             qDebug() << ". type: Levering";
-        }
-        else
-        {
-            qDebug() << ". type: UNKNOWN";
+            qDebug() << "........... not defined yet...";
         }
     }
 }
@@ -617,7 +613,7 @@ void Form::setTotalWeightTotalVolume()
 
     for(int i = 0; i < m_markers.length(); i++)
     {
-        if(m_markers[i]->marker_type == Ophaalpunt)
+        if(m_markers[i]->ophaling)
         {
             //total_weight += m_markers[i]->ophaalpunt.kg_kurk + m_markers[i]->ophaalpunt.kg_kaarsresten;
             total_weight += m_markers[i]->ophaalpunt.getWeight();
@@ -626,9 +622,10 @@ void Form::setTotalWeightTotalVolume()
             total_bags_kurk += m_markers[i]->ophaalpunt.zakken_kurk;
             total_bags_kaarsresten += m_markers[i]->ophaalpunt.zakken_kaarsresten;
         }
-        else if(m_markers[i]->marker_type == Levering)
+        if(m_markers[i]->levering)
         {
-            qDebug() << "Levering is nog niet gedefinieerd";
+            qDebug() << ". type: Levering";
+            qDebug() << "........... not defined yet...";
         }
     }
 

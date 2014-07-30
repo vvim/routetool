@@ -9,6 +9,8 @@
 
 extern QSettings settings;
 
+enum MarkerType { Adres, Levering, Ophaalpunt };
+
 class GeocodeDataManager : public QObject
 {
     Q_OBJECT

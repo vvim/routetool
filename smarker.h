@@ -6,8 +6,6 @@
 
 extern QSettings settings;
 
-enum MarkerType { Adres, Levering, Ophaalpunt };
-
 //structure for save markers data
 struct SMarker
 {
@@ -17,17 +15,20 @@ struct SMarker
         north = 0;
         caption = "";
         distancematrixindex = -1;
-        marker_type = Adres;
+        ophaling = false;
+        levering = false;
     };
 
     SMarker(double _east, double _north, QString _caption)
     {
-        east = _east; north = _north; caption = _caption; distancematrixindex = -1; marker_type = Adres;
+        east = _east; north = _north; caption = _caption; distancematrixindex = -1;
+        ophaling = false; levering = false;
     };
 
     SMarker(double _east, double _north, SOphaalpunt _ophaalpunt)
     {
-        east = _east; north = _north; caption = QString("%1, %2").arg(_ophaalpunt.naam).arg(_ophaalpunt.adres); ophaalpunt = _ophaalpunt; distancematrixindex = -1; marker_type = Ophaalpunt;
+        east = _east; north = _north; caption = QString("%1, %2").arg(_ophaalpunt.naam).arg(_ophaalpunt.adres); ophaalpunt = _ophaalpunt; distancematrixindex = -1;
+        ophaling = true; levering = false;
     };
 
     double east;
@@ -35,7 +36,9 @@ struct SMarker
     QString caption;
     int distancematrixindex;
 
-    MarkerType marker_type;
+    bool ophaling;
+    bool levering;
+
     SOphaalpunt ophaalpunt;
 };
 
