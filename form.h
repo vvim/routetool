@@ -35,7 +35,8 @@ private slots:
     void setMarker(double east, double north, QString caption);
     void setMarker(double east, double north, SOphaalpunt ophaalpunt);
     void errorOccured(const QString&);
-    void process_result_distancematrix(QList<int> *, int**, int**);
+    void process_result_distancematrix(QList<int> *);
+    void reload_distancematrix(int**, int**);
     void add_aanmeldingen(QList<SOphaalpunt> *);
     void keyPressEvent( QKeyEvent *k );
     void on_lwMarkers_currentRowChanged(int currentRow);

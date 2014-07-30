@@ -663,7 +663,16 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
         }
     }
 
+    emit new_distance_matrices(distance_matrix_in_meters, distance_matrix_in_seconds);
+}
+
+void DistanceMatrix::calculateOptimalRoute()
+{
+    qDebug() << "you should only call this function when the distance matrices have been filled in correctly";
+    qDebug() << "that is why Form has the boolean `matrices_up_to_date` ";
+
 //logOutputCitynamesDistanceMatrices(); //for debugging only:
+    int nr_of_cities = m_markers.length();
 
     QString startTimeString = QDateTime::currentDateTime().toString();
     qDebug() << "Start:" << startTimeString;
@@ -705,6 +714,7 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
     DocumentWriter vervoersLijst("",
                                  "",
                                  currentdate);
+    qDebug() << "<vvim> vervoerslijst wordt nu opgesteld in de class DistanceMatrix, beter dit te verplaatsen naar de class Form";
 
 
     int previous_i = -1;
@@ -753,7 +763,8 @@ qDebug() << "<vvim> TODO: totale afstand én totale tijd tesamen berekenen";
 
     QApplication::restoreOverrideCursor(); // set cursor back to "Arrow cursor"
 
-    emit new_order_smarkers(tsp_solution, distance_matrix_in_meters, distance_matrix_in_seconds); // geef de voorgestelde route door aan de class Form zodat die ook in de GUI kan worden aangepast
+    //emit new_order_smarkers(tsp_solution, distance_matrix_in_meters, distance_matrix_in_seconds); // geef de voorgestelde route door aan de class Form zodat die ook in de GUI kan worden aangepast
+    emit new_order_smarkers(tsp_solution); // geef de voorgestelde route door aan de class Form zodat die ook in de GUI kan worden aangepast
 
     //QString("vervoerslijst-(%1).odt".arg(currentdate)); -> no const char[23]
     vervoersLijst.write("vervoerslijst.odt");

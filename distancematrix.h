@@ -31,8 +31,8 @@ public:
 
 signals:
     void errorOccured(const QString&);
-    //void coordinatesReady(double east, double north);
-    void new_order_smarkers(QList<int> *, int**, int**);
+    void new_order_smarkers(QList<int> *);
+    void new_distance_matrices(int**, int**);
 
 private slots:
     void replyFinished(QNetworkReply* reply);
@@ -60,6 +60,7 @@ private:
     QString seconds_human_readable(int totalseconds);
     QString prepareForUrl(QString string);
     void deleteTheMatrices();
+    void calculateOptimalRoute();
 
     // tsp help-functions
     int initialize_current_minimum_cost(int size);
