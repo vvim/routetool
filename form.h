@@ -45,6 +45,7 @@ private slots:
     void drawRoute();
     void on_pbRouteOmdraaien_clicked();
     void reorderMarkers();
+    void setTotalWeightTotalVolume();
 
 private:
     /**    I believe this member is a copy/paste accident, must try out.
@@ -56,7 +57,7 @@ private:
     bool matrices_up_to_date;
 
     QMap<QString, SMarker*> link_lwMarkers_mmarkers;
-
+    QPalette *warning, *normal;
 
 private:
     Ui::Form *ui;

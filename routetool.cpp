@@ -20,7 +20,7 @@ RouteTool::RouteTool(QWidget *parent) :
     setCentralWidget(m_pForm);
 
     connect(&kiesOphaalpuntenWidget, SIGNAL(aanmelding_for_route(QList<SOphaalpunt> *)), m_pForm, SLOT(add_aanmeldingen(QList<SOphaalpunt>*)));
-
+    connect(&configurationWidget, SIGNAL(configurationChanged()), m_pForm, SLOT(setTotalWeightTotalVolume()));
 }
 
 RouteTool::~RouteTool()

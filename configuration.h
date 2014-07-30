@@ -16,9 +16,10 @@ class Configuration : public QWidget
     Q_OBJECT
 public:
     explicit Configuration(QWidget *parent = 0);
-
-public slots:
     void setOriginalValues();
+
+signals:
+    void configurationChanged();
     
 private:
     QLineEdit *apiKeyEdit;

@@ -78,6 +78,7 @@ void Configuration::accept()
      settings.setValue("zak_kurk_volume", zak_kurk_volumeEdit->text().toDouble()); // in liter
      settings.setValue("max_gewicht_vrachtwagen", max_gewicht_vrachtwagenEdit->text().toDouble()); // in liter
      settings.setValue("max_volume_vrachtwagen", max_volume_vrachtwagenEdit->text().toDouble()); // in liter
+     emit configurationChanged();
 
      this->close();
 }

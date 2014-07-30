@@ -16,6 +16,13 @@ Form::Form(QWidget *parent) :
 {
     matrices_up_to_date = false;
 
+    normal = new QPalette();
+    normal->setColor(QPalette::Text,Qt::AutoColor);
+
+    warning = new QPalette();
+    warning->setColor(QPalette::Text,Qt::red);
+
+
     ui->setupUi(this);
     connect(ui->goButton, SIGNAL(clicked()), this, SLOT(goClicked()));
     connect(ui->lePostalAddress, SIGNAL(returnPressed()), this, SLOT(goClicked()));
@@ -120,6 +127,8 @@ Form::Form(QWidget *parent) :
 
     ui->lePostalAddress->setText(settings.value("startpunt").toString());
     goClicked();
+
+    setTotalWeightTotalVolume();
 }
 
 Form::~Form()
@@ -199,9 +208,11 @@ void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
         if (m_markers[i]->caption == caption)
         {
             // overschrijven met info ophaalpunt???
+            qDebug() << "<vvim> TODO: wat als OPHAALPUNT & LEVERING ?";
             qDebug() << "found marker with the same caption" << caption << "of the type" << m_markers[i]->marker_type << ". Overwriting with SOphaalpunt data.";
             m_markers[i]->marker_type = Ophaalpunt;
             m_markers[i]->ophaalpunt = ophaalpunt;
+            setTotalWeightTotalVolume();
             return;
         }
     }
@@ -224,6 +235,8 @@ void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
     ui->lwMarkers->addItem(caption);
     link_lwMarkers_mmarkers[caption] = _marker;
     matrices_up_to_date = false;
+
+    setTotalWeightTotalVolume();
 }
 
 void Form::goClicked()
@@ -593,4 +606,46 @@ void Form::logOutputMarkers()
             qDebug() << ". type: UNKNOWN";
         }
     }
+}
+
+void Form::setTotalWeightTotalVolume()
+{
+    double total_weight = 0;
+    double total_volume = 0;
+    int total_bags_kurk = 0;
+    int total_bags_kaarsresten = 0;
+
+    for(int i = 0; i < m_markers.length(); i++)
+    {
+        if(m_markers[i]->marker_type == Ophaalpunt)
+        {
+            //total_weight += m_markers[i]->ophaalpunt.kg_kurk + m_markers[i]->ophaalpunt.kg_kaarsresten;
+            total_weight += m_markers[i]->ophaalpunt.getWeight();
+            //total_volume += (m_markers[i]->ophaalpunt.zakken_kurk * settings.value("zak_kurk_volume").toDouble()) + (m_markers[i]->ophaalpunt.zakken_kaarsresten * settings.value("zak_kaarsresten_volume").toDouble());
+            total_volume += m_markers[i]->ophaalpunt.getVolume();
+            total_bags_kurk += m_markers[i]->ophaalpunt.zakken_kurk;
+            total_bags_kaarsresten += m_markers[i]->ophaalpunt.zakken_kaarsresten;
+        }
+        else if(m_markers[i]->marker_type == Levering)
+        {
+            qDebug() << "Levering is nog niet gedefinieerd";
+        }
+    }
+
+
+    ui->totalWeightEdit->setText(QString("%1 kg").arg(total_weight));
+    ui->totalVolumeEdit->setText(QString("%1 liter").arg(total_volume));
+    ui->totalBagsKurkEdit->setText(QString("%1").arg(total_bags_kurk));
+    ui->totalBagsParafineEdit->setText(QString("%1").arg(total_bags_kaarsresten));
+
+    if(total_weight > settings.value("max_gewicht_vrachtwagen").toDouble())
+        ui->totalWeightEdit->setPalette(*warning);
+    else
+        ui->totalWeightEdit->setPalette(*normal);
+
+    if(total_volume > settings.value("max_volume_vrachtwagen").toDouble())
+        ui->totalVolumeEdit->setPalette(*warning);
+    else
+        ui->totalVolumeEdit->setPalette(*normal);
+
 }
