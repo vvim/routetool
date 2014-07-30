@@ -196,9 +196,14 @@ void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
     QString caption = QString("%1, %2").arg(ophaalpunt.naam).arg(ophaalpunt.adres);
     for (int i=0; i<m_markers.size(); i++)
     {
-        if (m_markers[i]->caption == caption) return;
-
-        // overschrijven met info ophaalpunt???
+        if (m_markers[i]->caption == caption)
+        {
+            // overschrijven met info ophaalpunt???
+            qDebug() << "found marker with the same caption" << caption << "of the type" << m_markers[i]->marker_type << ". Overwriting with SOphaalpunt data.";
+            m_markers[i]->marker_type = Ophaalpunt;
+            m_markers[i]->ophaalpunt = ophaalpunt;
+            return;
+        }
     }
 
     QString str =
