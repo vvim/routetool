@@ -37,7 +37,20 @@ private:
     QLabel *locationLabel;
     MyLineEdit *locationEdit;
     QPushButton *toonOphaalpunt;
+    QPushButton *vulOphaalpuntIn;
     QDialogButtonBox *buttonBox;
+    QLineEdit *nameEdit;
+    QLineEdit *streetEdit;
+    QLineEdit *houseNrEdit;
+    QLineEdit *busNrEdit;
+    QLineEdit *postalCodeEdit;
+    QLineEdit *plaatsEdit;
+    QLineEdit *countryEdit;
+    QLineEdit *contactPersonEdit;
+    QLineEdit *telephoneEdit;
+    QSpinBox *weightSpinBox;
+    QSpinBox *volumeSpinBox;
+    QSpinBox *timeNeededSpinBox;
 
     QMap<QString, int> ophaalpunten;
 
@@ -50,6 +63,7 @@ private slots:
     void ophaalpuntChanged();
     void loadOphaalpunten();
     void toonOphaalpuntInformatie();
+    void vulInformatieOphaalpuntIn();
 };
 
 #endif // LEVERING_H
