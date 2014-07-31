@@ -108,7 +108,7 @@
      <item>
       <widget class="QPushButton" name="pbShowRouteAsDefined">
        <property name="text">
-        <string>Show Route As Defined</string>
+        <string>Toon Route</string>
        </property>
       </widget>
      </item>

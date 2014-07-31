@@ -29,9 +29,11 @@ Form::Form(QWidget *parent) :
     connect(ui->lePostalAddress, SIGNAL(returnPressed()), this, SLOT(goClicked()));
 
     //ui: buttons should be disabled until optimal route has been calculated:
-    ui->pbPrintMap->setEnabled(false);
-    ui->pbRouteOmdraaien->setEnabled(false);
-    ui->pbShowRouteAsDefined->setEnabled(false);
+    ui->pbOptimizeRoute->setEnabled(true);
+    ui->pbRemoveMarker->setEnabled(true);
+    ui->pbShowRouteAsDefined->setEnabled(true);
+    ui->pbPrintMap->setEnabled(true);
+    ui->pbRouteOmdraaien->setEnabled(true);
 
     /*
     connect(ui->lwMarkers, SIGNAL(itemPressed(QListWidgetItem*)), this, SLOT(reorderMarkers()));
