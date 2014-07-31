@@ -271,67 +271,33 @@ void Form::on_lwMarkers_currentRowChanged(int currentRow)
 void Form::on_pbRemoveMarker_clicked()
 {
     matrices_up_to_date = false;
-    reorderMarkers(); // reorderMarkers in case of a Drag / Drop
 
-    qDebug() << "<vvim> TODO: na Drag en Drop is de volgorde van ui->lwMarkers veranderd, maar NIET" <<
-                "die van m_markers of de markers[] in JavaScript." <<
-                "What to do? WebView() herschrijven?";
-
-    // !! door Drag and Drop mogelijkheid, klopt de JavaScript benadering in deze functie niet meer.
-    // best dus om die verwijdering in JavaScript te herzien, of de WebView helemaal te herladen!
-
-    // misschien is de crash dan ook opgelost?
-
-
-
-
-    //<vvim> TODO: programma crasht als er meerdere markers zijn en je wil de voorlaatste verwijderen. Waarom?
-    qDebug() << "<vvim> TODO: programma crasht als er meerdere markers zijn en je wil de voorlaatste verwijderen. Waarom?";
+    // after a Drag and Drop, the order might have changed
+    reorderMarkers();
 
     if (ui->lwMarkers->currentRow() < 0) return;
+
+    /*
+        because of the Drag and Drop in lwMarkers,
+        the order of the markers[] array in JavaScript can be incorrect
+        therefore we do not use these lines anymore
 
     QString str =
             QString("markers[%1].setMap(null); markers.splice(%1, 1);").arg(ui->lwMarkers->currentRow());
     qDebug() << str;
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 
+    */
+
     //deleteing caption from markers list
     /** THIS LINE GIVES THE TROUBLE, some sort of interaction with lwMarkers? **/
+    //<vvim> TODO: programma crasht als er maar 2 markers zijn en je wil de tweede verwijderen. Waarom?
     delete m_markers.takeAt(ui->lwMarkers->currentRow());
 
     //deleteing caption from ListWidget
     delete ui->lwMarkers->takeItem(ui->lwMarkers->currentRow());
 
-    /**  I believed this one worked, but I was mistaking: ( http://stackoverflow.com/questions/24895977/qt-c-removing-next-to-last-item-from-qlistwidget-makes-program-crash )
-
-
-    I might have found an answer, but it seems so counter-intuitive. Can someone comment on this?
-
-    I changed the "takeItem" and broke it up into:
-
-        void Form::on_pbRemoveMarker_clicked()
-        {
-            if (ui->lwMarkers->currentRow() < 0) return;
-
-            QListWidgetItem *item_to_be_deleted = ui->lwMarkers->item(ui->lwMarkers->currentRow());
-            ui->lwMarkers->removeItemWidget(item_to_be_deleted);
-            delete item_to_be_deleted;
-        }
-
-    So instead of the takeItem(), which basically should remove the item whilst taking it, I now create a QListWidgetItem-pointer to the item and ask to remove it from the list through removeItem (but I guess this takes some extra calculation, locating the correct item?), before I finally remove the item itself.
-
-    Now, the crash no longer happens. Is my code correct now? Am I missing something?
-
-    Any comment is welcome, I am really not sure about this and require a second opinion.
-
-    Thank you.
-
-    **/
-
-
-
-    if(ui->pbShowRouteAsDefined->isEnabled())
-        drawRoute();
+    drawRoute();
 }
 
 void Form::on_zoomSpinBox_valueChanged(int arg1)
