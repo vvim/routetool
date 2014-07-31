@@ -156,6 +156,7 @@ void NieuweAanmelding::resetValues()
 
 NieuweAanmelding::~NieuweAanmelding()
 {
+    qDebug() << "start to deconstruct NieuweAanmelding()";
     delete info;
     delete locationLabel;
     delete locationEdit;
@@ -175,6 +176,7 @@ NieuweAanmelding::~NieuweAanmelding()
     delete opmerkingenEdit;
     delete buttonBox;
     delete completer;
+    qDebug() << "NieuweAanmelding() deconstructed";
 }
 
 void NieuweAanmelding::accept()

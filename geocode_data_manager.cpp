@@ -102,6 +102,8 @@ void GeocodeDataManager::giveNextMarker()
 
 GeocodeDataManager::~GeocodeDataManager()
 {
+    qDebug() << "start to deconstruct GeocodeDataManager()";
     delete markersToBeDone;
     delete m_pNetworkAccessManager;
+    qDebug() << "GeocodeDataManager() deconstructed";
 }

@@ -26,8 +26,10 @@ RouteTool::RouteTool(QWidget *parent) :
 
 RouteTool::~RouteTool()
 {
+    qDebug() << "start to deconstruct RouteTool()";
     delete m_pForm;
     delete ui;
+    qDebug() << "RouteTool() deconstructed";
 }
 
 void RouteTool::showNieuweAanmelding()
@@ -68,7 +70,7 @@ void RouteTool::showNieuweLevering()
 {
     qDebug() << "Levering! kg, volume, waar";
 
-    // functionality based on kiesOphaalpuntenWidget:
-    //  xx.initialise(); // of .empty();
-    //  xx.show();
+    // functionality based on nieuweAanmeldingWidget:
+    leveringWidget.resetValues();
+    leveringWidget.show();
 }

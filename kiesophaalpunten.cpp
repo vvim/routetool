@@ -288,6 +288,7 @@ void KiesOphaalpunten::reject()
 
 KiesOphaalpunten::~KiesOphaalpunten()
 {
+    qDebug() << "start to deconstruct KiesOphaalpunten()";
     delete warning;
     delete normal;
     delete legeAanmeldingenList;
@@ -299,6 +300,7 @@ KiesOphaalpunten::~KiesOphaalpunten()
     delete resetButton;
     delete allButton;
     delete buttonBox;
+    qDebug() << "KiesOphaalpunten() deconstructed";
 }
 
 void KiesOphaalpunten::initialise()

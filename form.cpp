@@ -137,10 +137,12 @@ Form::Form(QWidget *parent) :
 
 Form::~Form()
 {
+    qDebug() << "start to deconstruct Form()";
     delete ui;
     delete completer;
     qDebug() << "<vvim> ~Form() deconstructor: no need to delete distance_matrix_in_meters and distance_matrix_in_seconds, this has been done by the class DistanceMatrix";
     qDebug() << "<vvim> ~Form() deconstructor: must we also delete all contents of QList <SMarker*> m_markers ?";
+    qDebug() << "Form() deconstructed";
 }
 
 void Form::showOphaalpunt(double east, double north, SOphaalpunt ophaalpunt, bool saveMarker)

@@ -197,6 +197,7 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
 
 InfoOphaalpunt::~InfoOphaalpunt()
 {
+    qDebug() << "start to deconstruct InfoOphaalpunt()";
     delete  resetButton;
     delete  buttonBox;
     delete  ophaalpuntLabel;
@@ -240,6 +241,7 @@ InfoOphaalpunt::~InfoOphaalpunt()
     delete  frequentie_attestComboBox;
     delete  extra_informatieLabel;
     delete  extra_informatieEdit;
+    qDebug() << "InfoOphaalpunt() deconstructed";
 }
 
 void InfoOphaalpunt::accept()

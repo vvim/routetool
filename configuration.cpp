@@ -106,6 +106,7 @@ void Configuration::setOriginalValues()
 
 Configuration::~Configuration()
 {
+    qDebug() << "start to deconstruct Configuration()";
     delete apiKeyEdit;
     delete db_databasenameEdit;
     delete db_hostEdit;
@@ -119,4 +120,5 @@ Configuration::~Configuration()
     delete max_volume_vrachtwagenEdit;
     delete startpuntEdit;
     delete resetButton;
+    qDebug() << "Configuration() deconstructed";
 }

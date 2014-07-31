@@ -2,6 +2,7 @@
 #include <math.h>
 #include <QTextTable>
 #include <QPainter>
+#include <QDebug>
 
 // read http://doc.qt.digia.com/qq/qq27-odfwriter.html
 
@@ -28,7 +29,9 @@ DocumentWriter::DocumentWriter(const QString &address, const QString &legal, con
 
 DocumentWriter::~DocumentWriter()
 {
+  qDebug() << "start to deconstruct DocumentWriter()";
   delete m_document;
+  qDebug() << "DocumentWriter() deconstructed";
 }
 
 void DocumentWriter::addVisit(

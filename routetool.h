@@ -7,6 +7,7 @@
 #include "infoophaalpunt.h"
 #include "configuration.h"
 #include "kiesophaalpunten.h"
+#include "levering.h"
 
 extern QSettings settings;
 
@@ -32,6 +33,7 @@ private:
     InfoOphaalpunt nieuwOphaalpuntWidget;
     Configuration configurationWidget;
     KiesOphaalpunten kiesOphaalpuntenWidget;
+    Levering leveringWidget;
 
 private slots:
     void showNieuweAanmelding();

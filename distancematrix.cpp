@@ -1003,22 +1003,26 @@ void DistanceMatrix::deleteTheMatrices()
 {
     int nr_of_cities = m_markers.length();
 
-    for(int i = 0; i < nr_of_cities; i++) {
-        delete [] distance_matrix_in_meters[i];
-        delete [] distance_matrix_in_seconds[i];
+    if(nr_of_cities > 0)
+    {
+        for(int i = 0; i < nr_of_cities; i++) {
+            delete [] distance_matrix_in_meters[i];
+            delete [] distance_matrix_in_seconds[i];
+        }
+        delete [] distance_matrix_in_meters;
+        delete [] distance_matrix_in_seconds;
     }
-    delete [] distance_matrix_in_meters;
-    delete [] distance_matrix_in_seconds;
 }
 
 DistanceMatrix::~DistanceMatrix()
 {
+    qDebug() << "start to deconstruct DistanceMatrix()";
     deleteTheMatrices();
     delete m_pNetworkAccessManager;
     delete tsp_solution;
     delete all_cities_marked;
     delete citynames;
-
+    qDebug() << "DistanceMatrix() deconstructed";
 }
 
 QString DistanceMatrix::prepareForUrl(QString string)
