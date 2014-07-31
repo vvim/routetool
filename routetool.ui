@@ -26,6 +26,7 @@
    <addaction name="nieuweAanmeldingMenuButton"/>
    <addaction name="nieuwOphaalpuntMenuButton"/>
    <addaction name="kiesOphaalpuntenMenuButton"/>
+   <addaction name="nieuweLeveringMenuButton"/>
    <addaction name="configurationMenuButton"/>
    <addaction name="actionQuit"/>
   </widget>
@@ -40,17 +41,22 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="nieuweAanmeldingMenuButton">
    <property name="text">
-    <string>Nieuwe aanmelding</string>
-   </property>
-  </action>
-  <action name="nieuwOphaalpuntMenuButton">
-   <property name="text">
-    <string>Nieuw ophaalpunt</string>
+    <string>Aanmelding</string>
    </property>
   </action>
   <action name="kiesOphaalpuntenMenuButton">
    <property name="text">
     <string>Kies ophaalpunten</string>
+   </property>
+  </action>
+  <action name="nieuweLeveringMenuButton">
+   <property name="text">
+    <string>Levering</string>
+   </property>
+  </action>
+  <action name="nieuwOphaalpuntMenuButton">
+   <property name="text">
+    <string>Nieuw ophaalpunt</string>
    </property>
   </action>
   <action name="configurationMenuButton">

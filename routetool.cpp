@@ -15,6 +15,7 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(ui->nieuwOphaalpuntMenuButton, SIGNAL(triggered()), this, SLOT(showNieuwOphaalpunt()));
     connect(ui->configurationMenuButton, SIGNAL(triggered()), this, SLOT(showConfiguration()));
     connect(ui->kiesOphaalpuntenMenuButton, SIGNAL(triggered()), this, SLOT(showKiesOphaalpunten()));
+    connect(ui->nieuweLeveringMenuButton, SIGNAL(triggered()), this, SLOT(showNieuweLevering()));
 
     m_pForm = new Form(this);
     setCentralWidget(m_pForm);
@@ -61,4 +62,13 @@ void RouteTool::showKiesOphaalpunten()
     kiesOphaalpuntenWidget.initialise();
     kiesOphaalpuntenWidget.show();
     // always re-initialise the list of 'aanmeldingen' as the user might have given new input since last time
+}
+
+void RouteTool::showNieuweLevering()
+{
+    qDebug() << "Levering! kg, volume, waar";
+
+    // functionality based on kiesOphaalpuntenWidget:
+    //  xx.initialise(); // of .empty();
+    //  xx.show();
 }
