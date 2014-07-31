@@ -284,8 +284,8 @@ void Form::on_pbRemoveMarker_clicked()
 
 
 
-    //<vvim> TODO: programma crasht als er maar 2 markers zijn en je wil de tweede verwijderen. Waarom?
-    qDebug() << "<vvim> TODO: BUG: programma crasht als er maar 2 markers zijn en je wil de tweede verwijderen. Waarom?";
+    //<vvim> TODO: programma crasht als er meerdere markers zijn en je wil de voorlaatste verwijderen. Waarom?
+    qDebug() << "<vvim> TODO: programma crasht als er meerdere markers zijn en je wil de voorlaatste verwijderen. Waarom?";
 
     if (ui->lwMarkers->currentRow() < 0) return;
 
@@ -501,6 +501,7 @@ void Form::drawRoute()
           //             Bestaat er een extensie voor Qt die deze SIGNAL wel heeft?
     reorderMarkers();
 
+    qDebug() << "<vvim>: Google MAX is 8 WayPoints. To beat this, see http://lemonharpy.wordpress.com/2011/12/15/working-around-8-waypoint-limit-in-google-maps-directions-api/ and http://jsfiddle.net/ZyHnk/";
 
     //info: https://www.youtube.com/watch?v=nN85QMYZzQQ
 
