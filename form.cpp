@@ -270,7 +270,7 @@ void Form::on_lwMarkers_currentRowChanged(int currentRow)
 
 void Form::on_pbRemoveMarker_clicked()
 {
-    //matrices_up_to_date = false; -> doesn't matter, the information in the distance_matrices stays relevant
+    matrices_up_to_date = false;
 
     qDebug() << "<vvim> TODO: na Drag en Drop is de volgorde van ui->lwMarkers veranderd, maar NIET" <<
                 "die van m_markers of de markers[] in JavaScript." <<
