@@ -16,6 +16,7 @@ class Configuration : public QWidget
     Q_OBJECT
 public:
     explicit Configuration(QWidget *parent = 0);
+    ~Configuration();
 
 public slots:
     void setOriginalValues();

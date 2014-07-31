@@ -1014,6 +1014,11 @@ void DistanceMatrix::deleteTheMatrices()
 DistanceMatrix::~DistanceMatrix()
 {
     deleteTheMatrices();
+    delete m_pNetworkAccessManager;
+    delete tsp_solution;
+    delete all_cities_marked;
+    delete citynames;
+
 }
 
 QString DistanceMatrix::prepareForUrl(QString string)

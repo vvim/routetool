@@ -57,9 +57,6 @@ private:
 
     QDialogButtonBox *buttonBox;
 
-    QStandardItemModel *model;
-    QDataWidgetMapper *mapper;
-
     MyCompleter *completer;
 
     QMap<QString, int> ophaalpunten;

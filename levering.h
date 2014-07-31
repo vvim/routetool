@@ -20,8 +20,6 @@
 #include <QSettings>
 
 #include "mylineedit.h"
-#include "infoophaalpunt.h"
-
 
 extern QSettings settings;
 
@@ -65,15 +63,11 @@ private:
 
     QMap<QString, int> ophaalpunten;
 
-    InfoOphaalpunt *info;
-
 private slots:
     void accept();
     void reject();
     void ophaalpuntChanged();
-    void toonOphaalpuntInformatie();
     void loadOphaalpunten();
-    void createNewOphaalpunt();
 };
 
 #endif // LEVERING_H

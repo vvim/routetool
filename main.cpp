@@ -38,6 +38,8 @@ void checkSettings()
         qDebug() << "show Dialog";
         Configuration *c = new Configuration();
         c->show();
+
+        // how to correctly delete "c" after it is done?
     }
 
     qDebug() << "Configuration checkSettings(): OK! All settings are filled in.";
@@ -116,6 +118,13 @@ int main(int argc, char *argv[])
     qDebug() << "remove DB";
     QSqlDatabase::removeDatabase(settings.value("db/databasename").toString());
 
+    /*
+      how to correctly close the logfile? This gives errors:
+    qDebug() << "close logfile";
+    fclose(debuglogfile);
+    qDebug() << "delete logfile";
+    delete debuglogfile;
+    */
 
     return 0;
 }

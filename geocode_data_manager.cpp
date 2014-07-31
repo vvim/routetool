@@ -9,7 +9,7 @@ GeocodeDataManager::GeocodeDataManager(QObject *parent) :
     QObject(parent)
 {
     m_pNetworkAccessManager = new QNetworkAccessManager(this);
-    markersToBeDone = new QList<SOphaalpunt>();
+    markersToBeDone = new QList<SOphaalpunt>(); // needed so that we can delete it at the first call of pushListOfMarkers() + for the empty()-check at giveNextMarker()
     connect(m_pNetworkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
     connect(this, SIGNAL(coordinatesReady(double, double, QString)), this, SLOT(giveNextMarker()));
     connect(this, SIGNAL(coordinatesReady(double, double, SOphaalpunt)), this, SLOT(giveNextMarker()));
@@ -77,6 +77,7 @@ void GeocodeDataManager::replyFinished(QNetworkReply* reply)
 
 void GeocodeDataManager::pushListOfMarkers(QList<SOphaalpunt> *list_of_markers)
 {
+    delete markersToBeDone;
     markersToBeDone = list_of_markers;
 
     giveNextMarker();
@@ -102,4 +103,5 @@ void GeocodeDataManager::giveNextMarker()
 GeocodeDataManager::~GeocodeDataManager()
 {
     delete markersToBeDone;
+    delete m_pNetworkAccessManager;
 }

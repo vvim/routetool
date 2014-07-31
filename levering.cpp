@@ -21,8 +21,6 @@ Levering::Levering(QWidget *parent) :
         * eventueel opmerkingen
     **/
 
-    info = new InfoOphaalpunt();
-
     locationLabel = new QLabel(tr("Ophaalpunt:")); //wordt een keuzelijst uit de databank!
     locationEdit = new MyLineEdit(); //wordt een keuzelijst uit de databank!
     toonOphaalpunt  = new QPushButton(tr("Toon info"));
@@ -59,11 +57,7 @@ Levering::Levering(QWidget *parent) :
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
     // zie mapper zoals custom widget mapper om ID te linken ??
-    connect(toonOphaalpunt, SIGNAL(clicked()), this, SLOT(toonOphaalpuntInformatie()));
-    connect(nieuwOphaalpunt, SIGNAL(clicked()), this, SLOT(createNewOphaalpunt()));
     connect(locationEdit, SIGNAL(editingFinished()), this, SLOT(ophaalpuntChanged()));
-
-    connect(info, SIGNAL(infoChanged()), this, SLOT(loadOphaalpunten()));
 
     locationLabel->setBuddy(locationEdit);
 
@@ -158,52 +152,11 @@ void Levering::resetValues()
 
 Levering::~Levering()
 {
-    delete info;
+    qDebug() << "NIET VERGETEN!!! delete pointers!!";
 }
 
 void Levering::accept()
 {
-    /** calculate bags to kgs (if needed) **/
-
-
-    if (zakkenkaarsenSpinBox->value() == 0)
-        zakkenkaarsenSpinBox->setValue(ceil(   kgkaarsenSpinBox->value() / settings.value("zak_kaarsresten_naar_kg").toDouble()  ) );
-    else if (kgkaarsenSpinBox->value() == 0)
-        kgkaarsenSpinBox->setValue(zakkenkaarsenSpinBox->value() * settings.value("zak_kaarsresten_naar_kg").toInt()  );
-
-    if (zakkenkurkSpinBox->value() == 0)
-        zakkenkurkSpinBox->setValue(ceil(   kgkurkSpinBox->value() / settings.value("zak_kurk_naar_kg").toDouble()  ) );
-    else if (kgkurkSpinBox->value() == 0)
-        kgkurkSpinBox->setValue(zakkenkurkSpinBox->value() * settings.value("zak_kurk_naar_kg").toInt()  );
-
-
-    /** insert into db **/
-    QSqlQuery query;
-
-    //ESCAPING QUERY: http://stackoverflow.com/questions/19045281/insert-strings-that-contain-or-to-the-database-table-qt and http://qt-project.org/doc/qt-5/qsqlquery.html#prepare
-    query.prepare("INSERT INTO aanmelding (id,   timestamp, ophaalpunt,  contactpersoon,  datum,  zakken_kurk,  kg_kurk,  zakken_kaarsresten,  kg_kaarsresten,  opmerkingen, ophaalronde_nr, volgorde) "
-                                  "VALUES (NULL, NULL,     :ophaalpunt, :contactpersoon, :datum, :zakken_kurk, :kg_kurk, :zakken_kaarsresten, :kg_kaarsresten, :opmerkingen, NULL,           NULL) ");
-    // id wordt ingevuld via AUTO_INCREMENT en is primary key
-    // timestamp wordt ingevuld met default value 'current_timestamp'
-    query.bindValue(":ophaalpunt", ophaalpunten[locationEdit->text()]);  // VERANDER NAARophaalpunt_id
-    query.bindValue(":contactpersoon", nameEdit->text());
-    query.bindValue(":datum", dateEdit->date().toString("yyyy-MM-dd"));
-    query.bindValue(":zakken_kurk", zakkenkurkSpinBox->value());
-    query.bindValue(":kg_kurk", kgkurkSpinBox->value());
-    query.bindValue(":zakken_kaarsresten", zakkenkaarsenSpinBox->value());
-    query.bindValue(":kg_kaarsresten", kgkaarsenSpinBox->value());
-    query.bindValue(":opmerkingen", opmerkingenEdit->toPlainText());
-    // ophaalronde_nr wordt pas ingevuld als aanmelding is geselecteerd voor een ophaalronde
-    // volgorde wordt pas ingevuld als aanmelding is geselecteerd voor een ophaalronde
-
-    if(!query.exec())
-    {
-        QMessageBox::critical(this, tr("INSERT aanmelding voor ophaalpunt %1 FAALT!").arg(locationEdit->text()),
-                    query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
-        qCritical(QString(tr("INSERT aanmelding voor ophaalpunt %1 FAALT!").arg(locationEdit->text()).append(query.lastError().text())).toStdString().c_str());
-    }
-    else
-        this->close();
 }
 
 void Levering::reject()
@@ -222,12 +175,6 @@ void Levering::ophaalpuntChanged()
 
 }
 
-void Levering::toonOphaalpuntInformatie()
-{
-    info->setWindowTitle("info over ophaalpunt");
-    info->showOphaalpunt(ophaalpunten[locationEdit->text()]);
-}
-
 void Levering::loadOphaalpunten()
 {
     // autocompletion for locationEdit:
@@ -238,13 +185,14 @@ void Levering::loadOphaalpunten()
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     #endif
 
-    QSqlQuery query("SELECT id, naam FROM ophaalpunten");
+    QSqlQuery query("SELECT id, naam FROM ophaalpunten"); // adres ??
         while (query.next()) {
             int id = query.value(0).toInt();
             QString naam	= query.value(1).toString();
             words << naam;
 
             ophaalpunten[naam] = id;
+            // adres[id_of_naam] = ADRES ??
         }
 
     #ifndef QT_NO_CURSOR
@@ -257,10 +205,4 @@ void Levering::loadOphaalpunten()
     completer->setCaseSensitivity(Qt::CaseInsensitive);
 
     locationEdit->setCompleter(completer);
-}
-
-void Levering::createNewOphaalpunt()
-{
-    info->setWindowTitle("Nieuw ophaalpunt");
-    info->createNewOphaalpunt();
 }

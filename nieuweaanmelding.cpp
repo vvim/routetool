@@ -8,8 +8,6 @@
 NieuweAanmelding::NieuweAanmelding(QWidget *parent) :
     QWidget(parent)
 {
-    //setupModel();
-
     /**
         * ophaalpunt dat zich heeft aangemled (kan je uit een keuzelijst kiezen)
         * datum melding
@@ -159,6 +157,24 @@ void NieuweAanmelding::resetValues()
 NieuweAanmelding::~NieuweAanmelding()
 {
     delete info;
+    delete locationLabel;
+    delete locationEdit;
+    delete toonOphaalpunt;
+    delete nieuwOphaalpunt;
+    delete nameLabel;
+    delete nameEdit;
+    delete dateLabel;
+    delete dateEdit;
+    delete zakkenkurkLabel;
+    delete zakkenkurkSpinBox;
+    delete kgkurkLabel;
+    delete kgkurkSpinBox;
+    delete kgkaarsenLabel;
+    delete kgkaarsenSpinBox;
+    delete opmerkingenLabel;
+    delete opmerkingenEdit;
+    delete buttonBox;
+    delete completer;
 }
 
 void NieuweAanmelding::accept()

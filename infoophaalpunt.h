@@ -26,7 +26,6 @@ public:
     void createNewOphaalpunt();
 
 private:
-    QSqlRelationalTableModel *codemodel;
     int codeIndex;
     QDialogButtonBox *buttonBox;
     QPushButton *resetButton;

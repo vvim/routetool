@@ -103,3 +103,20 @@ void Configuration::setOriginalValues()
     max_gewicht_vrachtwagenEdit->setText(settings.value("max_gewicht_vrachtwagen").toString());
     max_volume_vrachtwagenEdit->setText(settings.value("max_volume_vrachtwagen").toString());
 }
+
+Configuration::~Configuration()
+{
+    delete apiKeyEdit;
+    delete db_databasenameEdit;
+    delete db_hostEdit;
+    delete db_passwordEdit;
+    delete db_usernameEdit;
+    delete zak_kaarsresten_naar_kgEdit;
+    delete zak_kaarsresten_volumeEdit;
+    delete zak_kurk_naar_kgEdit;
+    delete zak_kurk_volumeEdit;
+    delete max_gewicht_vrachtwagenEdit;
+    delete max_volume_vrachtwagenEdit;
+    delete startpuntEdit;
+    delete resetButton;
+}

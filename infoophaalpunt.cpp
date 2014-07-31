@@ -197,6 +197,49 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
 
 InfoOphaalpunt::~InfoOphaalpunt()
 {
+    delete  resetButton;
+    delete  buttonBox;
+    delete  ophaalpuntLabel;
+    delete  ophaalpuntEdit;
+    delete  kurkCheckBox;
+    delete  parafineCheckBox;
+    delete  codeLabel;
+    delete  codeComboBox;
+    delete  code_intercommunaleLabel;
+    delete  code_intercommunaleComboBox;
+    delete  straatLabel;
+    delete  straatEdit;
+    delete  nrLabel;
+    delete  nrEdit;
+    delete  busLabel;
+    delete  busEdit;
+    delete  postcodeLabel;
+    delete  postcodeEdit;
+    delete  plaatsLabel;
+    delete  plaatsEdit;
+    delete  landLabel;
+    delete  landEdit;
+    delete  openingsurenLabel;
+    delete  openingsurenEdit;
+    delete  contactpersoonLabel;
+    delete  contactpersoonEdit;
+    delete  telefoonnummer1Label;
+    delete  telefoonnummer1Edit;
+    delete  telefoonnummer2Label;
+    delete  telefoonnummer2Edit;
+    delete  email1Label;
+    delete  email1Edit;
+    delete  email2Label;
+    delete  email2Edit;
+    delete  taalvoorkeurLabel;
+    delete  taalvoorkeurComboBox;
+    delete  preferred_contactLabel;
+    delete  preferred_contactComboBox;
+    delete  attest_nodigCheckBox;
+    delete  frequentie_attestLabel;
+    delete  frequentie_attestComboBox;
+    delete  extra_informatieLabel;
+    delete  extra_informatieEdit;
 }
 
 void InfoOphaalpunt::accept()
