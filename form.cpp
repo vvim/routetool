@@ -640,3 +640,10 @@ void Form::setTotalWeightTotalVolume()
         ui->totalVolumeEdit->setPalette(*normal);
 
 }
+
+void Form::on_pbPrintMap_clicked()
+{
+    qDebug() << "Form::on_pbPrintMap_clicked()";
+    // see http://qt-project.org/doc/qt-4.8/desktop-screenshot.html
+    // see http://stackoverflow.com/questions/681148/how-to-print-a-qt-dialog-or-window
+}
