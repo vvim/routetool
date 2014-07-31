@@ -78,6 +78,8 @@ private:
     **/
 
     void logOutputMarkers();
+    void logOutputLwMarkers();
+
 };
 
 #endif // FORM_H

@@ -275,12 +275,19 @@ void Form::on_lwMarkers_currentRowChanged(int currentRow)
 
 void Form::on_pbRemoveMarker_clicked()
 {
+    if (ui->lwMarkers->currentRow() < 0) return;
+
+    if((ui->lwMarkers->currentRow()+2) == ui->lwMarkers->count())
+    {
+        qDebug() << "Dangerous business";
+        QMessageBox::critical(this, tr("WAARSCHUWING"), tr("Het wissen van de 'voorlaatste' marker in de lijst resulteert in een fout die ik nog niet heb kunnen opsporen.\n\nAls je deze marker echt wilt wissen, versleep hem dan eerst tot onderaan de lijst, en verwijder hem dan."));
+        return;
+    }
+
     matrices_up_to_date = false;
 
     // after a Drag and Drop, the order might have changed
     reorderMarkers();
-
-    if (ui->lwMarkers->currentRow() < 0) return;
 
     /*
         because of the Drag and Drop in lwMarkers,
@@ -649,4 +656,18 @@ void Form::on_pbPrintMap_clicked()
     qDebug() << "Form::on_pbPrintMap_clicked()";
     // see http://qt-project.org/doc/qt-4.8/desktop-screenshot.html
     // see http://stackoverflow.com/questions/681148/how-to-print-a-qt-dialog-or-window
+}
+
+
+void Form::logOutputLwMarkers()
+{
+    qDebug() << "\n\nSTART lwMarkers";
+    // function used for debugging
+    qDebug() << "Debug information: output lwmarkers. Count: " << ui->lwMarkers->count();
+    qDebug() << "Current row:" << ui->lwMarkers->currentRow();
+    for(int i = 0; i < ui->lwMarkers->count(); i++)
+    {
+        qDebug() << "Row" << i << ":" << ui->lwMarkers->item(i)->text();
+    }
+    qDebug() << "STOP\n\n";
 }
