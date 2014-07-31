@@ -271,6 +271,7 @@ void Form::on_lwMarkers_currentRowChanged(int currentRow)
 void Form::on_pbRemoveMarker_clicked()
 {
     matrices_up_to_date = false;
+    reorderMarkers(); // reorderMarkers in case of a Drag / Drop
 
     qDebug() << "<vvim> TODO: na Drag en Drop is de volgorde van ui->lwMarkers veranderd, maar NIET" <<
                 "die van m_markers of de markers[] in JavaScript." <<
@@ -585,8 +586,8 @@ void Form::on_pbRouteOmdraaien_clicked()
 void Form::reorderMarkers()
 {
     QList<SMarker*> temp;
-    //qDebug() << "write out of m_markers BEFORE the reordering";
-    //logOutputMarkers();
+    /**/qDebug() << "write out of m_markers BEFORE the reordering";
+    /**/logOutputMarkers();
 
     for(int i = 0; i < ui->lwMarkers->count(); i++)
     {
@@ -596,8 +597,8 @@ void Form::reorderMarkers()
     m_markers = temp; // does this leave garbage in memory? should I delete something??
                       // TODO <vvim> ask StackOverflow
 
-    //qDebug() << "write out of m_markers AFTER the reordering";
-    //logOutputMarkers();
+    /**/qDebug() << "write out of m_markers AFTER the reordering";
+    /**/logOutputMarkers();
 }
 
 void Form::logOutputMarkers()
