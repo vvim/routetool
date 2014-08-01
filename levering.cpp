@@ -136,10 +136,9 @@ Levering::~Levering()
 
 void Levering::accept()
 {
-    qDebug() << "gebruik een nieuwe struct SLevering met daar alle informatie in om via connect door te geven, zie void KiesOphaalpunten::accept()";
-
-    // some sweet action
-    // this->close();
+    SLevering levering(nameEdit->text(), streetEdit->text(), houseNrEdit->text(), busNrEdit->text(), postalCodeEdit->text(), plaatsEdit->text(), countryEdit->text(), contactPersonEdit->text(), telephoneEdit->text(), weightSpinBox->value(), volumeSpinBox->value(), timeNeededSpinBox->value());
+    emit levering_for_route(levering);
+    this->close();
 }
 
 void Levering::reject()

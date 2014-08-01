@@ -2,6 +2,7 @@
 #define SLEVERING_H
 
 #include <QString>
+#include <QDebug>
 
 //structure for save levering data
 struct SLevering
@@ -45,26 +46,45 @@ struct SLevering
         QString nameandaddress = "";
 
         if(!name.trimmed().isEmpty())
-            nameandaddress.append("%1, ").arg(name);
+            nameandaddress.append(name).append(", ");
 
         nameandaddress.append(getAddress());
 
         return nameandaddress;
-    }
+    };
 
     QString getAddress()
     {
         QString address = "";
 
-        address.append("%1 %2").arg(street).arg(housenr);
+        address.append(street).append(" ").append(housenr);
 
         if(!busnr.trimmed().isEmpty())
-            address.append(" bus %1").arg(busnr);
+            address.append(" bus ").append(busnr);
 
-        address.append(", %1 %2, %3").arg(postalcode).arg(plaats).arg(country);
+        address.append(", ").append(postalcode).append(" ").append(plaats).append(", ").append(country);
 
         return address;
-    }
+    };
+
+    void PrintInformation()
+    {
+        qDebug() << ". type: Levering"; //  ophaalpunt_id? -> later?
+        qDebug() << "... name       :" << name;
+        qDebug() << "... street     :" << street;
+        qDebug() << "... housenr    :" << housenr;
+        qDebug() << "... busnr      :" << busnr;
+        qDebug() << "... postalcode :" << postalcode;
+        qDebug() << "... plaats     :" << plaats;
+        qDebug() << "... country    :" << country;
+        qDebug() << "... ... getAddress()       :" << getAddress();
+        qDebug() << "... ... getNameAndAddress():" << getNameAndAddress();
+        qDebug() << "... contactperson:" << contactperson;
+        qDebug() << "... telephone    :" << telephone;
+        qDebug() << "... weight :" << weight;
+        qDebug() << "... volume :" << volume;
+        qDebug() << "... timeneeded   :" << timeneeded << "minutes";
+    };
 
     QString name;
     QString street;

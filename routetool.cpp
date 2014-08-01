@@ -21,6 +21,7 @@ RouteTool::RouteTool(QWidget *parent) :
     setCentralWidget(m_pForm);
 
     connect(&kiesOphaalpuntenWidget, SIGNAL(aanmelding_for_route(QList<SOphaalpunt> *)), m_pForm, SLOT(add_aanmeldingen(QList<SOphaalpunt>*)));
+    connect(&leveringWidget, SIGNAL(levering_for_route(SLevering)), m_pForm, SLOT(add_levering(SLevering)));
     connect(&configurationWidget, SIGNAL(configurationChanged()), m_pForm, SLOT(setTotalWeightTotalVolume()));
 }
 
@@ -36,12 +37,6 @@ void RouteTool::showNieuweAanmelding()
 {
     nieuweAanmeldingWidget.resetValues();
     nieuweAanmeldingWidget.show();
-/**
-    NieuweAanmelding *na = new NieuweAanmelding();
-    na->show();
-    // are these pointers automatically destroyed after closing the program, or does this create memory leaks?
-    // might use "nieuweAanmeldingWidget.show()" , but then will have to clear the information every time I call it?
-**/
 }
 
 void RouteTool::showNieuwOphaalpunt()
@@ -68,9 +63,6 @@ void RouteTool::showKiesOphaalpunten()
 
 void RouteTool::showNieuweLevering()
 {
-    qDebug() << "Levering! kg, volume, waar";
-
-    // functionality based on nieuweAanmeldingWidget:
     leveringWidget.resetValues();
     leveringWidget.show();
 }

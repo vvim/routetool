@@ -45,6 +45,7 @@ Form::Form(QWidget *parent) :
 
     connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,QString)), this, SLOT(showCoordinates(double,double,QString)));
     connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,SOphaalpunt)), this, SLOT(showOphaalpunt(double,double,SOphaalpunt)));
+    connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,SLevering)), this, SLOT(showLevering(double,double,SLevering)));
     connect(&m_geocodeDataManager, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
 
     connect(&m_distanceMatrix, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
@@ -143,6 +144,23 @@ Form::~Form()
     qDebug() << "<vvim> ~Form() deconstructor: no need to delete distance_matrix_in_meters and distance_matrix_in_seconds, this has been done by the class DistanceMatrix";
     qDebug() << "<vvim> ~Form() deconstructor: must we also delete all contents of QList <SMarker*> m_markers ?";
     qDebug() << "Form() deconstructed";
+}
+
+void Form::showLevering(double east, double north, SLevering levering, bool saveMarker)
+{
+    qDebug() << "Form, showLevering" << east << north;
+
+    QString str =
+            QString("var newLoc = new google.maps.LatLng(%1, %2); ").arg(north).arg(east) +
+            QString("map.setCenter(newLoc);") +
+            QString("map.setZoom(%1);").arg(ui->zoomSpinBox->value());
+
+     qDebug() << str;
+
+    ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
+
+    if (saveMarker)
+        setMarker(east, north, levering);
 }
 
 void Form::showOphaalpunt(double east, double north, SOphaalpunt ophaalpunt, bool saveMarker)
@@ -245,6 +263,46 @@ void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
     matrices_up_to_date = false;
 
     setTotalWeightTotalVolume();
+}
+
+void Form::setMarker(double east, double north, SLevering levering)
+{
+    QString caption = levering.getNameAndAddress();
+    for (int i=0; i<m_markers.size(); i++)
+    {
+        if (m_markers[i]->caption == caption)
+        {
+            // overschrijven met info levering???
+            qDebug() << "found marker with the same caption" << caption << "ophaling" << m_markers[i]->ophaling << ", levering" << m_markers[i]->levering << ". Overwriting with SLevering data.";
+            m_markers[i]->levering = true;
+            m_markers[i]->leveringspunt = levering;
+            setTotalWeightTotalVolume();
+            // anders bij levering dan bij ophaling, neen??? Levering wordt eerst gedaan, daarna is de camion leeg, dan de ophaling
+            return;
+        }
+    }
+
+    QString str =
+            QString("var marker = new google.maps.Marker({") +
+            QString("position: new google.maps.LatLng(%1, %2),").arg(north).arg(east) +
+            QString("map: map,") +
+            QString("title: %1").arg("\""+caption+"\"") +
+            QString("});") +
+            QString("markers.push(marker);");
+    qDebug() << str;
+    ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
+
+
+    SMarker *_marker = new SMarker(east, north, levering);
+    m_markers.append(_marker);
+
+    //adding capton to ListWidget
+    ui->lwMarkers->addItem(caption);
+    link_lwMarkers_mmarkers[caption] = _marker;
+    matrices_up_to_date = false;
+
+    setTotalWeightTotalVolume();
+    // anders bij levering dan bij ophaling, neen??? Levering wordt eerst gedaan, daarna is de camion leeg, dan de ophaling
 }
 
 void Form::goClicked()
@@ -436,6 +494,11 @@ void Form::add_aanmeldingen(QList<SOphaalpunt> *aanmeldingen)
     m_geocodeDataManager.pushListOfMarkers(aanmeldingen);
 }
 
+void Form::add_levering(SLevering levering)
+{
+    m_geocodeDataManager.pushLevering(levering);
+}
+
 /**
 
     I believe this function is a copy/paste accident, must try out. Was already included in version 20140519
@@ -589,29 +652,13 @@ void Form::logOutputMarkers()
     for(int i = 0; i < m_markers.length(); i++)
     {
         qDebug() << "Marker" << i << ":";
-        qDebug() << "." << m_markers[i]->caption << "(" << m_markers[i]->east << m_markers[i]->north << ")" << "matrix:" << m_markers[i]->distancematrixindex;
-        if((!m_markers[i]->ophaling) && (!m_markers[i]->levering))
-        {
-            qDebug() << ". type: Adres";
-        }
-        if(m_markers[i]->ophaling)
-        {
-            qDebug() << ". type: Ophaalpunt ( aanmelding:" << m_markers[i]->ophaalpunt.id << ")";
-            qDebug() << "..." << m_markers[i]->ophaalpunt.naam;
-            qDebug() << "..." << m_markers[i]->ophaalpunt.adres;
-            qDebug() << "... kurk: " << m_markers[i]->ophaalpunt.kg_kurk << "kg, "<< m_markers[i]->ophaalpunt.zakken_kurk << "zakken";
-            qDebug() << "... kaars: " << m_markers[i]->ophaalpunt.kg_kaarsresten << "kg, "<< m_markers[i]->ophaalpunt.zakken_kaarsresten << "zakken";
-        }
-        if(m_markers[i]->levering)
-        {
-            qDebug() << ". type: Levering";
-            qDebug() << "........... not defined yet...";
-        }
+        m_markers[i]->PrintInformation();
     }
 }
 
 void Form::setTotalWeightTotalVolume()
 {
+    // anders bij levering dan bij ophaling, neen??? Levering wordt eerst gedaan, daarna is de camion leeg, dan de ophaling
     double total_weight = 0;
     double total_volume = 0;
     int total_bags_kurk = 0;

@@ -31,13 +31,16 @@ private slots:
     void goClicked();
     void showCoordinates(double east, double north, QString markername, bool saveMarker = true);
     void showOphaalpunt(double east, double north, SOphaalpunt ophaalpunt, bool saveMarker = true);
+    void showLevering(double east, double north, SLevering levering, bool saveMarker = true);
     //set marker to map and save marker in markers list
     void setMarker(double east, double north, QString caption);
     void setMarker(double east, double north, SOphaalpunt ophaalpunt);
+    void setMarker(double east, double north, SLevering levering);
     void errorOccured(const QString&);
     void process_result_distancematrix(QList<int> *);
     void reload_distancematrix(int**, int**);
     void add_aanmeldingen(QList<SOphaalpunt> *);
+    void add_levering(SLevering);
     void keyPressEvent( QKeyEvent *k );
     void on_lwMarkers_currentRowChanged(int currentRow);
     void on_pbRemoveMarker_clicked();

@@ -2,6 +2,7 @@
 #define SOPHAALPUNT_H
 
 #include <QSettings>
+#include <QDebug>
 
 extern QSettings settings;
 
@@ -40,6 +41,15 @@ struct SOphaalpunt
     double getWeight()
     {
         return kg_kurk + kg_kaarsresten;
+    }
+
+    void PrintInformation()
+    {
+        qDebug() << ". type: Ophaalpunt ( aanmelding:" << id << ")";
+        qDebug() << "..." << naam;
+        qDebug() << "..." << adres;
+        qDebug() << "... kurk: " << kg_kurk << "kg, "<< zakken_kurk << "zakken";
+        qDebug() << "... kaars: " << kg_kaarsresten << "kg, "<< zakken_kaarsresten << "zakken";
     }
 
     QString naam;

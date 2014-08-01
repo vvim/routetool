@@ -34,6 +34,9 @@ public:
     ~Levering();
     void resetValues();
 
+signals:
+    void levering_for_route(SLevering);
+
 private:
     QLabel *locationLabel;
     MyLineEdit *locationEdit;

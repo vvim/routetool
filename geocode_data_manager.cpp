@@ -73,6 +73,18 @@ void GeocodeDataManager::replyFinished(QNetworkReply* reply)
         marker_type = Adres;
         emit coordinatesReady(locationOfResult["lng"].toDouble(), locationOfResult["lat"].toDouble(),ophaalpunt_to_mark);
     }
+    else if(marker_type == Levering)
+    {
+        marker_type = Adres;
+        emit coordinatesReady(locationOfResult["lng"].toDouble(), locationOfResult["lat"].toDouble(),leveringToBeDone);
+    }
+}
+
+void GeocodeDataManager::pushLevering(SLevering levering)
+{
+    marker_type = Levering;
+    leveringToBeDone = levering;
+    getCoordinates(leveringToBeDone.getAddress()); // getAddress() should be enough, while the marker will be named with getNameAndAddress()
 }
 
 void GeocodeDataManager::pushListOfMarkers(QList<SOphaalpunt> *list_of_markers)

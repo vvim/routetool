@@ -20,11 +20,13 @@ public:
 
     void getCoordinates(const QString& address);
     void pushListOfMarkers(QList<SOphaalpunt> *);
+    void pushLevering(SLevering);
 
 signals:
     void errorOccured(const QString&);
     void coordinatesReady(double east, double north, QString markername);
     void coordinatesReady(double east, double north, SOphaalpunt ophaalpunt);
+    void coordinatesReady(double east, double north, SLevering levering);
     void markerDone();
 
 private slots:
@@ -34,6 +36,7 @@ private slots:
 private:
     QNetworkAccessManager* m_pNetworkAccessManager;
     QList<SOphaalpunt> *markersToBeDone;
+    SLevering leveringToBeDone;
     MarkerType marker_type;
     QString name_of_marker;
     SOphaalpunt ophaalpunt_to_mark;
