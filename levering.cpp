@@ -72,14 +72,16 @@ Levering::Levering(QWidget *parent) :
     // line: lading
     formlayout->addRow(tr("Gewicht lading (kg):"), weightSpinBox);
     formlayout->addRow(tr("Volume lading (liter):"), volumeSpinBox);
-    formlayout->addRow(tr("Aantal minuten die nodig voor de levering:"), timeNeededSpinBox);
+    formlayout->addRow(tr("Aantal minuten nodig om te leveren:"), timeNeededSpinBox);
 
     QVBoxLayout *mainlayout = new QVBoxLayout();
-    mainlayout->addLayout(toplayout);
+    //mainlayout->addLayout(toplayout); -> let's leave this out for a future version, shall we?
     mainlayout->addLayout(formlayout);
     mainlayout->addWidget(buttonBox);
     setLayout(mainlayout);
     setMinimumWidth(600);
+
+    resetValues();
 }
 
 void Levering::resetValues()
@@ -96,7 +98,7 @@ void Levering::resetValues()
     countryEdit->setText("");
     weightSpinBox->setValue(0);
     volumeSpinBox->setValue(0);
-    timeNeededSpinBox->setValue(0);
+    timeNeededSpinBox->setValue(30); // by default 30 minutes for a delivery
     contactPersonEdit->setText("");
     telephoneEdit->setText("");
 }
