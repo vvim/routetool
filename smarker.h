@@ -3,6 +3,7 @@
 
 #include <QSettings>
 #include "sophaalpunt.h"
+#include "slevering.h"
 
 extern QSettings settings;
 
@@ -40,6 +41,7 @@ struct SMarker
     bool levering;
 
     SOphaalpunt ophaalpunt;
+    SLevering leveringspunt;
 };
 
 

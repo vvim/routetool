@@ -65,7 +65,8 @@ HEADERS  += routetool.h \
     mainwindow.h \
     kiesophaalpunten.h \
     sophaalpunt.h \
-    levering.h
+    levering.h \
+    slevering.h
 
 FORMS    += routetool.ui \
     form.ui

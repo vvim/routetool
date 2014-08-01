@@ -21,6 +21,7 @@
 
 #include "mylineedit.h"
 #include "infoophaalpunt.h"
+#include "slevering.h"
 
 extern QSettings settings;
 
