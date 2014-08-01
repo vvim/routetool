@@ -6,7 +6,7 @@
 extern QSettings settings;
 
 
-//structure for save markers data
+//structure for save ophaalpunt data
 struct SOphaalpunt
 {
     SOphaalpunt()
