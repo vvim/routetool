@@ -46,7 +46,7 @@ private slots:
     void on_pbRemoveMarker_clicked();
     void on_zoomSpinBox_valueChanged(int arg1);
     void on_pbOptimizeRoute_clicked();
-    void on_pbPrintMap_clicked();
+    void on_pbTransportationList_clicked();
     void drawRoute();
     void on_pbRouteOmdraaien_clicked();
     void reorderMarkers();

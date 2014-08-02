@@ -32,7 +32,7 @@ Form::Form(QWidget *parent) :
     ui->pbOptimizeRoute->setEnabled(true);
     ui->pbRemoveMarker->setEnabled(true);
     ui->pbShowRouteAsDefined->setEnabled(true);
-    ui->pbPrintMap->setEnabled(true);
+    ui->pbTransportationList->setEnabled(true);
     ui->pbRouteOmdraaien->setEnabled(true);
 
     /*
@@ -402,7 +402,7 @@ void Form::on_pbOptimizeRoute_clicked()
     }
 
     //extra funcationalities
-    ui->pbPrintMap->setEnabled(true);
+    ui->pbTransportationList->setEnabled(true);
     ui->pbRouteOmdraaien->setEnabled(true);
     ui->pbShowRouteAsDefined->setEnabled(true);
 }
@@ -700,11 +700,12 @@ void Form::setTotalWeightTotalVolume()
 
 }
 
-void Form::on_pbPrintMap_clicked()
+void Form::on_pbTransportationList_clicked()
 {
-    qDebug() << "Form::on_pbPrintMap_clicked()";
-    // see http://qt-project.org/doc/qt-4.8/desktop-screenshot.html
-    // see http://stackoverflow.com/questions/681148/how-to-print-a-qt-dialog-or-window
+    qDebug() << "Form::on_pbTransportationList_clicked()";
+    qDebug() << "This is where we should work on making the Transportation List (using distance matrices and Document Writer)";
+    // for the map: see http://qt-project.org/doc/qt-4.8/desktop-screenshot.html
+    //              see http://stackoverflow.com/questions/681148/how-to-print-a-qt-dialog-or-window
 }
 
 

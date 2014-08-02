@@ -123,12 +123,12 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pbPrintMap">
+      <widget class="QPushButton" name="pbTransportationList">
        <property name="enabled">
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Print Map</string>
+        <string>Maak Vervoerslijst</string>
        </property>
       </widget>
      </item>
