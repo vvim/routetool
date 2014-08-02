@@ -41,6 +41,8 @@ private slots:
     void showConfiguration();
     void showKiesOphaalpunten();
     void showNieuweLevering();
+    void showBijWieNogNooitOpgehaald();
+    void showVoorspelling();
 };
 
 #endif // ROUTETOOL_H

@@ -16,6 +16,8 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(ui->configurationMenuButton, SIGNAL(triggered()), this, SLOT(showConfiguration()));
     connect(ui->kiesOphaalpuntenMenuButton, SIGNAL(triggered()), this, SLOT(showKiesOphaalpunten()));
     connect(ui->nieuweLeveringMenuButton, SIGNAL(triggered()), this, SLOT(showNieuweLevering()));
+    connect(ui->wieNogNooitMenuButton, SIGNAL(triggered()), this, SLOT(showBijWieNogNooitOpgehaald()));
+    connect(ui->voorspellingMenuButton, SIGNAL(triggered()), this, SLOT(showVoorspelling()));
 
     m_pForm = new Form(this);
     setCentralWidget(m_pForm);
@@ -65,4 +67,22 @@ void RouteTool::showNieuweLevering()
 {
     leveringWidget.resetValues();
     leveringWidget.show();
+}
+
+void RouteTool::showBijWieNogNooitOpgehaald()
+{
+    qDebug() << "Toon bij welke ophaalpunten we nog nooit iets zijn gaan ophalen";
+    /** waarschijnlijk gebaseerd op kiesOphaalpuntenWidget
+        kiesOphaalpuntenWidget.initialise();
+        kiesOphaalpuntenWidget.show();
+    **/
+}
+
+void RouteTool::showVoorspelling()
+{
+    qDebug() << "Toon welke ophaalpunten nu waarschijnlijk een voorraad zullen hebben (berekend uit de historiek van ophalingen)";
+    /** waarschijnlijk gebaseerd op kiesOphaalpuntenWidget
+        kiesOphaalpuntenWidget.initialise();
+        kiesOphaalpuntenWidget.show();
+    **/
 }
