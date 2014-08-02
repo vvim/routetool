@@ -106,7 +106,6 @@ void Levering::resetValues()
 Levering::~Levering()
 {
     qDebug() << "start to deconstruct Levering()";
-    qDebug() << "NIET VERGETEN!!! delete pointers!!";
 
     delete info;
     delete locationLabel;
