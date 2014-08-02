@@ -61,11 +61,11 @@ private:
     int matrix_dimensions;
     bool matrices_up_to_date;
     bool after_calculating_distance_matrix_continue_to_tsp;
+    bool after_calculating_distance_matrix_continue_to_transportationlist;
 
     QMap<QString, SMarker*> link_lwMarkers_mmarkers;
     QPalette *warning, *normal;
 
-private:
     Ui::Form *ui;
     GeocodeDataManager m_geocodeDataManager;
     DistanceMatrix m_distanceMatrix;
@@ -80,6 +80,7 @@ private:
 
     **/
 
+    void buildTransportationList();
     void logOutputMarkers();
     void logOutputLwMarkers();
 

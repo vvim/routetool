@@ -113,15 +113,6 @@ void DocumentWriter::addVisit(
   m_cursor.movePosition(QTextCursor::PreviousRow);
   m_cursor.movePosition(QTextCursor::NextCell);
   m_cursor.movePosition(QTextCursor::NextCell);
-  m_cursor.insertText(QString("Telefoon"));
-  m_cursor.movePosition(QTextCursor::NextCell);
-  m_cursor.insertText(QString("%1").arg(location.Telefoon));
-  m_cursor.movePosition(QTextCursor::NextCell);
-
-  table->appendRows(1);
-  m_cursor.movePosition(QTextCursor::PreviousRow);
-  m_cursor.movePosition(QTextCursor::NextCell);
-  m_cursor.movePosition(QTextCursor::NextCell);
   m_cursor.insertText(QString("Contactpersoon"));
   m_cursor.movePosition(QTextCursor::NextCell);
   m_cursor.insertText(QString("%1").arg(location.Contactpersoon));
@@ -144,7 +135,7 @@ void DocumentWriter::addVisit(
   m_cursor.movePosition(QTextCursor::NextCell);
   m_cursor.insertText(QString("Verwachtte aankomsttijd"));
   m_cursor.movePosition(QTextCursor::NextCell);
-  m_cursor.insertText(QString("nog te berekenen"));
+  m_cursor.insertText(seconds_human_readable(location.aankomsttijd));
   m_cursor.movePosition(QTextCursor::NextCell);
   m_cursor.insertHtml(QString("%1").arg(location.Speciale_opmerkingen));
 

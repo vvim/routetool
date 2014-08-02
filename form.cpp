@@ -10,12 +10,17 @@
 #include <QVariant>
 #include <QSqlQuery>
 
+#ifdef Q_OS_WIN
+    #include <windows.h> // for Sleep
+#endif
+
 Form::Form(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Form)
 {
     matrices_up_to_date = false;
     after_calculating_distance_matrix_continue_to_tsp = false;
+    after_calculating_distance_matrix_continue_to_transportationlist = false;
 
     normal = new QPalette();
     normal->setColor(QPalette::Text,Qt::AutoColor);
@@ -392,12 +397,14 @@ void Form::on_pbOptimizeRoute_clicked()
     {
         // no need to recalculate the distance matrices, just go straight to TSP:
         after_calculating_distance_matrix_continue_to_tsp = false;
+        after_calculating_distance_matrix_continue_to_transportationlist = false;
         m_distanceMatrix.calculateOptimalRoute();
     }
     else
     {
         // we need to first calculate the distance matrices
         after_calculating_distance_matrix_continue_to_tsp = true;
+        after_calculating_distance_matrix_continue_to_transportationlist = false;
         m_distanceMatrix.getDistances(m_markers);
     }
 
@@ -420,6 +427,12 @@ void Form::reload_distancematrix(int** matrix_in_meters, int ** matrix_in_second
         // continue to TSP:
         after_calculating_distance_matrix_continue_to_tsp = false;
         m_distanceMatrix.calculateOptimalRoute();
+    }
+    else if(after_calculating_distance_matrix_continue_to_transportationlist)
+    {
+        // continue to Transportation List:
+        after_calculating_distance_matrix_continue_to_transportationlist = false;
+        buildTransportationList();
     }
 }
 
@@ -678,7 +691,7 @@ void Form::setTotalWeightTotalVolume()
         if(m_markers[i]->levering)
         {
             qDebug() << ". type: Levering";
-            qDebug() << "........... not defined yet...";
+            qDebug() << "... anders bij levering dan bij ophaling, neen??? Levering wordt eerst gedaan, daarna is de camion leeg, dan de ophaling";
         }
     }
 
@@ -706,6 +719,202 @@ void Form::on_pbTransportationList_clicked()
     qDebug() << "This is where we should work on making the Transportation List (using distance matrices and Document Writer)";
     // for the map: see http://qt-project.org/doc/qt-4.8/desktop-screenshot.html
     //              see http://stackoverflow.com/questions/681148/how-to-print-a-qt-dialog-or-window
+
+
+    // 1. prepare the Maps for a screenshot
+    drawRoute();
+    // drawRoute() also calls `reorderMarkers()` so that is taken care of: "make sure Drag and Drop changes are in place"
+
+
+    // 2. check if we need to recalculate the distance matrices
+    if(!matrices_up_to_date)
+    {
+        // first fill in the distance matrices, then go to build the transportation list
+        after_calculating_distance_matrix_continue_to_tsp = false;
+        after_calculating_distance_matrix_continue_to_transportationlist = true;
+        m_distanceMatrix.getDistances(m_markers);
+    }
+    else
+        buildTransportationList();
+}
+
+void Form::buildTransportationList()
+{
+    // 3. distance matrices should be filled in correctly
+
+    // 4. <vvim> TODO: (porposal -> ) move building of Transportation List to a separate class
+    qDebug() << "[Vervoerslijst]" << "<vvim> TODO: (porposal -> ) move building of Transportation List to a separate class";
+
+    qDebug() << "[Vervoerslijst]" << "Vraag: verwachtte vertrektijd???";
+
+    //QString currentdate = QDate::currentDate().toString("d MMMM yyyy"); // QLocale::setDefault(QLocale::Dutch);
+    QLocale::setDefault(QLocale::Dutch);
+    QString currentdate = QDateTime::currentDateTime().toString("d MMMM yyyy - hh:mm:ss");
+    DocumentWriter vervoersLijst("",
+                                 "",
+                                 currentdate);
+
+
+    int previous_distance_matrix_i = -1; // we do not need the information of the starting point in the Transportation List
+    int total_distance_in_meters = 0;
+    int total_time_on_the_road_in_seconds = 0;
+    int total_time_needed_in_seconds = 8 * 60 * 60; // 8 AM
+    int STANDAARD_OPHAALTIJD_IN_SECONDEN = 30 * 60; // 30 minutes
+    int counter = 1;
+    int empty_bags_of_kurk_needed = 0;
+    int empty_bags_of_kaarsresten_needed = 0;
+
+    // 0. for debug only:
+    for(int i = 0; i < m_markers.length(); i++)
+    {
+        qDebug() << "[Vervoerslijst]" << i << ":" << m_markers[i]->caption;
+    }
+
+    // 5. go to each SMarker, in order shown, and add its information to the Transportation List
+    for(int i = 0; i < m_markers.length(); i++)
+    {
+        int current_distance_matrix_i = m_markers[i]->distancematrixindex;
+        if(previous_distance_matrix_i > -1)
+        {
+
+            total_distance_in_meters += distance_matrix_in_meters[previous_distance_matrix_i][current_distance_matrix_i];
+            total_time_on_the_road_in_seconds += distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
+            total_time_needed_in_seconds += distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
+
+            qDebug() << "[Vervoerslijst]" << "location:" << m_markers[i]->caption;
+            qDebug() << "[Vervoerslijst]" << "arrival time:" << total_time_needed_in_seconds; // make human readable
+
+            // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SMarker) => m_markers[i]
+            DocumentWriter::VisitLocation location;
+            location.order = counter;
+            location.distance_seconds = distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
+            location.distance_meters = distance_matrix_in_meters[previous_distance_matrix_i][current_distance_matrix_i];
+            location.Naam = m_markers[i]->caption;
+            location.aankomsttijd = total_time_needed_in_seconds;
+            if(m_markers[i]->ophaling)
+            {
+                // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SOphaalpunt) => m_markers[i]->ophaalpunt
+                location.Naam = m_markers[i]->ophaalpunt.naam;
+                location.Adres = m_markers[i]->ophaalpunt.adres;
+                location.Postcode = "een PC";
+                location.Gemeente = "een gemeente";
+                location.Telefoon = "een telefoonnr";
+                location.Contactpersoon = "een contactpersoon";
+                location.Openingsuren = "ma-vr ...";
+                location.Speciale_opmerkingen = "speciale opmerk...";
+                location.Soort_vervoer = "Ophaling";
+                location.Kaartnr = "kaartnr?";
+                location.Kurk_op_te_halen_zakken = QString("%1 zakken, %2 kg").arg(m_markers[i]->ophaalpunt.zakken_kurk).arg(m_markers[i]->ophaalpunt.kg_kurk);
+                //location.Kaars_op_te_halen_zakken = QString("%1 zakken, %2 kg").arg(m_markers[i]->ophaalpunt.zakken_kaarsresten).arg(m_markers[i]->ophaalpunt.kg_kaarsresten);
+                vervoersLijst.addVisit(location);
+                total_time_needed_in_seconds += STANDAARD_OPHAALTIJD_IN_SECONDEN;
+                empty_bags_of_kurk_needed += m_markers[i]->ophaalpunt.zakken_kurk;
+                empty_bags_of_kaarsresten_needed += m_markers[i]->ophaalpunt.zakken_kaarsresten;
+            }
+            if(m_markers[i]->levering)
+            {
+                // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SLevering) => m_markers[i]->levering
+                location.Naam = m_markers[i]->leveringspunt.name;
+                location.Adres = ""; location.Adres.append(m_markers[i]->leveringspunt.street).append(" ").append(m_markers[i]->leveringspunt.housenr);
+                location.Postcode = m_markers[i]->leveringspunt.postalcode;
+                location.Gemeente = m_markers[i]->leveringspunt.plaats;
+                location.Telefoon = m_markers[i]->leveringspunt.telephone;
+                location.Contactpersoon = m_markers[i]->leveringspunt.contactperson;
+                location.Openingsuren = "ma-vr ...";
+                location.Speciale_opmerkingen = "speciale opmerk...";
+                location.Soort_vervoer = "Levering";
+                location.Kaartnr = "kaartnr?";
+                // GEWICHT, VOLUME + TIJD DIE NODIG IS
+                vervoersLijst.addVisit(location);
+                total_time_needed_in_seconds += m_markers[i]->leveringspunt.minutes_needed;
+            }
+            if((!m_markers[i]->ophaling)&&(!m_markers[i]->levering))
+            {
+                // enkel een adres?
+                location.Soort_vervoer = "Adres";
+                vervoersLijst.addVisit(location);
+            }
+            counter++;
+            qDebug() << "[Vervoerslijst]" << "departure time:" << total_time_needed_in_seconds; // make human readable
+
+        }
+        previous_distance_matrix_i = current_distance_matrix_i;
+    }
+
+    if(m_markers.length() > 1)
+    {
+        int i = 0;
+        qDebug() << "[Vervoerslijst]" << "We moeten de terugkeer naar het startpunt ook nog in de vervoerslijst steken";
+
+        total_distance_in_meters += distance_matrix_in_meters[previous_distance_matrix_i][0];
+        total_time_on_the_road_in_seconds += distance_matrix_in_seconds[previous_distance_matrix_i][0];
+        total_time_needed_in_seconds += distance_matrix_in_seconds[previous_distance_matrix_i][0];
+
+        qDebug() << "[Vervoerslijst]" << "location:" << m_markers[i]->caption;
+        qDebug() << "[Vervoerslijst]" << "arrival time:" << total_time_needed_in_seconds; // make human readable
+
+        // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SMarker) => m_markers[i]
+        DocumentWriter::VisitLocation location;
+        location.order = counter;
+        location.distance_seconds = distance_matrix_in_seconds[previous_distance_matrix_i][0];
+        location.distance_meters = distance_matrix_in_meters[previous_distance_matrix_i][0];
+        location.Naam = m_markers[i]->caption;
+        location.aankomsttijd = total_time_needed_in_seconds;
+        if(m_markers[i]->ophaling)
+        {
+            // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SOphaalpunt) => m_markers[i]->ophaalpunt
+            location.Naam = m_markers[i]->ophaalpunt.naam;
+            location.Adres = m_markers[i]->ophaalpunt.adres;
+            location.Postcode = "een PC";
+            location.Gemeente = "een gemeente";
+            location.Telefoon = "een telefoonnr";
+            location.Contactpersoon = "een contactpersoon";
+            location.Openingsuren = "ma-vr ...";
+            location.Speciale_opmerkingen = "speciale opmerk...";
+            location.Soort_vervoer = "Ophaling";
+            location.Kaartnr = "kaartnr?";
+            location.Kurk_op_te_halen_zakken = QString("%1 zakken, %2 kg").arg(m_markers[i]->ophaalpunt.zakken_kurk).arg(m_markers[i]->ophaalpunt.kg_kurk);
+            //location.Kaars_op_te_halen_zakken = QString("%1 zakken, %2 kg").arg(m_markers[i]->ophaalpunt.zakken_kaarsresten).arg(m_markers[i]->ophaalpunt.kg_kaarsresten);
+            vervoersLijst.addVisit(location);
+            total_time_needed_in_seconds += STANDAARD_OPHAALTIJD_IN_SECONDEN;
+            empty_bags_of_kurk_needed += m_markers[i]->ophaalpunt.zakken_kurk;
+            empty_bags_of_kaarsresten_needed += m_markers[i]->ophaalpunt.zakken_kaarsresten;
+        }
+        if(m_markers[i]->levering)
+        {
+            // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SLevering) => m_markers[i]->levering
+            location.Naam = m_markers[i]->leveringspunt.name;
+            location.Adres = ""; location.Adres.append(m_markers[i]->leveringspunt.street).append(" ").append(m_markers[i]->leveringspunt.housenr);
+            location.Postcode = m_markers[i]->leveringspunt.postalcode;
+            location.Gemeente = m_markers[i]->leveringspunt.plaats;
+            location.Telefoon = m_markers[i]->leveringspunt.telephone;
+            location.Contactpersoon = m_markers[i]->leveringspunt.contactperson;
+            location.Openingsuren = "ma-vr ...";
+            location.Speciale_opmerkingen = "speciale opmerk...";
+            location.Soort_vervoer = "Levering";
+            location.Kaartnr = "kaartnr?";
+            // GEWICHT, VOLUME + TIJD DIE NODIG IS
+            vervoersLijst.addVisit(location);
+            total_time_needed_in_seconds += (m_markers[i]->leveringspunt.minutes_needed)* 60;
+        }
+        if((!m_markers[i]->ophaling)&&(!m_markers[i]->levering))
+        {
+            // enkel een adres?
+            location.Soort_vervoer = "Adres";
+            vervoersLijst.addVisit(location);
+        }
+        counter++;
+        qDebug() << "[Vervoerslijst]" << "departure time:" << total_time_needed_in_seconds; // make human readable
+
+    }
+
+    // TELKENS
+
+    vervoersLijst.write(QString("vervoerslijst-(%1).odt").arg(currentdate));
+    qDebug() << "[Vervoerslijst]" << "Lege zakken voor kurk:" << empty_bags_of_kurk_needed << ", lege zakken voor kaarsresten:" << empty_bags_of_kaarsresten_needed;
+    setTotalWeightTotalVolume();
+    qDebug() << "[Vervoerslijst]" << "Totaal lading:" << ui->totalWeightEdit->text() << "kg and " << ui->totalVolumeEdit->text() << "liter";
+
 }
 
 

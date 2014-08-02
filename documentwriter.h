@@ -32,6 +32,7 @@ public:
     QString Soort_vervoer;
     QString Kaartnr;
     QString Kurk_op_te_halen_zakken;
+    int aankomsttijd;
     //zakken opgehaald
     //Lege zakken afgegeven
   };
