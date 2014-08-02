@@ -20,11 +20,11 @@ struct SLevering
         telephone = "";
         weight = 0;
         volume = 0;
-        timeneeded = 0;
+        minutes_needed = 0;
         // ophaalpunt_id? -> later?
     };
 
-    SLevering(QString _name, QString _street, QString _housenr, QString _busnr, QString _postalcode, QString _plaats, QString _country, QString _contactperson, QString _telephone, double _weight, double _volume, double _timeneeded)
+    SLevering(QString _name, QString _street, QString _housenr, QString _busnr, QString _postalcode, QString _plaats, QString _country, QString _contactperson, QString _telephone, double _weight, double _volume, double _minutes_needed)
     {
         name = _name;
         street = _street;
@@ -37,7 +37,7 @@ struct SLevering
         telephone = _telephone;
         weight = _weight;
         volume = _volume;
-        timeneeded = _timeneeded;
+        minutes_needed = _minutes_needed;
         // ophaalpunt_id? -> later?
     };
 
@@ -83,7 +83,7 @@ struct SLevering
         qDebug() << "... telephone    :" << telephone;
         qDebug() << "... weight :" << weight;
         qDebug() << "... volume :" << volume;
-        qDebug() << "... timeneeded   :" << timeneeded << "minutes";
+        qDebug() << "... timeneeded   :" << minutes_needed << "minutes";
     };
 
     QString name;
@@ -97,7 +97,7 @@ struct SLevering
     QString telephone;
     double weight;
     double volume;
-    double timeneeded;
+    double minutes_needed;
     // ophaalpunt_id? -> later?
 };
 #endif // SLEVERING_H
