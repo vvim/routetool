@@ -710,6 +710,7 @@ void DistanceMatrix::calculateOptimalRoute()
 
 // beter verplaatsen naar einde, nee?   emit new_order_smarkers(tsp_solution); // geef de voorgestelde route door aan de class Form zodat die ook in de GUI kan worden aangepast
 
+    /** <cut here> **/
     QString currentdate = QDate::currentDate().toString("d MMMM yyyy"); // QLocale::setDefault(QLocale::Dutch);
     DocumentWriter vervoersLijst("",
                                  "",
@@ -760,6 +761,7 @@ qDebug() << "<vvim> TODO: totale afstand én totale tijd tesamen berekenen";
     //else
         path_string.append(QString("\ntotale duurtijd: %1 sec, ofte %2\n").arg(totale_tijd).arg(seconds_human_readable(totale_tijd)));
         path_string.append(QString("\n\n(controlegetal voor wim: %1 %2)").arg(current_minimum_cost).arg((distance_calc == DISTANCE_IN_METERS) ? "m" : "sec"));
+    /** </cut here> **/
 
     QApplication::restoreOverrideCursor(); // set cursor back to "Arrow cursor"
 
