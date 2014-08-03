@@ -7,9 +7,9 @@
 #include <QString>
 #include <QCompleter>
 #include <QKeyEvent>
-#include <QSettings>
+//#include <QSettings>
 
-extern QSettings settings;
+//extern QSettings settings;
 
 class MyCompleter : public QCompleter
 {
