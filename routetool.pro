@@ -25,12 +25,24 @@ LIBS += /home/wim/QtSDK/QtSources/4.7.3/src/plugins/sqldrivers/mysql/libqsqlmysq
 
 win32-g++ {
     LIBS += ../qjson/build/lib/qjson0.dll
-#voeg mysql.lib toe
+    LIBS += ../qjson/build/lib/libqjson.dll
+    LIBS += C:\\Wim\\MySQL\\MySQLServer55\\lib\\libmysql.dll
+    LIBS += C:\\Wim\\MySQL\\MySQLServer55\\lib\\libmysql.lib
+#I don't think these ones are necessary, but just in case:
+    LIBS += C:\\Wim\\Qt\\4.8.6\\plugins\\sqldrivers\\libqsqlmysql4.a
+    LIBS += C:\\Wim\\Qt\\4.8.6\\plugins\\sqldrivers\\qsqlmysql4.dll
+    LIBS += C:\\Wim\\Qt\\4.8.6\\plugins\\sqldrivers\\qsqlmysqld4.dll
 }
 
 win32-msvc* {
     LIBS += ../qjson/build/lib/qjson0.lib
-#voeg mysql.lib toe
+    LIBS += ../qjson/build/lib/libqjson.dll
+    LIBS += C:\\Wim\\MySQL\\MySQLServer55\\lib\\libmysql.dll
+    LIBS += C:\\Wim\\MySQL\\MySQLServer55\\lib\\libmysql.lib
+#I don't think these ones are necessary, but just in case:
+    LIBS += C:\\Wim\\Qt\\4.8.6\\plugins\\sqldrivers\\libqsqlmysql4.a
+    LIBS += C:\\Wim\\Qt\\4.8.6\\plugins\\sqldrivers\\qsqlmysql4.dll
+    LIBS += C:\\Wim\\Qt\\4.8.6\\plugins\\sqldrivers\\qsqlmysqld4.dll
 }
 
 macx* {
