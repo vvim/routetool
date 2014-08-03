@@ -19,7 +19,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Postal Address</string>
+        <string>Adres</string>
        </property>
       </widget>
      </item>
@@ -92,7 +92,7 @@
    <item row="0" column="1">
     <widget class="QPushButton" name="pbRemoveMarker">
      <property name="text">
-      <string>Remove marker</string>
+      <string>Locatie verwijderen</string>
      </property>
     </widget>
    </item>
@@ -101,14 +101,14 @@
      <item>
       <widget class="QPushButton" name="pbOptimizeRoute">
        <property name="text">
-        <string>Optimize Route</string>
+        <string>Route optimaliseren</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pbShowRouteAsDefined">
        <property name="text">
-        <string>Toon Route</string>
+        <string>Route tonen</string>
        </property>
       </widget>
      </item>
@@ -118,7 +118,7 @@
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Route Omdraaien</string>
+        <string>Route omdraaien</string>
        </property>
       </widget>
      </item>
@@ -128,7 +128,7 @@
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Maak Vervoerslijst</string>
+        <string>Vervoerslijst aanmaken</string>
        </property>
       </widget>
      </item>
