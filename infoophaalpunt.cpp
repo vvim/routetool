@@ -135,6 +135,16 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     extra_informatieLabel = new QLabel(tr("Extra informatie:"));
     extra_informatieEdit = new QTextEdit();
 
+    lastContactDateEdit = new QDateEdit();
+    lastContactDateEdit->setDisplayFormat("dd MMM yyyy");
+    lastContactDateEdit->setLocale(QLocale::Dutch);
+    lastContactDateEdit->setCalendarPopup(true);  //zie http://stackoverflow.com/questions/7031962/qdateedit-calendar-popup
+
+    contactAgainOnEdit = new QDateEdit();
+    contactAgainOnEdit->setDisplayFormat("dd MMM yyyy");
+    contactAgainOnEdit->setLocale(QLocale::Dutch);
+    contactAgainOnEdit->setCalendarPopup(true);  //zie http://stackoverflow.com/questions/7031962/qdateedit-calendar-popup
+
 
     buttonBox = new QDialogButtonBox;
     buttonBox->addButton(tr("Wijzigingen opslaan"),
@@ -184,7 +194,9 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     layout->addRow(tr("Email:"), email1Edit);
     layout->addRow(tr(""), email2Edit);
     // horizontal line
-    layout->addRow(tr("Extra informatie"), extra_informatieEdit);
+    layout->addRow(tr("Extra informatie:"), extra_informatieEdit);
+    layout->addRow(tr("Laatste contact:"), lastContactDateEdit);
+    layout->addRow(tr("Voorspelling:"), contactAgainOnEdit);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addLayout(layout);
@@ -241,6 +253,14 @@ InfoOphaalpunt::~InfoOphaalpunt()
     delete  frequentie_attestComboBox;
     delete  extra_informatieLabel;
     delete  extra_informatieEdit;
+/*
+    QDateEdit testing;
+    if(testing.date() == lastContactDateEdit->date())
+        => never changed
+        (working on MetaDateEdit)
+*/
+    delete lastContactDateEdit;
+    delete contactAgainOnEdit;
     qDebug() << "InfoOphaalpunt() deconstructed";
 }
 

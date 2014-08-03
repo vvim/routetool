@@ -7,10 +7,12 @@
 #include <QSettings>
 #include <QLabel>
 #include <QLineEdit>
+#include <QDateEdit>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QTextEdit>
 #include <QSqlRelationalTableModel>
+//#include "metadateedit.h"
 
 extern QSettings settings;
 
@@ -80,6 +82,9 @@ private:
     QComboBox *frequentie_attestComboBox;
     QLabel *extra_informatieLabel;
     QTextEdit *extra_informatieEdit;
+
+    QDateEdit *lastContactDateEdit;
+    QDateEdit *contactAgainOnEdit;
 
 private slots:
     void accept();
