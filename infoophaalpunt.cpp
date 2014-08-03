@@ -140,10 +140,14 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     lastContactDateEdit->setLocale(QLocale::Dutch);
     lastContactDateEdit->setCalendarPopup(true);  //zie http://stackoverflow.com/questions/7031962/qdateedit-calendar-popup
 
+    lastContactDateEdit->setEnabled(false);
+
     contactAgainOnEdit = new QDateEdit();
     contactAgainOnEdit->setDisplayFormat("dd MMM yyyy");
     contactAgainOnEdit->setLocale(QLocale::Dutch);
     contactAgainOnEdit->setCalendarPopup(true);  //zie http://stackoverflow.com/questions/7031962/qdateedit-calendar-popup
+
+    contactAgainOnEdit->setEnabled(false);
 
 
     buttonBox = new QDialogButtonBox;
@@ -253,12 +257,6 @@ InfoOphaalpunt::~InfoOphaalpunt()
     delete  frequentie_attestComboBox;
     delete  extra_informatieLabel;
     delete  extra_informatieEdit;
-/*
-    QDateEdit testing;
-    if(testing.date() == lastContactDateEdit->date())
-        => never changed
-        (working on MetaDateEdit)
-*/
     delete lastContactDateEdit;
     delete contactAgainOnEdit;
     qDebug() << "InfoOphaalpunt() deconstructed";
@@ -298,6 +296,15 @@ void InfoOphaalpunt::accept()
         query.bindValue(":frequentie_attest",frequentie_attestComboBox->currentIndex());
         query.bindValue(":extra_informatie",extra_informatieEdit->toPlainText());
         query.bindValue(":id",id);
+
+        /*  // update  "last_contact_date" and  "contact_again_on" ? for now: no
+
+            QDateEdit testing;
+            if(testing.date() == lastContactDateEdit->date())
+                => never changed, no update needed
+
+            + working on code of class MetaDateEdit()
+        */
 
         if(!query.exec())
         {
@@ -422,6 +429,22 @@ void InfoOphaalpunt::reset()
                 else
                     toggleFrequentie(Qt::Unchecked);
             extra_informatieEdit->setText(query.value(23).toString());
+            if(!query.value(24).isNull())
+            {
+                lastContactDateEdit->setDate(query.value(24).toDate());
+            }
+            else
+            {
+                lastContactDateEdit->setDate(QDate());
+            }
+            if(!query.value(25).isNull())
+            {
+                contactAgainOnEdit->setDate(query.value(25).toDate());
+            }
+            else
+            {
+                contactAgainOnEdit->setDate(QDate());
+            }
         }
     }
     else // clear all
@@ -450,6 +473,10 @@ void InfoOphaalpunt::reset()
         frequentie_attestComboBox->setCurrentIndex(0);
         toggleFrequentie(Qt::Unchecked);
         extra_informatieEdit->clear();
+
+        lastContactDateEdit->setDate(QDate());
+
+        contactAgainOnEdit->setDate(QDate());
     }
 }
 
