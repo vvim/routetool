@@ -74,51 +74,11 @@ void RouteTool::showNieuweLevering()
 
 void RouteTool::showBijWieNogNooitOpgehaald()
 {
-    qDebug() << "Toon bij welke ophaalpunten we nog nooit iets zijn gaan ophalen";
-    /** waarschijnlijk gebaseerd op kiesOphaalpuntenWidget
-        kiesOphaalpuntenWidget.initialise();
-        kiesOphaalpuntenWidget.show();
-    **/
-
-    QSqlQuery query;
-    query.prepare("select ophaalpunten.id, ophaalpunten.naam "
-                  "from ophaalpunten where not exists "
-                      "(select null from ophalinghistoriek "
-                       "where ophalinghistoriek.ophaalpunt = ophaalpunten.id);");
-    if(!query.exec())
-        qDebug() << "SELECT FAILED!" << query.lastError();
-    else
-        qDebug() << "Deze ophaalpunten hebben geen historiek: (misschien hebben ze wel een aanmelding gedaan!)";
-
-    int i = 0;
-    while (query.next())
-    {
-        qDebug() << "#" << query.value(0).toInt() << ":" << query.value(1).toString();
-        i++;
-
-        QSqlQuery query2;
-        query2.prepare("Select * from aanmelding where ophaalpunt = :ophaal");
-        query2.bindValue(":ophaal",query.value(0).toInt());
-
-        if(query2.exec())
-        {
-            if (query2.next())
-                qDebug() << "... dit ophaalpunt heeft een aanmelding lopende.";
-        }
-        else
-            qDebug() << "something went wrong with checking for an existing aanmelding";
-
-    }
-    qDebug() << i << "ophaalpunten in totaal";
+    contactListWidget.show_never_contacted_ophaalpunten(); // does 'init' & 'show' in one go.
 }
 
 void RouteTool::showVoorspelling()
 {
-    qDebug() << "Toon welke ophaalpunten nu waarschijnlijk een voorraad zullen hebben (berekend uit de historiek van ophalingen)";
-    /** waarschijnlijk gebaseerd op kiesOphaalpuntenWidget
-        kiesOphaalpuntenWidget.initialise();
-        kiesOphaalpuntenWidget.show();
-    **/
     contactListWidget.initialise();
     contactListWidget.show();
 }

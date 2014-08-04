@@ -15,6 +15,7 @@ public:
     ~ListOfOphaalpuntenToContact();
 
     void initialise();
+    void show_never_contacted_ophaalpunten();
 
 private slots:
     void showOphaalpunt(QListWidgetItem*);

@@ -210,3 +210,69 @@ void ListOfOphaalpuntenToContact::ok_button_pushed()
 {
     this->close();
 }
+
+void ListOfOphaalpuntenToContact::show_never_contacted_ophaalpunten()
+{
+#ifndef QT_NO_CURSOR
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+    label->setText(tr("Hieronder de lijst met ophaalpunten die nog geen ophaalhistoriek hebben.\n"
+                      "Dubbelklik op een ophaalpunt om de informatie te zien."));
+
+    contactList->clear();
+    contactList->setSortingEnabled(true); // sorting is okay
+
+    QSqlQuery query;
+    query.prepare("SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode "
+                  "FROM ophaalpunten WHERE not exists "
+                      "(select null from ophalinghistoriek "
+                       "where ophalinghistoriek.ophaalpunt = ophaalpunten.id);");
+
+    if(query.exec())
+    {
+        while (query.next())
+        {
+            QListWidgetItem * item = new QListWidgetItem();
+
+            int ophaalpunt_id = query.value(0).toInt();
+            QString ophaalpunt_naam = query.value(1).toString();
+            ophaalpunt_naam.replace("\n"," ");
+            QString ophaalpunt_postcode = query.value(2).toString();
+
+            QString item_name = "";
+            item_name.append(ophaalpunt_postcode).append(": ").append(ophaalpunt_naam);
+
+            QSqlQuery query2;
+            query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal");
+            query2.bindValue(":ophaal",query.value(0).toInt());
+
+            if(query2.exec())
+            {
+                if (query2.next())
+                {
+                    item_name.append(tr(" ( ** dit ophaalpunt heeft een aanmelding lopende)"));
+                    item->setForeground(Qt::blue);
+                }
+            }
+            else
+                qDebug() << "something went wrong with checking for an existing aanmelding";
+
+            qDebug() << "[show_never_contacted_ophaalpunten] ..adding ophaalpunt" << ophaalpunt_id << "to list:" << item_name;
+            item->setData(Qt::DisplayRole,item_name);
+
+            item->setData(OPHAALPUNT_ID,ophaalpunt_id);
+            contactList->addItem(item);
+        }
+    }
+    else
+    {
+        qDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL";
+        qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
+    }
+
+#ifndef QT_NO_CURSOR
+    QApplication::restoreOverrideCursor();
+#endif
+
+    this->show();
+}
