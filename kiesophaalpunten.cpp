@@ -202,6 +202,10 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
             double volume = (query.value(3).toDouble() * settings.value("zak_kurk_volume").toDouble()) +(query.value(4).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
             QString ophaalpunt_adres = query.value(5).toString();
             QListWidgetItem * item = new QListWidgetItem();
+
+            // ! <vvim> TODO: setDate takes a QVariant, you should use SOphaalpunt here!!!
+            //          item->setData(OPHAALPUNT, new SOphaalpunt_with_all_data);
+            //   http://www.qtcentre.org/archive/index.php/t-53454.html
             item->setData(Qt::DisplayRole,QString("%1 (%2 kg , %3 liter)").arg(ophaalpunt).arg(weight).arg(volume));
             item->setData(OPHAALPUNT,ophaalpunt);
             item->setData(WEIGHT_KURK,query.value(1).toDouble());
