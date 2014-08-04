@@ -35,6 +35,7 @@ private:
     Configuration configurationWidget;
     KiesOphaalpunten kiesOphaalpuntenWidget;
     Levering leveringWidget;
+    ListOfOphaalpuntenToContact contactListWidget;
 
 private slots:
     void showNieuweAanmelding();

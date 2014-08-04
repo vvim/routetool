@@ -2,21 +2,31 @@
 #define LISTOFOPHAALPUNTENTOCONTACT_H
 
 #include "infoophaalpunt.h"
+#include <QListWidget>
 
 extern QSettings settings;
 
-class ListOfOphaalpuntenToContact
+class ListOfOphaalpuntenToContact : public QWidget
 {
+    Q_OBJECT
+
 public:
-    ListOfOphaalpuntenToContact();
+    explicit ListOfOphaalpuntenToContact(QWidget *parent = 0);
     ~ListOfOphaalpuntenToContact();
+
+    void initialise();
+
+private slots:
+    void showOphaalpunt(QListWidgetItem*);
 
 private:
     InfoOphaalpunt *info;
+    QListWidget *contactList;
+    QDialogButtonBox *buttonBox;
+    QLabel *label;
 
     void UpdateOphaalpunt(int ophaalpuntid);
-public:
-    void UptodateAllOphaalpunten();
+    void UpdateAllOphaalpunten();
 };
 
 #endif // LISTOFOPHAALPUNTENTOCONTACT_H

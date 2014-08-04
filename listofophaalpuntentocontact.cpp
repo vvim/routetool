@@ -2,14 +2,42 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QDebug>
+#include <QApplication>
+#include <QVBoxLayout>
 
-ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact()
+#define OPHAALPUNT_ID Qt::UserRole
+
+ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
+    QWidget(parent)
 {
+    label = new QLabel();
+    contactList = new QListWidget();
+    info = new InfoOphaalpunt();
+    buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok);
+
+    QVBoxLayout *layout = new QVBoxLayout();
+    layout->addWidget(label);
+    layout->addWidget(contactList);
+    layout->addWidget(buttonBox);
+
+    setLayout(layout);
+    setMinimumWidth(600);
+    setWindowTitle(tr("Lijst van te contacteren ophaalpunten:"));
+
+    connect(contactList,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(showOphaalpunt(QListWidgetItem*)));
+
+    qDebug() << "<vvim> TODO: should we call UptodateAllOphaalpunten() everytime we initialise the contactList?";
+    UpdateAllOphaalpunten();
 }
 
 ListOfOphaalpuntenToContact::~ListOfOphaalpuntenToContact()
 {
+    qDebug() << "start to deconstruct ListOfOphaalpuntenToContact()";
     delete info;
+    delete contactList;
+    delete buttonBox;
+    delete label;
+    qDebug() << "ListOfOphaalpuntenToContact() deconstructed";
 }
 
 void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
@@ -104,7 +132,7 @@ void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
 
 
 
-void ListOfOphaalpuntenToContact::UptodateAllOphaalpunten()
+void ListOfOphaalpuntenToContact::UpdateAllOphaalpunten()
 {
     QSqlQuery query;
     query.prepare("SELECT DISTINCT ophaalpunt FROM `ophalinghistoriek`");
@@ -120,4 +148,59 @@ void ListOfOphaalpuntenToContact::UptodateAllOphaalpunten()
         qDebug() << "check with query SELECT id, `last_contact_date`, `contact_again_on` FROM `ophaalpunten` WHERE `last_contact_date` > 0";
     }
 
+}
+
+void ListOfOphaalpuntenToContact::initialise()
+{
+
+#ifndef QT_NO_CURSOR
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+    label->setText(tr("Hieronder de lijst met ophaalpunten die al een historiek hebben en gecontacteerd dienen te worden.\n"
+                      "Dubbelklik op een ophaalpunt om de informatie te zien."));
+
+    contactList->clear();
+    contactList->setSortingEnabled(false); // sort it by database: contact_again_on ASC ?
+
+    QSqlQuery query("SELECT id, naam, postcode, last_contact_date, contact_again_on "
+                    "FROM ophaalpunten "
+                    "WHERE contact_again_on < date( CURDATE() + INTERVAL 1 DAY)"
+                    "ORDER BY postcode");
+
+    if(query.exec())
+    {
+        while (query.next())
+        {
+            QListWidgetItem * item = new QListWidgetItem();
+
+            int ophaalpunt_id = query.value(0).toInt();
+            QString ophaalpunt_naam = query.value(1).toString();
+            ophaalpunt_naam.replace("\n"," ");
+            QString ophaalpunt_postcode = query.value(2).toString();
+            QDate last_contact_date = query.value(3).toDate();
+            QDate contact_again_on = query.value(4).toDate();
+
+            QString item_name = "";
+            item_name.append(QLocale().toString(contact_again_on,"d MMM yyyy")).append(" - ").append(ophaalpunt_naam).append(" (postcode: ").append(ophaalpunt_postcode).append(")");
+            item->setData(Qt::DisplayRole,item_name);
+
+            item->setData(OPHAALPUNT_ID,ophaalpunt_id);
+            contactList->addItem(item);
+        }
+    }
+    else
+    {
+        qDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL";
+        qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
+    }
+
+#ifndef QT_NO_CURSOR
+    QApplication::restoreOverrideCursor();
+#endif
+}
+
+void ListOfOphaalpuntenToContact::showOphaalpunt(QListWidgetItem* item)
+{
+    info->setWindowTitle(tr("info over ophaalpunt"));
+    info->showOphaalpunt(item->data(OPHAALPUNT_ID).toInt());
 }

@@ -119,6 +119,6 @@ void RouteTool::showVoorspelling()
         kiesOphaalpuntenWidget.initialise();
         kiesOphaalpuntenWidget.show();
     **/
-    ListOfOphaalpuntenToContact l;
-    l.UptodateAllOphaalpunten();
+    contactListWidget.initialise();
+    contactListWidget.show();
 }
