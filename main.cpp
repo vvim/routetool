@@ -103,6 +103,7 @@ bool connectToDatabase()
 
 int main(int argc, char *argv[])
 {
+    qDebug() << "<vvim> TODO: in databank table ophaalhistoriek kan Tourist Union het ophaalpuntid 0 hebben, terwijl in table ophaalpunten het id 131 heeft. Best ophaalhistoriek aanpassen!";
     QApplication a(argc, argv);
 
     checkSettings();

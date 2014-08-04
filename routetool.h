@@ -43,6 +43,9 @@ private slots:
     void showNieuweLevering();
     void showBijWieNogNooitOpgehaald();
     void showVoorspelling();
+
+private:
+    void vvimTestingPurposesOnly(int ophaalpuntid);
 };
 
 #endif // ROUTETOOL_H
