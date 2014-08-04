@@ -9,6 +9,7 @@
 #include <QKeyEvent>
 #include <QVariant>
 #include <QSqlQuery>
+#include "transportationlistwriter.h"
 
 #ifdef Q_OS_WIN
     #include <windows.h> // for Sleep
@@ -740,6 +741,9 @@ void Form::on_pbTransportationList_clicked()
 
 void Form::buildTransportationList()
 {
+    TransportationListWriter *t = new TransportationListWriter();
+    t->show();
+    return;
     // 3. distance matrices should be filled in correctly
 
     // 4. <vvim> TODO: (porposal -> ) move building of Transportation List to a separate class

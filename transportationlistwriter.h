@@ -2,10 +2,12 @@
 #define TRANSPORTATIONLISTWRITER_H
 
 #include <QWidget>
-#include <QSettings>
-
+#include <QLineEdit>
+#include <QTimeEdit>
 #include "smarker.h"
 #include "documentwriter.h"
+
+#include <QSettings>
 
 extern QSettings settings;
 
@@ -21,6 +23,10 @@ signals:
     
 public slots:
     
+private:
+    QLineEdit* nameTransportationListEdit;
+    QTimeEdit* startTimeEdit;
+    QTimeEdit* expectedArrivalTimeEdit;
 };
 
 #endif // TRANSPORTATIONLISTWRITER_H
