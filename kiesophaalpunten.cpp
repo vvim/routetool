@@ -193,25 +193,33 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
 
     QSqlQuery query("select ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
 
-    while (query.next())
+    if(query.exec())
     {
-        QString ophaalpunt = query.value(0).toString();
-        double weight = query.value(1).toDouble()+query.value(2).toDouble();
-        double volume = (query.value(3).toDouble() * settings.value("zak_kurk_volume").toDouble()) +(query.value(4).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
-        QString ophaalpunt_adres = query.value(5).toString();
-        QListWidgetItem * item = new QListWidgetItem();
-        item->setData(Qt::DisplayRole,QString("%1 (%2 kg , %3 liter)").arg(ophaalpunt).arg(weight).arg(volume));
-        item->setData(OPHAALPUNT,ophaalpunt);
-        item->setData(WEIGHT_KURK,query.value(1).toDouble());
-        item->setData(WEIGHT_KAARS,query.value(2).toDouble());
-        item->setData(ZAK_KURK,query.value(3).toDouble());
-        item->setData(ZAK_KAARS,query.value(4).toDouble());
-        item->setData(ADRES,ophaalpunt_adres);
-        item->setData(AANMELDING_ID,query.value(6).toInt());
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setFlags(item->flags() &~ Qt::ItemIsSelectable);
-        item->setCheckState(Qt::Unchecked); // http://www.qtcentre.org/threads/7032-QListWidget-with-check-box-s , thank you J-P Nurmi
-        legeAanmeldingenList->addItem(item);
+        while (query.next())
+        {
+            QString ophaalpunt = query.value(0).toString();
+            double weight = query.value(1).toDouble()+query.value(2).toDouble();
+            double volume = (query.value(3).toDouble() * settings.value("zak_kurk_volume").toDouble()) +(query.value(4).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
+            QString ophaalpunt_adres = query.value(5).toString();
+            QListWidgetItem * item = new QListWidgetItem();
+            item->setData(Qt::DisplayRole,QString("%1 (%2 kg , %3 liter)").arg(ophaalpunt).arg(weight).arg(volume));
+            item->setData(OPHAALPUNT,ophaalpunt);
+            item->setData(WEIGHT_KURK,query.value(1).toDouble());
+            item->setData(WEIGHT_KAARS,query.value(2).toDouble());
+            item->setData(ZAK_KURK,query.value(3).toDouble());
+            item->setData(ZAK_KAARS,query.value(4).toDouble());
+            item->setData(ADRES,ophaalpunt_adres);
+            item->setData(AANMELDING_ID,query.value(6).toInt());
+            item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+            item->setFlags(item->flags() &~ Qt::ItemIsSelectable);
+            item->setCheckState(Qt::Unchecked); // http://www.qtcentre.org/threads/7032-QListWidget-with-check-box-s , thank you J-P Nurmi
+            legeAanmeldingenList->addItem(item);
+        }
+    }
+    else
+    {
+        qDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL";
+        qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
     }
 
 #ifndef QT_NO_CURSOR
