@@ -44,6 +44,11 @@ void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
             if(aantal_ophalingen > 0)
             {
                 int gemiddelde = aantal_dagen_tussen_verschillende_ophalingen / aantal_ophalingen;
+                if(gemiddelde > 365)
+                {
+                    qDebug() << "Gemiddelde blijkt groter dan een jaar: " << gemiddelde << "dagen, afronden naar 1 jaar.";
+                    gemiddelde = 365;
+                }
                 qDebug() << "..gemiddeld:" << gemiddelde;
                 //if CURRENTDATE > laatste_ophaling + GEMIDDELDE : contact == current_date (-1) ()
                 qDebug() << "..dus ophaalpunt te contacteren rond:" << laatste_ophaling.addDays(gemiddelde).toString() << "(waarde van laatste_ophaling verandert ook?)" << laatste_ophaling.toString();
@@ -52,7 +57,7 @@ void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
 
                 //  << "** IF last_ophaling > current_value of field (oplossen door waarde op te vragen in eerste SELECT ?? )")
                 //  << "** IF last_ophaling > TODAY
-                QString q = QString("UPDATE ophaalpunten SET last_contact_date = %1 , contact_again_on = %2 WHERE id = %3;").arg(laatste_ophaling.toString()).arg(laatste_ophaling.addDays(gemiddelde).toString()).arg(ophaalpuntid);
+                QString q = QString("UPDATE ophaalpunten SET last_contact_date = %1 , contact_again_on = %2 WHERE id = %3;").arg(laatste_ophaling.toString()).arg(qMax(laatste_ophaling.addDays(gemiddelde), qMax(QDate().currentDate(),ophaalpunt_ContactAgainOn)).toString()).arg(ophaalpuntid);
                 query_lastcontact_and_contact_on.prepare("UPDATE ophaalpunten SET last_contact_date = :last_ophaling , contact_again_on = :contact_again WHERE id = :id;");
                 query_lastcontact_and_contact_on.bindValue(":last_ophaling",laatste_ophaling);
 
@@ -64,10 +69,9 @@ void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
                     qDebug() << ".....vandaag:" << QDate().currentDate().toString();
                     qDebug() << ".....voorspelling:" << laatste_ophaling.addDays(gemiddelde).toString();
                     qDebug() << "...Maximum is:" << qMax(laatste_ophaling.addDays(gemiddelde), qMax(QDate().currentDate(),ophaalpunt_ContactAgainOn));
-                    qDebug() << "<vvim> TODO: maximum invullen ipv standaard?";
                     qDebug() << "<vvim> TODO: na 2 jaar gebruiken tabel AANMELDING gebruiken ipv OPHAALHISTORIEK?";
 
-                query_lastcontact_and_contact_on.bindValue(":contact_again ", laatste_ophaling.addDays(gemiddelde) );
+                query_lastcontact_and_contact_on.bindValue(":contact_again ", qMax(laatste_ophaling.addDays(gemiddelde), qMax(QDate().currentDate(),ophaalpunt_ContactAgainOn)) );
                 query_lastcontact_and_contact_on.bindValue(":id",ophaalpuntid);
 
                 if(query_lastcontact_and_contact_on.exec())
