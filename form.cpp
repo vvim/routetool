@@ -748,8 +748,7 @@ void Form::buildTransportationList()
     qDebug() << "[Vervoerslijst]" << "Vraag: verwachtte vertrektijd???";
 
     //QString currentdate = QDate::currentDate().toString("d MMMM yyyy"); // QLocale::setDefault(QLocale::Dutch);
-    QLocale::setDefault(QLocale::Dutch);
-    QString currentdate = QDateTime::currentDateTime().toString("d MMMM yyyy - hh:mm:ss");
+    QString currentdate = QLocale().toString(QDateTime::currentDateTime(),"d MMMM yyyy - hh:mm:ss");
     DocumentWriter vervoersLijst("",
                                  "",
                                  currentdate);
