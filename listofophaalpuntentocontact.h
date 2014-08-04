@@ -18,6 +18,7 @@ public:
 
 private slots:
     void showOphaalpunt(QListWidgetItem*);
+    void ok_button_pushed();
 
 private:
     InfoOphaalpunt *info;

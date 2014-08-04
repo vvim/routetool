@@ -25,6 +25,7 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
     setWindowTitle(tr("Lijst van te contacteren ophaalpunten:"));
 
     connect(contactList,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(showOphaalpunt(QListWidgetItem*)));
+    connect(buttonBox,SIGNAL(accepted()),this,SLOT(ok_button_pushed()));
 
     qDebug() << "<vvim> TODO: should we call UptodateAllOphaalpunten() everytime we initialise the contactList?";
     UpdateAllOphaalpunten();
@@ -203,4 +204,9 @@ void ListOfOphaalpuntenToContact::showOphaalpunt(QListWidgetItem* item)
 {
     info->setWindowTitle(tr("info over ophaalpunt"));
     info->showOphaalpunt(item->data(OPHAALPUNT_ID).toInt());
+}
+
+void ListOfOphaalpuntenToContact::ok_button_pushed()
+{
+    this->close();
 }
