@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
     checkSettings();
 
-//    if (!startLoggingToFile()) exit(0);
+    if (!startLoggingToFile()) exit(0);
     if (!connectToDatabase()) exit(0);
 
     RouteTool r;
