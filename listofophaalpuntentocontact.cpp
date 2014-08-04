@@ -243,7 +243,7 @@ void ListOfOphaalpuntenToContact::show_never_contacted_ophaalpunten()
             item_name.append(ophaalpunt_postcode).append(": ").append(ophaalpunt_naam);
 
             QSqlQuery query2;
-            query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal");
+            query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal"); // and ophaalronde is NULL
             query2.bindValue(":ophaal",query.value(0).toInt());
 
             if(query2.exec())
