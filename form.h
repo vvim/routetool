@@ -10,6 +10,7 @@
 #include <QSettings>
 #include <QList>
 #include "sophaalpunt.h"
+#include "transportationlistwriter.h"
 
 extern QSettings settings;
 
@@ -69,6 +70,7 @@ private:
     Ui::Form *ui;
     GeocodeDataManager m_geocodeDataManager;
     DistanceMatrix m_distanceMatrix;
+    TransportationListWriter transporationlistWriter;
     //markers list
     QList <SMarker*> m_markers;
 
