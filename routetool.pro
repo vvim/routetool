@@ -62,7 +62,8 @@ SOURCES += main.cpp\
     infoophaalpunt.cpp \
     mainwindow.cpp \
     kiesophaalpunten.cpp \
-    levering.cpp
+    levering.cpp \
+    listofophaalpuntentocontact.cpp
 
 HEADERS  += routetool.h \
     form.h \
@@ -78,7 +79,8 @@ HEADERS  += routetool.h \
     kiesophaalpunten.h \
     sophaalpunt.h \
     levering.h \
-    slevering.h
+    slevering.h \
+    listofophaalpuntentocontact.h
 
 FORMS    += routetool.ui \
     form.ui

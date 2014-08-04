@@ -8,6 +8,7 @@
 #include "configuration.h"
 #include "kiesophaalpunten.h"
 #include "levering.h"
+#include "listofophaalpuntentocontact.h"
 
 extern QSettings settings;
 
@@ -43,9 +44,6 @@ private slots:
     void showNieuweLevering();
     void showBijWieNogNooitOpgehaald();
     void showVoorspelling();
-
-private:
-    void vvimTestingPurposesOnly(int ophaalpuntid);
 };
 
 #endif // ROUTETOOL_H
