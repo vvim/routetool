@@ -199,8 +199,8 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     layout->addRow(tr(""), email2Edit);
     // horizontal line
     layout->addRow(tr("Extra informatie:"), extra_informatieEdit);
-    layout->addRow(tr("Laatste contact:"), lastContactDateEdit);
-    layout->addRow(tr("Voorspelling:"), contactAgainOnEdit);
+    layout->addRow(tr("Contacteer op:"), contactAgainOnEdit);
+    layout->addRow(tr("Laatste contact (ophaling):"), lastContactDateEdit);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addLayout(layout);
@@ -208,7 +208,7 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     setLayout(mainLayout);
 
     setMinimumWidth(600);
-    setWindowTitle("Nieuw ophaalpunt");
+    setWindowTitle(tr("Nieuw ophaalpunt"));
 }
 
 InfoOphaalpunt::~InfoOphaalpunt()
