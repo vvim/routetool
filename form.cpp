@@ -428,7 +428,17 @@ void Form::reload_distancematrix(int** matrix_in_meters, int ** matrix_in_second
         after_calculating_distance_matrix_continue_to_tsp = false;
         m_distanceMatrix.calculateOptimalRoute();
     }
-    else if(after_calculating_distance_matrix_continue_to_transportationlist)
+    else
+    {
+        QList<int> *test = new QList<int>();
+        for(int i = 0 ; i < m_markers.length() ; i++)
+        {
+            test->push_back(i);
+        }
+        process_result_distancematrix(test);
+    }
+
+    if(after_calculating_distance_matrix_continue_to_transportationlist)
     {
         // continue to Transportation List:
         after_calculating_distance_matrix_continue_to_transportationlist = false;
