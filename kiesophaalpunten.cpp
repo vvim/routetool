@@ -183,7 +183,7 @@ void KiesOphaalpunten::setTotalWeightTotalVolume()
 
 void KiesOphaalpunten::populateLegeAanmeldingen()
 {
-    // TODO neem dit uit de databank : mysql> select * from aanmelding where ophaalronde_nr is NULL;
+    // TODO neem dit uit de databank : mysql> select * from aanmelding where ophaalronde_datum is NULL;
 
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -196,7 +196,7 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
                           " CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES,"
                           " aanmelding.id, ophaalpunten.id"
                    " FROM aanmelding, ophaalpunten"
-                   " WHERE ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
+                   " WHERE ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL");
 
     if(query.exec())
     {
@@ -228,8 +228,8 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
     }
     else
     {
-        qDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id, ophaalpunten.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL; error:" << query.lastError();
-        qFatal(QString("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id, ophaalpunten.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL, error is: ").append(query.lastError().text()).toStdString().c_str());
+        qDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id, ophaalpunten.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL; error:" << query.lastError();
+        qFatal(QString("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id, ophaalpunten.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL, error is: ").append(query.lastError().text()).toStdString().c_str());
     }
 
 #ifndef QT_NO_CURSOR
@@ -266,7 +266,6 @@ void KiesOphaalpunten::accept()
             return;
     }
 
-    qDebug() << "TODO: Insert into DB";
     QList<SOphaalpunt> *listOfAanmeldingen = new QList<SOphaalpunt>();
     for(int i = 0 ; i < legeAanmeldingenList->count(); i++)
     {

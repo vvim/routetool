@@ -199,7 +199,7 @@ void NieuweAanmelding::accept()
     QSqlQuery query;
 
     //ESCAPING QUERY: http://stackoverflow.com/questions/19045281/insert-strings-that-contain-or-to-the-database-table-qt and http://qt-project.org/doc/qt-5/qsqlquery.html#prepare
-    query.prepare("INSERT INTO aanmelding (id,   timestamp, ophaalpunt,  contactpersoon,  datum,  zakken_kurk,  kg_kurk,  zakken_kaarsresten,  kg_kaarsresten,  opmerkingen, ophaalronde_nr, volgorde) "
+    query.prepare("INSERT INTO aanmelding (id,   timestamp, ophaalpunt,  contactpersoon,  datum,  zakken_kurk,  kg_kurk,  zakken_kaarsresten,  kg_kaarsresten,  opmerkingen, ophaalronde_datum, volgorde) "
                                   "VALUES (NULL, NULL,     :ophaalpunt, :contactpersoon, :datum, :zakken_kurk, :kg_kurk, :zakken_kaarsresten, :kg_kaarsresten, :opmerkingen, NULL,           NULL) ");
     // id wordt ingevuld via AUTO_INCREMENT en is primary key
     // timestamp wordt ingevuld met default value 'current_timestamp'
@@ -211,7 +211,7 @@ void NieuweAanmelding::accept()
     query.bindValue(":zakken_kaarsresten", zakkenkaarsenSpinBox->value());
     query.bindValue(":kg_kaarsresten", kgkaarsenSpinBox->value());
     query.bindValue(":opmerkingen", opmerkingenEdit->toPlainText());
-    // ophaalronde_nr wordt pas ingevuld als aanmelding is geselecteerd voor een ophaalronde
+    // ophaalronde_datum wordt pas ingevuld als aanmelding is geselecteerd voor een ophaalronde
     // volgorde wordt pas ingevuld als aanmelding is geselecteerd voor een ophaalronde
 
     if(!query.exec())
