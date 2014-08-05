@@ -15,28 +15,50 @@ extern QSettings settings;
 class TransportationListDocumentWriter
 {
 public:
-  TransportationListDocumentWriter(const QString &address, const QString &legal, const QString &date);
+  TransportationListDocumentWriter(QDate date_of_transportation, int empty_bags_of_kurk_to_bring, int empty_bags_of_kaarsresten_to_bring);
   ~TransportationListDocumentWriter();
-  struct VisitLocation {
-    int order;
-    int distance_seconds;
-    int distance_meters;
-    QString Naam;
-    QString Adres;
-    QString Postcode;
-    QString Gemeente;
-    QString Telefoon;
-    QString Contactpersoon;
-    QString Openingsuren;
-    QString Speciale_opmerkingen;
-    QString Soort_vervoer;
-    QString Kaartnr;
-    QString Kurk_op_te_halen_zakken;
-    int aankomsttijd;
-    //zakken opgehaald
-    //Lege zakken afgegeven
+
+  struct Ophaalpunt {
+      int counter;
+      char kaart_nr;
+      QTime arrivaltime;
+      QString naam;
+      QString straat;
+      QString nr;
+      QString bus;
+      QString postcode;
+      QString gemeente;
+      QString land;
+      QString openingsuren;
+      QString contactpersoon;
+      QString telefoonnummer;
+      QString extra_informatie;
+      double kg_kurk;
+      double kg_kaarsresten;
+      double zakken_kurk;
+      double zakken_kaarsresten;
   };
-  void addVisit(const VisitLocation &location);
+
+  struct Levering {
+      int counter;
+      char kaart_nr;
+      QTime arrivaltime;
+      // zie transportationlistwriter
+  };
+
+  struct Adres {
+      int counter;
+      char kaart_nr;
+      QTime arrivaltime;
+      // zie transportationlistwriter
+  };
+
+  void addOphaalpunt(const Ophaalpunt &ophaalpunt);
+
+  void addLevering(const Levering &levering);
+
+  void addAdres(const Adres &adres);
+
   void addGraph(QList<int> values,
                 const QString &subtext);
   void write(const QString &fileName);
@@ -44,8 +66,6 @@ public:
 private:
   QTextDocument * const m_document;
   QTextCursor m_cursor;
-
-  QString seconds_human_readable(int totalseconds);
 };
 
 

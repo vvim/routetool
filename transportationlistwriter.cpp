@@ -1,10 +1,12 @@
-#include "transportationlistwriter.h"
 #include <QFormLayout>
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QSqlQuery>
 #include <QSqlError>
+#include "transportationlistwriter.h"
+#include "documentwriter.h"
+
 
 // 30 minutes
 #define STANDAARD_OPHAALTIJD_IN_SECONDEN 1800
@@ -19,6 +21,10 @@ TransportationListWriter::TransportationListWriter(QWidget *parent) :
     total_time_on_the_road_in_seconds = 0;
     seconds_needed_to_complete_transport = 0;
     ready = false;
+
+    translist_doc = new TransportationListDocumentWriter(QDate::currentDate(),0,0);
+
+
 
     nameTransportationListEdit = new QLineEdit();
     startTimeEdit = new QTimeEdit();
@@ -70,6 +76,7 @@ TransportationListWriter::~TransportationListWriter()
     delete expectedArrivalTimeEdit;
     delete empty_bags_of_kurk_neededEdit;
     delete empty_bags_of_kaarsresten_neededEdit;
+    delete translist_doc;
  //   delete buttonBox; -> is this taken care of by ~QWidget?
  //   delete resetButton; -> is this taken care of by ~QWidget?
     qDebug() << "TransportationListWriter() deconstructed";
@@ -184,6 +191,9 @@ void TransportationListWriter::print()
 
     qDebug() << "Meenemen:" << empty_bags_of_kurk_neededEdit->value() << "lege zakken kurk en" << empty_bags_of_kaarsresten_neededEdit->value() << "lege zakken kaarsresten";
 
+    delete translist_doc;
+    translist_doc = new TransportationListDocumentWriter(dateEdit->date(),empty_bags_of_kurk_neededEdit->value(),empty_bags_of_kaarsresten_neededEdit->value());
+
     int previous_distance_matrix_i = -1; // we do not need the information of the starting point in the Transportation List
     int counter = 0;
 
@@ -196,7 +206,7 @@ void TransportationListWriter::print()
             qDebug() << "Locatie #" << counter;
             char kaart_nr = 'A' + counter;
             qDebug() << "Kaartnr" << QChar(kaart_nr);
-            writeInformation(m_markers[i], previous_distance_matrix_i, current_distance_matrix_i);
+            writeInformation(m_markers[i], previous_distance_matrix_i, current_distance_matrix_i, counter, kaart_nr);
             if(m_markers[i]->ophaling)
             {
                 //ophaling in databank steken
@@ -242,12 +252,11 @@ void TransportationListWriter::print()
     //qDebug() << "[Vervoerslijst]" << "Totaal lading:" << ui->totalWeightEdit->text() << "kg and " << ui->totalVolumeEdit->text() << "liter";
 
 
-    qDebug() << "vergeet niet ophaling ook op te slaan in DB!" << "als volgt: aanmeldingen.volgnr + aanmeldingen.datumophaling";
-    // want maar één ophaling per dag max?
+    translist_doc->write(name_vervoerslijst);
 }
 
 
-void TransportationListWriter::writeInformation(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i)
+void TransportationListWriter::writeInformation(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i, int counter, int kaart_nr)
 {
     total_distance_in_meters += distance_matrix_in_meters[previous_distance_matrix_i][current_distance_matrix_i];
     total_time_on_the_road_in_seconds += distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
@@ -265,6 +274,30 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
         query.bindValue(":id",marker->ophaalpunt.ophaalpunt_id);
         if((query.exec()) && (query.next()))
         {
+            TransportationListDocumentWriter::Ophaalpunt doc_ophaalpunt;
+            doc_ophaalpunt.counter = counter;
+            doc_ophaalpunt.kaart_nr = kaart_nr;
+            doc_ophaalpunt.arrivaltime = startTimeEdit->time().addSecs(seconds_needed_to_complete_transport);;
+            doc_ophaalpunt.naam = query.value(0).toString();
+            doc_ophaalpunt.straat = query.value(1).toString();
+            doc_ophaalpunt.nr = query.value(2).toString();
+            doc_ophaalpunt.bus = query.value(3).toString();
+            doc_ophaalpunt.postcode = query.value(4).toString();
+            doc_ophaalpunt.gemeente = query.value(5).toString();
+            doc_ophaalpunt.land = query.value(6).toString();
+            doc_ophaalpunt.openingsuren = query.value(7).toString();
+            doc_ophaalpunt.contactpersoon = query.value(8).toString();
+            doc_ophaalpunt.telefoonnummer = query.value(9).toString();
+            doc_ophaalpunt.extra_informatie = query.value(10).toString(); // extra_info uit AANMELDING HALEN!
+            doc_ophaalpunt.kg_kurk = marker->ophaalpunt.kg_kurk;
+            doc_ophaalpunt.kg_kaarsresten = marker->ophaalpunt.kg_kaarsresten;
+            doc_ophaalpunt.zakken_kurk = marker->ophaalpunt.zakken_kurk;
+            doc_ophaalpunt.zakken_kaarsresten = marker->ophaalpunt.zakken_kaarsresten;
+
+            translist_doc->addOphaalpunt(doc_ophaalpunt);
+
+
+            // <cut-here>
             QString naam = query.value(0).toString();
             QString straat = query.value(1).toString();
             QString nr = query.value(2).toString();
@@ -296,6 +329,7 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
             qDebug() << "..op te halen kaars:" << marker->ophaalpunt.kg_kaarsresten << "kg" << marker->ophaalpunt.zakken_kaarsresten << "zakken";
             qDebug() << "....werkelijk opgehaald: ___ kg , ___ zakken";
             qDebug() << "..lege zakken afgegeven: ____";
+            // </cut-here>
         }
         else
         {

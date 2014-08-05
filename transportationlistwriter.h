@@ -6,7 +6,7 @@
 #include <QTimeEdit>
 #include <QSpinBox>
 #include "smarker.h"
-#include "documentwriter.h"
+#include "transportationlistdocumentwriter.h"
 
 #include <QSettings>
 
@@ -52,8 +52,10 @@ private:
     int **distance_matrix_in_meters;
     int **distance_matrix_in_seconds;
 
+    TransportationListDocumentWriter * translist_doc;
+
     void populateWithSmarker(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i);
-    void writeInformation(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i);
+    void writeInformation(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i, int counter = 0, int kaart_nr = 0);
     void deleteTheMatrices();
 };
 
