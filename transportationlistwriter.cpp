@@ -197,6 +197,24 @@ void TransportationListWriter::print()
             char kaart_nr = 'A' + counter;
             qDebug() << "Kaartnr" << QChar(kaart_nr);
             writeInformation(m_markers[i], previous_distance_matrix_i, current_distance_matrix_i);
+            if(m_markers[i]->ophaling)
+            {
+                //ophaling in databank steken
+                QSqlQuery query;
+                query.prepare("UPDATE aanmelding SET ophaalronde_datum = :date , volgorde = :counter "
+                              "WHERE id = :aanmeldings_id ");
+                query.bindValue(":date",dateEdit->date());
+                query.bindValue(":counter",counter);
+                query.bindValue(":aanmeldings_id",m_markers[i]->ophaalpunt.aanmelding_id);
+
+                if(!query.exec())
+                {
+                    qCritical(QString(tr("UPDATE aanmelding SET ophaalronde_datum = %1 , volgorde = %2 WHERE id = %3").arg(dateEdit->date().toString()).arg(counter).arg(m_markers[i]->ophaalpunt.aanmelding_id).append(query.lastError().text())).toStdString().c_str());
+                    qDebug() << " !!! fout in wegschrijven aanmelding: " << QString(tr("UPDATE aanmelding SET ophaalronde_datum = %1 , volgorde = %2 WHERE id = %3").arg(dateEdit->date().toString()).arg(counter).arg(m_markers[i]->ophaalpunt.aanmelding_id).append(query.lastError().text()));
+                }
+                else
+                    qDebug() << " <<< aanmelding is nu officieel in ophaalronde opgenomen :-) >>>";
+            }
         }
         previous_distance_matrix_i = current_distance_matrix_i;
         counter++;
@@ -236,6 +254,7 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
     seconds_needed_to_complete_transport += distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
 
     qDebug() << "Verwachtte aankomsttijd:" << QLocale().toString(startTimeEdit->time().addSecs(seconds_needed_to_complete_transport));
+    // .trim(4) ?   // .truncate(4) ?
 
     if(marker->ophaling)
     {
