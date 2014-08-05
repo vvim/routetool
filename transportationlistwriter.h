@@ -26,12 +26,17 @@ signals:
     
 private slots:
     void editExpectedArrivalTime(QTime);
-    
+    void reject();
+    void accept();
+    void setOriginalValues();
+
 private:
     QLineEdit* nameTransportationListEdit;
     QDateEdit* dateEdit;
     QTimeEdit* startTimeEdit;
     QTimeEdit* expectedArrivalTimeEdit;
+
+    QList<SMarker *> m_markers;
 
     QSpinBox* empty_bags_of_kurk_neededEdit;
     QSpinBox* empty_bags_of_kaarsresten_neededEdit;
@@ -48,6 +53,8 @@ private:
     int **distance_matrix_in_seconds;
 
     void populateWithSmarker(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i);
+    void writeInformation(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i);
+    void deleteTheMatrices();
 };
 
 #endif // TRANSPORTATIONLISTWRITER_H
