@@ -280,7 +280,12 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
             qDebug() << "..Naam:" << naam;
             qDebug() << "..Adres:" << straat << nr << bus;
             qDebug() << "..Postcode:" << postcode;
-            qDebug() << "..Gemeente:" << gemeente;
+            if(land.left(4).toLower() != "belg")
+            {
+                qDebug() << "..Gemeente:" << gemeente << "("<<land<<")";
+            }
+            else
+                qDebug() << "..Gemeente:" << gemeente;
             qDebug() << "..Telefoon:" << telefoonnummer;
             qDebug() << "..Contactpersoon:" << contactpersoon;
             qDebug() << "..Openingsuren:" << openingsuren;
@@ -306,13 +311,43 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
     {
         qDebug() << "Deze locatie is een" << "LEVERING";
         seconds_needed_to_complete_transport += marker->leveringspunt.minutes_needed;
+
+        QString naam = marker->leveringspunt.name;
+        QString straat = marker->leveringspunt.street;
+        QString nr = marker->leveringspunt.housenr;
+        QString bus = marker->leveringspunt.busnr;
+        QString postcode = marker->leveringspunt.postalcode;
+        QString gemeente = marker->leveringspunt.plaats;
+        QString land = marker->leveringspunt.country;
+        QString contactpersoon = marker->leveringspunt.contactperson;
+        QString telefoonnummer = marker->leveringspunt.telephone;
+        double weight = marker->leveringspunt.weight;
+        double volume = marker->leveringspunt.volume;
+
+        qDebug() << "..Naam:" << naam;
+        qDebug() << "..Adres:" << straat << nr << bus;
+        qDebug() << "..Postcode:" << postcode;
+
+        if(land.left(4).toLower() != "belg")
+        {
+            qDebug() << "..Gemeente:" << gemeente << "("<<land<<")";
+        }
+        else
+            qDebug() << "..Gemeente:" << gemeente;
+
+        qDebug() << "..Telefoon:" << telefoonnummer;
+        qDebug() << "..Contactpersoon:" << contactpersoon;
+        qDebug() << "....................................";
+        qDebug() << "..af te leveren:" << weight << "kg" << volume << "liter";
+        qDebug() << "....werkelijk afgeleverd: ___ kg , ___  liter";
+
+        // ergens in databank opnemen? Aparte table voor LEVERINGEN ???
     }
     if((!marker->ophaling)&&(!marker->levering))
     {
         qDebug() << "Deze locatie is een" << "gewoon ADRES";
+        qDebug() << "..Adres:" << marker->caption;
     }
-//            qDebug() << "[Vervoerslijst]" << "departure time:" << seconds_needed_to_complete_transport; // make human readable
-
 }
 
 
