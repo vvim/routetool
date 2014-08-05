@@ -266,8 +266,8 @@ void ListOfOphaalpuntenToContact::show_never_contacted_ophaalpunten()
     }
     else
     {
-        qDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL";
-        qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
+        qDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode FROM ophaalpunten WHERE not exists (select null from ophalinghistoriek where ophalinghistoriek.ophaalpunt = ophaalpunten.id)";
+        qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode FROM ophaalpunten WHERE not exists (select null from ophalinghistoriek where ophalinghistoriek.ophaalpunt = ophaalpunten.id)");
     }
 
 #ifndef QT_NO_CURSOR
