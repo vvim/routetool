@@ -25,6 +25,7 @@
 #define ZAK_KAARS WEIGHT_KAARS+1
 #define ADRES ZAK_KAARS+1
 #define AANMELDING_ID ADRES+1
+#define OPHAALPUNT_ID AANMELDING_ID+1
 
 
 KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
@@ -191,7 +192,11 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
     legeAanmeldingenList->clear();
     legeAanmeldingenList->setSortingEnabled(true);
 
-    QSqlQuery query("select ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
+    QSqlQuery query("SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten,"
+                          " CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES,"
+                          " aanmelding.id, ophaalpunten.id"
+                   " FROM aanmelding, ophaalpunten"
+                   " WHERE ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
 
     if(query.exec())
     {
@@ -214,6 +219,7 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
             item->setData(ZAK_KAARS,query.value(4).toDouble());
             item->setData(ADRES,ophaalpunt_adres);
             item->setData(AANMELDING_ID,query.value(6).toInt());
+            item->setData(OPHAALPUNT_ID,query.value(7).toInt());
             item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
             item->setFlags(item->flags() &~ Qt::ItemIsSelectable);
             item->setCheckState(Qt::Unchecked); // http://www.qtcentre.org/threads/7032-QListWidget-with-check-box-s , thank you J-P Nurmi
@@ -222,8 +228,8 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
     }
     else
     {
-        qDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL";
-        qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
+        qDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id, ophaalpunten.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL; error:" << query.lastError();
+        qFatal(QString("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id, ophaalpunten.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL, error is: ").append(query.lastError().text()).toStdString().c_str());
     }
 
 #ifndef QT_NO_CURSOR
@@ -281,7 +287,8 @@ void KiesOphaalpunten::accept()
                             aanmelding->data(ZAK_KURK).toDouble(),     // zakken_kurk
                             aanmelding->data(ZAK_KAARS).toDouble(),    // zakken_kaarsresten
                             aanmelding->data(ADRES).toString(),        // adres
-                            aanmelding->data(AANMELDING_ID).toInt()    // id
+                            aanmelding->data(AANMELDING_ID).toInt(),   // aanmelding_id
+                            aanmelding->data(OPHAALPUNT_ID).toInt()    // ophaalpunt_id
                         );
 
             listOfAanmeldingen->append(_ophaalpunt);
