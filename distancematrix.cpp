@@ -769,7 +769,7 @@ qDebug() << "<vvim> TODO: totale afstand én totale tijd tesamen berekenen";
     emit new_order_smarkers(tsp_solution); // geef de voorgestelde route door aan de class Form zodat die ook in de GUI kan worden aangepast
 
     //QString("vervoerslijst-(%1).odt".arg(currentdate)); -> no const char[23]
-    vervoersLijst.write("vervoerslijst.odt");
+    vervoersLijst.write("wismij-oude-stijl-vervoerslijst.odt");
 
     QMessageBox msg;
     msg.setText(path_string);
