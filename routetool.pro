@@ -64,7 +64,8 @@ SOURCES += main.cpp\
     kiesophaalpunten.cpp \
     levering.cpp \
     listofophaalpuntentocontact.cpp \
-    transportationlistwriter.cpp
+    transportationlistwriter.cpp \
+    transportationlistdocumentwriter.cpp
 
 HEADERS  += routetool.h \
     form.h \
@@ -82,7 +83,8 @@ HEADERS  += routetool.h \
     levering.h \
     slevering.h \
     listofophaalpuntentocontact.h \
-    transportationlistwriter.h
+    transportationlistwriter.h \
+    transportationlistdocumentwriter.h
 
 FORMS    += routetool.ui \
     form.ui
