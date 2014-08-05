@@ -20,7 +20,7 @@ public:
     explicit TransportationListWriter(QWidget *parent = 0);
     ~TransportationListWriter();
     
-    void prepare(QList <SMarker*> m_markers, int **distance_matrix_in_meters, int **distance_matrix_in_seconds);
+    void prepare(QList <SMarker*> m_markers, int **_distance_matrix_in_meters, int **_distance_matrix_in_seconds);
     void print();
 signals:
     
@@ -35,8 +35,19 @@ private:
 
     QSpinBox* empty_bags_of_kurk_neededEdit;
     QSpinBox* empty_bags_of_kaarsresten_neededEdit;
-    int minutes_needed;
     bool ready;
+
+    int empty_bags_of_kurk_needed;
+    int empty_bags_of_kaarsresten_needed;
+
+    int total_distance_in_meters;
+    int total_time_on_the_road_in_seconds;
+    int seconds_needed_to_complete_transport;
+
+    int **distance_matrix_in_meters;
+    int **distance_matrix_in_seconds;
+
+    void populateWithSmarker(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i);
 };
 
 #endif // TRANSPORTATIONLISTWRITER_H

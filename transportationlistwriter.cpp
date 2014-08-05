@@ -4,11 +4,17 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 
+// 30 minutes
+#define STANDAARD_OPHAALTIJD_IN_SECONDEN 1800
 
 TransportationListWriter::TransportationListWriter(QWidget *parent) :
     QWidget(parent)
 {
-    minutes_needed = 0;
+    empty_bags_of_kurk_needed = 0;
+    empty_bags_of_kaarsresten_needed = 0;
+    total_distance_in_meters = 0;
+    total_time_on_the_road_in_seconds = 0;
+    seconds_needed_to_complete_transport = 0;
     ready = false;
 
     nameTransportationListEdit = new QLineEdit();
@@ -21,18 +27,20 @@ TransportationListWriter::TransportationListWriter(QWidget *parent) :
     dateEdit->setCalendarPopup(true);  //zie http://stackoverflow.com/questions/7031962/qdateedit-calendar-popup
 
     empty_bags_of_kurk_neededEdit = new QSpinBox();
-    empty_bags_of_kurk_neededEdit->setValue(0);
+    empty_bags_of_kurk_neededEdit->setValue(empty_bags_of_kurk_needed);
     empty_bags_of_kaarsresten_neededEdit = new QSpinBox();
-    empty_bags_of_kaarsresten_neededEdit->setValue(0);
+    empty_bags_of_kaarsresten_neededEdit->setValue(empty_bags_of_kaarsresten_needed);
 
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
                                                     | QDialogButtonBox::Cancel);
     QPushButton* resetButton = new QPushButton(tr("Reset"));
     buttonBox->addButton(resetButton,QDialogButtonBox::ResetRole);
 
+    /*
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(resetButton, SIGNAL(pressed()), this, SLOT(setOriginalValues()));
+    */
 
     QFormLayout *formlayout = new QFormLayout();
     formlayout->addRow(tr("Bestandsnaam:"),nameTransportationListEdit);
@@ -65,24 +73,51 @@ TransportationListWriter::~TransportationListWriter()
     qDebug() << "TransportationListWriter() deconstructed";
 }
 
-void TransportationListWriter::prepare(QList<SMarker *> m_markers, int **distance_matrix_in_meters, int **distance_matrix_in_seconds)
+void TransportationListWriter::prepare(QList<SMarker *> m_markers, int **_distance_matrix_in_meters, int **_distance_matrix_in_seconds)
 {
+    qDebug() << "[TransportationListWriter::prepare()]" << "start";
+    distance_matrix_in_meters = _distance_matrix_in_meters;
+    distance_matrix_in_seconds = _distance_matrix_in_seconds;
+    qDebug() << "[TransportationListWriter::prepare()]" << "matrices filled in";
     ready = false;
-    int empty_bags_of_kurk_needed = 0;
-    int empty_bags_of_kaarsresten_needed = 0;
-    minutes_needed = 0;
+    seconds_needed_to_complete_transport = 0;
+
+    empty_bags_of_kurk_needed = 0;
+    empty_bags_of_kaarsresten_needed = 0;
+    total_distance_in_meters = 0;
+    total_time_on_the_road_in_seconds = 0;
+
+    int previous_distance_matrix_i = -1; // we do not need the information of the starting point in the Transportation List
+    int counter = 1;
 
     // read each SMarker, in order shown, and add its information to the Transportation List
     for(int i = 0; i < m_markers.length(); i++)
     {
+        qDebug() << "[TransportationListWriter::prepare()]" << "reading marker" << i << "of" << m_markers.length();
+        int current_distance_matrix_i = m_markers[i]->distancematrixindex;
+        if(previous_distance_matrix_i > -1)
+        {
+            populateWithSmarker(m_markers[i], previous_distance_matrix_i, current_distance_matrix_i);
+        }
+        previous_distance_matrix_i = current_distance_matrix_i;
+        counter++;
+    }
+
+    if(m_markers.length() > 1)
+    {
+        qDebug() << "[TransportationListWriter::prepare()]" << "adding startpoint to end at" << previous_distance_matrix_i << 0;
+        populateWithSmarker(m_markers[0],previous_distance_matrix_i, 0);
+        qDebug() << "[TransportationListWriter::prepare()]" << "adding startpoint is done";
+
     }
 
     empty_bags_of_kurk_neededEdit->setValue(empty_bags_of_kurk_needed);
     empty_bags_of_kaarsresten_neededEdit->setValue(empty_bags_of_kaarsresten_needed);
-minutes_needed = 15;
     startTimeEdit->setTime(QTime(8,0));
+    editExpectedArrivalTime(startTimeEdit->time());
     ready = true;
 
+    qDebug() << "[TransportationListWriter::prepare()]" << "Done";
 
 }
 
@@ -296,5 +331,47 @@ void TransportationListWriter::print()
 
 void TransportationListWriter::editExpectedArrivalTime(QTime arrival)
 {
-    expectedArrivalTimeEdit->setTime(arrival.addSecs(minutes_needed*60));
+    expectedArrivalTimeEdit->setTime(arrival.addSecs(seconds_needed_to_complete_transport));
+}
+
+void TransportationListWriter::populateWithSmarker(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i)
+{
+    qDebug() << "[TransportationListWriter::populateWithSmarker()]" << previous_distance_matrix_i << current_distance_matrix_i;
+
+    total_distance_in_meters += distance_matrix_in_meters[previous_distance_matrix_i][current_distance_matrix_i];
+    total_time_on_the_road_in_seconds += distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
+    seconds_needed_to_complete_transport += distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
+
+//            qDebug() << "[Vervoerslijst]" << "location:" << marker->caption;
+//            qDebug() << "[Vervoerslijst]" << "arrival time:" << total_time_needed_in_seconds; // make human readable
+
+//            // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SMarker) => marker
+//            DocumentWriter::VisitLocation location;
+//            location.order = counter;
+//            location.distance_seconds = distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
+//            location.distance_meters = distance_matrix_in_meters[previous_distance_matrix_i][current_distance_matrix_i];
+//            location.Naam = marker->caption;
+//            location.aankomsttijd = total_time_needed_in_seconds;
+    if(marker->ophaling)
+    {
+        qDebug() << "[TransportationListWriter::populateWithSmarker()]" << "marker is een ophaling";
+        // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SOphaalpunt) => marker->ophaalpunt
+        seconds_needed_to_complete_transport += STANDAARD_OPHAALTIJD_IN_SECONDEN;
+        empty_bags_of_kurk_needed += marker->ophaalpunt.zakken_kurk;
+        empty_bags_of_kaarsresten_needed += marker->ophaalpunt.zakken_kaarsresten;
+    }
+    if(marker->levering)
+    {
+        qDebug() << "[TransportationListWriter::populateWithSmarker()]" << "marker is een levering";
+        // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SLevering) => marker->levering
+        seconds_needed_to_complete_transport += marker->leveringspunt.minutes_needed;
+    }
+    if((!marker->ophaling)&&(!marker->levering))
+    {
+        qDebug() << "[TransportationListWriter::populateWithSmarker()]" << "marker is een adres";
+        // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SMarker) => marker
+        ;
+    }
+//            qDebug() << "[Vervoerslijst]" << "departure time:" << seconds_needed_to_complete_transport; // make human readable
+
 }
