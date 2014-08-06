@@ -23,12 +23,36 @@
      <height>21</height>
     </rect>
    </property>
-   <addaction name="nieuwOphaalpuntMenuButton"/>
-   <addaction name="nieuweAanmeldingMenuButton"/>
-   <addaction name="kiesOphaalpuntenMenuButton"/>
-   <addaction name="nieuweLeveringMenuButton"/>
-   <addaction name="voorspellingMenuButton"/>
-   <addaction name="wieNogNooitMenuButton"/>
+   <widget class="QMenu" name="menuMenuOphaalpunten">
+    <property name="title">
+     <string>Ophaalpunten</string>
+    </property>
+    <addaction name="nieuwOphaalpuntMenuButton"/>
+   </widget>
+   <widget class="QMenu" name="menuMenuAanmeldingen">
+    <property name="title">
+     <string>Aanmeldingen</string>
+    </property>
+    <addaction name="nieuweAanmeldingMenuButton"/>
+    <addaction name="kiesOphaalpuntenMenuButton"/>
+   </widget>
+   <widget class="QMenu" name="menuMenuLeveringen">
+    <property name="title">
+     <string>Leveringen</string>
+    </property>
+    <addaction name="nieuweLeveringMenuButton"/>
+   </widget>
+   <widget class="QMenu" name="menuMenuBellijst">
+    <property name="title">
+     <string>Bellijst</string>
+    </property>
+    <addaction name="voorspellingMenuButton"/>
+    <addaction name="wieNogNooitMenuButton"/>
+   </widget>
+   <addaction name="menuMenuOphaalpunten"/>
+   <addaction name="menuMenuAanmeldingen"/>
+   <addaction name="menuMenuLeveringen"/>
+   <addaction name="menuMenuBellijst"/>
    <addaction name="configurationMenuButton"/>
    <addaction name="actionQuit"/>
   </widget>
