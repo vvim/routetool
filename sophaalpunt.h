@@ -20,9 +20,10 @@ struct SOphaalpunt
         adres = "";
         aanmelding_id = -1;
         ophaalpunt_id = -1;
+        opmerkingen = "";
     };
 
-    SOphaalpunt(QString _naam, double _kg_kurk, double _kg_kaarsresten, double _zakken_kurk, double _zakken_kaarsresten, QString _adres, int _aanmelding_id, int _ophaalpunt_id)
+    SOphaalpunt(QString _naam, double _kg_kurk, double _kg_kaarsresten, double _zakken_kurk, double _zakken_kaarsresten, QString _adres, int _aanmelding_id, int _ophaalpunt_id, QString _opmerkingen)
     {
         naam = _naam;
         kg_kurk = _kg_kurk;
@@ -32,6 +33,7 @@ struct SOphaalpunt
         adres = _adres;
         aanmelding_id = _aanmelding_id;
         ophaalpunt_id = _ophaalpunt_id;
+        opmerkingen = _opmerkingen;
     };
 
     double getVolume()
@@ -50,6 +52,7 @@ struct SOphaalpunt
         qDebug() << ". type: Ophaalpunt" << ophaalpunt_id << "( aanmelding:" << aanmelding_id << ")";
         qDebug() << "..." << naam;
         qDebug() << "..." << adres;
+        qDebug() << "..." << opmerkingen;
         qDebug() << "... kurk: " << kg_kurk << "kg, "<< zakken_kurk << "zakken";
         qDebug() << "... kaars: " << kg_kaarsresten << "kg, "<< zakken_kaarsresten << "zakken";
     }
@@ -62,6 +65,7 @@ struct SOphaalpunt
     QString adres;
     int aanmelding_id;
     int ophaalpunt_id;
+    QString opmerkingen;
 };
 
 #endif // SOPHAALPUNT_H

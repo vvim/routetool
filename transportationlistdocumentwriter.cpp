@@ -5,6 +5,8 @@
 
 // read http://doc.qt.digia.com/qq/qq27-odfwriter.html
 
+// interesting read on PDFs: https://qt-project.org/forums/viewthread/38065
+
 TransportationListDocumentWriter::TransportationListDocumentWriter(QDate date_of_transportation, int empty_bags_of_kurk_to_bring, int empty_bags_of_kaarsresten_to_bring)
     : m_document(new QTextDocument()),
     m_cursor(m_document)
@@ -51,7 +53,7 @@ void TransportationListDocumentWriter::addOphaalpunt(const TransportationListDoc
     m_cursor.insertText( QString("..Telefoon: ").append(ophaalpunt.telefoonnummer).append("\n"));
     m_cursor.insertText( QString("..Contactpersoon: ").append(ophaalpunt.contactpersoon).append("\n"));
     m_cursor.insertText( QString("..Openingsuren: ").append(ophaalpunt.openingsuren).append("\n"));
-    m_cursor.insertText( QString("..Speciale opmerkingen: ").append(ophaalpunt.extra_informatie).append("\n"));
+    m_cursor.insertText( QString("..Speciale opmerkingen: ").append(ophaalpunt.opmerkingen).append("\n"));
     m_cursor.insertText( QString("....................................\n"));
     m_cursor.insertText( QString("..op te halen kurk: %1 kg, %2 zakken").arg(ophaalpunt.kg_kurk).arg(ophaalpunt.zakken_kurk).append("\n"));
     m_cursor.insertText( QString("....werkelijk opgehaald: ___ kg , ___ zakken\n"));

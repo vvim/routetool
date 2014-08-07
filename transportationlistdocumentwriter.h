@@ -32,7 +32,7 @@ public:
       QString openingsuren;
       QString contactpersoon;
       QString telefoonnummer;
-      QString extra_informatie;
+      QString opmerkingen;
       double kg_kurk;
       double kg_kaarsresten;
       double zakken_kurk;

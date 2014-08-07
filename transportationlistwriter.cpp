@@ -288,7 +288,7 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
             doc_ophaalpunt.openingsuren = query.value(7).toString();
             doc_ophaalpunt.contactpersoon = query.value(8).toString();
             doc_ophaalpunt.telefoonnummer = query.value(9).toString();
-            doc_ophaalpunt.extra_informatie = query.value(10).toString(); // extra_info uit AANMELDING HALEN!
+            doc_ophaalpunt.opmerkingen = marker->ophaalpunt.opmerkingen;
             doc_ophaalpunt.kg_kurk = marker->ophaalpunt.kg_kurk;
             doc_ophaalpunt.kg_kaarsresten = marker->ophaalpunt.kg_kaarsresten;
             doc_ophaalpunt.zakken_kurk = marker->ophaalpunt.zakken_kurk;
@@ -308,7 +308,7 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
             QString openingsuren = query.value(7).toString();
             QString contactpersoon = query.value(8).toString();
             QString telefoonnummer = query.value(9).toString();
-            QString extra_informatie = query.value(10).toString(); // extra_info uit AANMELDING HALEN!
+            QString opmerkingen = marker->ophaalpunt.opmerkingen;
 
             qDebug() << "..Naam:" << naam;
             qDebug() << "..Adres:" << straat << nr << bus;
@@ -322,7 +322,7 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
             qDebug() << "..Telefoon:" << telefoonnummer;
             qDebug() << "..Contactpersoon:" << contactpersoon;
             qDebug() << "..Openingsuren:" << openingsuren;
-            qDebug() << "..Speciale opmerkingen:" << extra_informatie;
+            qDebug() << "..Speciale opmerkingen:" << opmerkingen;
             qDebug() << "....................................";
             qDebug() << "..op te halen kurk:" << marker->ophaalpunt.kg_kurk << "kg" << marker->ophaalpunt.zakken_kurk << "zakken";
             qDebug() << "....werkelijk opgehaald: ___ kg , ___ zakken";

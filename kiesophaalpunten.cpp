@@ -26,6 +26,7 @@
 #define ADRES ZAK_KAARS+1
 #define AANMELDING_ID ADRES+1
 #define OPHAALPUNT_ID AANMELDING_ID+1
+#define OPMERKINGEN OPHAALPUNT_ID+1
 
 
 KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
@@ -194,7 +195,7 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
 
     QSqlQuery query("SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten,"
                           " CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES,"
-                          " aanmelding.id, ophaalpunten.id"
+                          " aanmelding.id, ophaalpunten.id, aanmelding.opmerkingen"
                    " FROM aanmelding, ophaalpunten"
                    " WHERE ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL");
 
@@ -220,6 +221,7 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
             item->setData(ADRES,ophaalpunt_adres);
             item->setData(AANMELDING_ID,query.value(6).toInt());
             item->setData(OPHAALPUNT_ID,query.value(7).toInt());
+            item->setData(OPMERKINGEN,query.value(8).toString());
             item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
             item->setFlags(item->flags() &~ Qt::ItemIsSelectable);
             item->setCheckState(Qt::Unchecked); // http://www.qtcentre.org/threads/7032-QListWidget-with-check-box-s , thank you J-P Nurmi
@@ -287,7 +289,8 @@ void KiesOphaalpunten::accept()
                             aanmelding->data(ZAK_KAARS).toDouble(),    // zakken_kaarsresten
                             aanmelding->data(ADRES).toString(),        // adres
                             aanmelding->data(AANMELDING_ID).toInt(),   // aanmelding_id
-                            aanmelding->data(OPHAALPUNT_ID).toInt()    // ophaalpunt_id
+                            aanmelding->data(OPHAALPUNT_ID).toInt(),   // ophaalpunt_id
+                            aanmelding->data(OPMERKINGEN).toString()   // speciale_opmerkingen
                         );
 
             listOfAanmeldingen->append(_ophaalpunt);
