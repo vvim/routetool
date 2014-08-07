@@ -84,6 +84,7 @@ TransportationListWriter::~TransportationListWriter()
 
 void TransportationListWriter::prepare(QList<SMarker *> _m_markers, int **_distance_matrix_in_meters, int **_distance_matrix_in_seconds)
 {
+    setOriginalValues();
     if(m_markers.length() > 0)
     {
 
@@ -232,8 +233,9 @@ void TransportationListWriter::print()
 
     if(m_markers.length() > 1)
     {
-        qDebug() << "[TransportationListWriter::print()]" << "adding startpoint to end at" << previous_distance_matrix_i << 0;
-        writeInformation(m_markers[0],previous_distance_matrix_i, 0);
+        char kaart_nr = 'A' + counter;
+        qDebug() << "[TransportationListWriter::print()]" << "adding startpoint to end at" << previous_distance_matrix_i << 0 << counter;
+        writeInformation(m_markers[0],previous_distance_matrix_i, 0, counter, kaart_nr);
         qDebug() << "[TransportationListWriter::print()]" << "adding startpoint is done";
 
     }
@@ -256,7 +258,7 @@ void TransportationListWriter::print()
 }
 
 
-void TransportationListWriter::writeInformation(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i, int counter, int kaart_nr)
+void TransportationListWriter::writeInformation(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i, int counter, char kaart_nr)
 {
     total_distance_in_meters += distance_matrix_in_meters[previous_distance_matrix_i][current_distance_matrix_i];
     total_time_on_the_road_in_seconds += distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
@@ -267,7 +269,7 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
 
     if(marker->ophaling)
     {
-        qDebug() << "Deze locatie is een" << "OPHALING";
+        qDebug() << "Deze locatie is een" << "OPHALING" << counter << kaart_nr;
         QSqlQuery query;
         query.prepare("SELECT naam, straat, nr, bus, postcode, plaats, land, openingsuren, contactpersoon, telefoonnummer1, extra_informatie"
                        " FROM   ophaalpunten WHERE id = :id ");
@@ -277,7 +279,7 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
             TransportationListDocumentWriter::Ophaalpunt doc_ophaalpunt;
             doc_ophaalpunt.counter = counter;
             doc_ophaalpunt.kaart_nr = kaart_nr;
-            doc_ophaalpunt.arrivaltime = startTimeEdit->time().addSecs(seconds_needed_to_complete_transport);;
+            doc_ophaalpunt.arrivaltime = startTimeEdit->time().addSecs(seconds_needed_to_complete_transport);
             doc_ophaalpunt.naam = query.value(0).toString();
             doc_ophaalpunt.straat = query.value(1).toString();
             doc_ophaalpunt.nr = query.value(2).toString();
@@ -343,8 +345,26 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
     }
     if(marker->levering)
     {
-        qDebug() << "Deze locatie is een" << "LEVERING";
+        qDebug() << "Deze locatie is een" << "LEVERING" << counter << kaart_nr;
         seconds_needed_to_complete_transport += marker->leveringspunt.minutes_needed;
+
+        TransportationListDocumentWriter::Levering doc_levering;
+        doc_levering.counter = counter;
+        doc_levering.kaart_nr = kaart_nr;
+        doc_levering.arrivaltime = startTimeEdit->time().addSecs(seconds_needed_to_complete_transport);
+        doc_levering.naam = marker->leveringspunt.name;
+        doc_levering.straat = marker->leveringspunt.street;
+        doc_levering.nr = marker->leveringspunt.housenr;
+        doc_levering.bus = marker->leveringspunt.busnr;
+        doc_levering.postcode = marker->leveringspunt.postalcode;
+        doc_levering.gemeente = marker->leveringspunt.plaats;
+        doc_levering.land = marker->leveringspunt.country;
+        doc_levering.contactpersoon = marker->leveringspunt.contactperson;
+        doc_levering.telefoonnummer = marker->leveringspunt.telephone;
+        doc_levering.weight = marker->leveringspunt.weight;
+        doc_levering.volume = marker->leveringspunt.volume;
+
+        translist_doc->addLevering(doc_levering);
 
         QString naam = marker->leveringspunt.name;
         QString straat = marker->leveringspunt.street;
@@ -376,10 +396,19 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
         qDebug() << "....werkelijk afgeleverd: ___ kg , ___  liter";
 
         // ergens in databank opnemen? Aparte table voor LEVERINGEN ???
+        seconds_needed_to_complete_transport += marker->leveringspunt.minutes_needed * 60;
     }
     if((!marker->ophaling)&&(!marker->levering))
     {
-        qDebug() << "Deze locatie is een" << "gewoon ADRES";
+        TransportationListDocumentWriter::Adres doc_adres;
+        doc_adres.counter = counter;
+        doc_adres.kaart_nr = kaart_nr;
+        doc_adres.arrivaltime = startTimeEdit->time().addSecs(seconds_needed_to_complete_transport);
+        doc_adres.caption = marker->caption;
+
+        translist_doc->addAdres(doc_adres);
+
+        qDebug() << "Deze locatie is een" << "gewoon ADRES" << counter << kaart_nr;
         qDebug() << "..Adres:" << marker->caption;
     }
 }
@@ -410,7 +439,7 @@ void TransportationListWriter::populateWithSmarker(SMarker* marker, int previous
     {
         qDebug() << "[TransportationListWriter::populateWithSmarker()]" << "marker is een levering";
         // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SLevering) => marker->levering
-        seconds_needed_to_complete_transport += marker->leveringspunt.minutes_needed;
+        seconds_needed_to_complete_transport += marker->leveringspunt.minutes_needed * 60;
     }
     if((!marker->ophaling)&&(!marker->levering))
     {
@@ -443,6 +472,7 @@ void TransportationListWriter::setOriginalValues()
     empty_bags_of_kaarsresten_neededEdit->setValue(empty_bags_of_kaarsresten_needed);
     startTimeEdit->setTime(QTime(8,0));
     editExpectedArrivalTime(startTimeEdit->time());
+    nameTransportationListEdit->clear();
 }
 
 void TransportationListWriter::deleteTheMatrices()
