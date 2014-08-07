@@ -28,6 +28,7 @@ signals:
     
 public slots:
 private:
+    //use QTableWidget to work with different columns: http://qt-project.org/wiki/How_to_Use_QTableWidget
     QListWidget *legeAanmeldingenList;
     QLabel *legeAanmeldingenLabel, *totalWeightLabel, *totalVolumeLabel;
     QLineEdit *totalWeightEdit, *totalVolumeEdit;
