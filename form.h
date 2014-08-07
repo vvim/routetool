@@ -70,7 +70,7 @@ private:
     Ui::Form *ui;
     GeocodeDataManager m_geocodeDataManager;
     DistanceMatrix m_distanceMatrix;
-    TransportationListWriter transporationlistWriter;
+    TransportationListWriter transportationlistWriter;
     //markers list
     QList <SMarker*> m_markers;
 

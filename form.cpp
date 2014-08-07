@@ -751,8 +751,8 @@ void Form::on_pbTransportationList_clicked()
 void Form::buildTransportationList()
 {
     // 3. distance matrices should be filled in correctly
-    transporationlistWriter.prepare(m_markers, distance_matrix_in_meters, distance_matrix_in_seconds);
-    transporationlistWriter.show();
+    transportationlistWriter.prepare(m_markers, distance_matrix_in_meters, distance_matrix_in_seconds);
+    transportationlistWriter.show();
     return;
     qDebug() << "[Vervoerslijst]" << "<vvim> TODO: (porposal -> ) move building of Transportation List to a separate class";
 
