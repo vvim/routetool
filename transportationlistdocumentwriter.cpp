@@ -26,7 +26,7 @@ TransportationListDocumentWriter::TransportationListDocumentWriter(QDate date_of
     m_cursor.insertHtml(QString("Datum: %1<br />").arg(QLocale().toString(date_of_transportation,"d/MM/yyyy"))); // 1/09/2014 = 1 september 2014
 
 
-    m_cursor.insertHtml(QString("<table><tr><th>Meenemen:</td><td>%1 lege zakken voor kurk</td></tr><tr><th></td><td>%1 lege zakken voor kaarsresten</td></tr></table><br /><br />").arg(empty_bags_of_kurk_to_bring).arg(empty_bags_of_kaarsresten_to_bring));
+    m_cursor.insertHtml(QString("<table><tr><th>Meenemen:</td><td>%1 lege zakken voor kurk</td></tr><tr><th></td><td>%2 lege zakken voor kaarsresten</td></tr></table><br /><br />").arg(empty_bags_of_kurk_to_bring).arg(empty_bags_of_kaarsresten_to_bring));
 }
 
 TransportationListDocumentWriter::~TransportationListDocumentWriter()
@@ -38,11 +38,11 @@ TransportationListDocumentWriter::~TransportationListDocumentWriter()
 
 void TransportationListDocumentWriter::addOphaalpunt(const TransportationListDocumentWriter::Ophaalpunt &ophaalpunt)
 {
-    m_cursor.insertText( QString("Locatie # %1\n").arg(ophaalpunt.counter));
+    m_cursor.insertText( QString("Locatie # %1 OPHALING\n").arg(ophaalpunt.counter));
     m_cursor.insertText( QString("..Kaart # %1\n").arg(ophaalpunt.kaart_nr));
     m_cursor.insertText( QString("..Verwachtte aankomsttijd %1\n").arg(QLocale().toString(ophaalpunt.arrivaltime,"hh:mm")));
     m_cursor.insertText( QString("..Naam: ").append(ophaalpunt.naam).append("\n"));
-    m_cursor.insertText( QString("..Adres: ").append(ophaalpunt.straat).append(ophaalpunt.nr).append(ophaalpunt.bus).append("\n"));
+    m_cursor.insertText( QString("..Adres: ").append(ophaalpunt.straat).append(" ").append(ophaalpunt.nr).append(" ").append(ophaalpunt.bus).append("\n"));
     m_cursor.insertText( QString("..Postcode: ").append(ophaalpunt.postcode).append("\n"));
     if(ophaalpunt.land.left(4).toLower() != "belg")
     {
@@ -81,8 +81,31 @@ void TransportationListDocumentWriter::write(const QString &fileName)
 
 void TransportationListDocumentWriter::addLevering(const Levering &levering)
 {
+    m_cursor.insertText( QString("Locatie # %1 LEVERING\n").arg(levering.counter));
+    m_cursor.insertText( QString("..Kaart # %1\n").arg(levering.kaart_nr));
+    m_cursor.insertText( QString("..Verwachtte aankomsttijd %1\n").arg(QLocale().toString(levering.arrivaltime,"hh:mm")));
+    m_cursor.insertText( QString("..Naam: ").append(levering.naam).append("\n"));
+    m_cursor.insertText( QString("..Adres: ").append(levering.straat).append(levering.nr).append(levering.bus).append("\n"));
+    m_cursor.insertText( QString("..Postcode: ").append(levering.postcode).append("\n"));
+    if(levering.land.left(4).toLower() != "belg")
+    {
+        m_cursor.insertText( QString("..Gemeente: ").append(levering.gemeente).append(" (").append(levering.land).append(")").append("\n"));
+    }
+    else
+        m_cursor.insertText( QString("..Gemeente: ").append(levering.gemeente).append("\n"));
+    m_cursor.insertText( QString("..Telefoon: ").append(levering.telefoonnummer).append("\n"));
+    m_cursor.insertText( QString("..Contactpersoon: ").append(levering.contactpersoon).append("\n"));
+    m_cursor.insertText( QString("....................................\n"));
+    m_cursor.insertText( QString("..af te leveren: %1 kg, %2 liter").arg(levering.weight).arg(levering.volume).append("\n"));
+    m_cursor.insertText( QString("\n\n"));
 }
 
 void TransportationListDocumentWriter::addAdres(const Adres &adres)
 {
+    m_cursor.insertText( QString("Locatie # %1 ADRES\n").arg(adres.counter));
+    m_cursor.insertText( QString("..Kaart # %1\n").arg(adres.kaart_nr));
+    m_cursor.insertText( QString("..Verwachtte aankomsttijd %1\n").arg(QLocale().toString(adres.arrivaltime,"hh:mm")));
+    m_cursor.insertText( QString("..Adres: ").append(adres.caption).append("\n"));
+    qDebug() << "caption:" << adres.caption;
+    m_cursor.insertText( QString("\n\n"));
 }

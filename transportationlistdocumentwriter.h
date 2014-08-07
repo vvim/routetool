@@ -43,14 +43,24 @@ public:
       int counter;
       char kaart_nr;
       QTime arrivaltime;
-      // zie transportationlistwriter
+      QString naam;
+      QString straat;
+      QString nr;
+      QString bus;
+      QString postcode;
+      QString gemeente;
+      QString land;
+      QString contactpersoon;
+      QString telefoonnummer;
+      double weight;
+      double volume;
   };
 
   struct Adres {
       int counter;
       char kaart_nr;
       QTime arrivaltime;
-      // zie transportationlistwriter
+      QString caption;
   };
 
   void addOphaalpunt(const Ophaalpunt &ophaalpunt);

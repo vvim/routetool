@@ -55,7 +55,7 @@ private:
     TransportationListDocumentWriter * translist_doc;
 
     void populateWithSmarker(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i);
-    void writeInformation(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i, int counter = 0, int kaart_nr = 0);
+    void writeInformation(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i, int counter = 0, char kaart_nr = 0);
     void deleteTheMatrices();
 };
 
