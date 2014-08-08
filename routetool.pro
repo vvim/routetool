@@ -56,7 +56,6 @@ SOURCES += main.cpp\
     geocode_data_manager.cpp \
     distancematrix.cpp \
     mylineedit.cpp \
-    documentwriter.cpp \
     configuration.cpp \
     nieuweaanmelding.cpp \
     infoophaalpunt.cpp \
@@ -73,7 +72,6 @@ HEADERS  += routetool.h \
     distancematrix.h \
     smarker.h \
     mylineedit.h \
-    documentwriter.h \
     configuration.h \
     nieuweaanmelding.h \
     infoophaalpunt.h \
