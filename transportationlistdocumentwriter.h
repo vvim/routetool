@@ -76,6 +76,12 @@ public:
 private:
   QTextDocument * const m_document;
   QTextCursor m_cursor;
+  QString template_ophaling;
+  QString template_levering;
+  QString template_adres;
+
+  QString getGemeente(QString gemeente, QString land);
+  QString getAdres(QString straat, QString huisnr, QString busnr);
 };
 
 
