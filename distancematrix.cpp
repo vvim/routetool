@@ -698,87 +698,17 @@ void DistanceMatrix::calculateOptimalRoute()
 
     qDebug() << "--- start:" << startTimeString;
     qDebug() << "--- done:" << QDateTime::currentDateTime().toString();
+
     // TSP 6. tsp_solution uitschrijven:
     // <vvim> TODO: wat als er geen tsp_solution is gevonden?
     qDebug() << "<vvim> TODO: wat als er geen tsp_solution is gevonden?";
-    QString path_string = "Voorgestelde route:\n";
-
-    /*
-    foreach(int i, *tsp_solution)
-        path_string += QString::number(i) + " -> ";
-    qDebug() << "tsp_solution:" << path_string << "met als kost" << current_minimum_cost;
-
-    path_string = "";
-    */
-
-// beter verplaatsen naar einde, nee?   emit new_order_smarkers(tsp_solution); // geef de voorgestelde route door aan de class Form zodat die ook in de GUI kan worden aangepast
-
-    /** <cut here> **/
-    QString currentdate = QDate::currentDate().toString("d MMMM yyyy"); // QLocale::setDefault(QLocale::Dutch);
-    DocumentWriter vervoersLijst("",
-                                 "",
-                                 currentdate);
-    qDebug() << "<vvim> vervoerslijst wordt nu opgesteld in de class DistanceMatrix, beter dit te verplaatsen naar de class Form";
-
-
-    int previous_i = -1;
-    int totale_afstand = 0;
-    int totale_tijd = 0;
-    int counter = 1;
-    foreach(int i, *tsp_solution)
-    {
-        if(previous_i > -1)
-        {
-            //if(distance_calc == DISTANCE_IN_METERS)
-                path_string.append(QString("    : %1 km\n").arg(distance_matrix_in_meters[previous_i][i]/1000));
-                totale_afstand += distance_matrix_in_meters[previous_i][i];
-            //else
-                path_string += "    : " + seconds_human_readable(distance_matrix_in_seconds[previous_i][i]) + "\n";
-                totale_tijd += distance_matrix_in_seconds[previous_i][i];
-
-                DocumentWriter::VisitLocation location;
-                location.order = counter;
-                location.distance_seconds = distance_matrix_in_seconds[previous_i][i];
-                location.distance_meters = distance_matrix_in_meters[previous_i][i];
-                location.Naam = "een ophaalpunt";
-                location.Adres = citynames->at(i);
-                location.Postcode = "een PC";
-                location.Gemeente = "een gemeente";
-                location.Telefoon = "een telefoonnr";
-                location.Contactpersoon = "een naam";
-                location.Openingsuren = "ma-vr ...";
-                location.Speciale_opmerkingen = "speciale opmerk...";
-                location.Soort_vervoer = "levering/ophaal/...";
-                location.Kaartnr = "kaartnr?";
-                location.Kurk_op_te_halen_zakken = "#zakken";
-
-                vervoersLijst.addVisit(location);
-                counter++;
-        }
-        path_string += " * " + citynames->at(i) + "\n";
-        previous_i = i;
-    }
-qDebug() << "<vvim> TODO: totale afstand én totale tijd tesamen berekenen";
-    //if(distance_calc == DISTANCE_IN_METERS)
-        path_string.append(QString("\ntotale afstand: %1 m, ofte %2 km\n").arg(totale_afstand).arg(totale_afstand/1000));
-    //else
-        path_string.append(QString("\ntotale duurtijd: %1 sec, ofte %2\n").arg(totale_tijd).arg(seconds_human_readable(totale_tijd)));
-        path_string.append(QString("\n\n(controlegetal voor wim: %1 %2)").arg(current_minimum_cost).arg((distance_calc == DISTANCE_IN_METERS) ? "m" : "sec"));
-    /** </cut here> **/
 
     QApplication::restoreOverrideCursor(); // set cursor back to "Arrow cursor"
 
     //emit new_order_smarkers(tsp_solution, distance_matrix_in_meters, distance_matrix_in_seconds); // geef de voorgestelde route door aan de class Form zodat die ook in de GUI kan worden aangepast
     emit new_order_smarkers(tsp_solution); // geef de voorgestelde route door aan de class Form zodat die ook in de GUI kan worden aangepast
 
-    //QString("vervoerslijst-(%1).odt".arg(currentdate)); -> no const char[23]
-    vervoersLijst.write("wismij-oude-stijl-vervoerslijst.odt");
-
-    QMessageBox msg;
-    msg.setText(path_string);
-    msg.exec();
-
-    qDebug() << "destroy path!";
+    qDebug() << "[DistanceMatrix::calculateOptimalRoute()]" << "destroy path!";
     delete path;
 
 }

@@ -6,7 +6,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include "smarker.h"
-#include "documentwriter.h"
 
 #define DISTANCE_IN_METERS 1
 #define DISTANCE_IN_SECONDS 2

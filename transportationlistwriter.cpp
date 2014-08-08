@@ -7,8 +7,6 @@
 #include <QFile>
 #include <QUuid>
 #include "transportationlistwriter.h"
-#include "documentwriter.h"
-
 
 // 30 minutes
 #define STANDAARD_OPHAALTIJD_IN_SECONDEN 1800
