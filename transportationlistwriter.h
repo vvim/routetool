@@ -20,7 +20,7 @@ public:
     explicit TransportationListWriter(QWidget *parent = 0);
     ~TransportationListWriter();
     
-    void prepare(QList <SMarker*> m_markers, int **_distance_matrix_in_meters, int **_distance_matrix_in_seconds);
+    void prepare(QList <SMarker*> m_markers, int **_distance_matrix_in_meters, int **_distance_matrix_in_seconds, QWidget *_mapwidget);
     void print();
 signals:
     
@@ -51,6 +51,7 @@ private:
 
     int **distance_matrix_in_meters;
     int **distance_matrix_in_seconds;
+    QWidget *mapwidget;
 
     TransportationListDocumentWriter * translist_doc;
 

@@ -71,7 +71,7 @@ public:
 
   void addGraph(QList<int> values,
                 const QString &subtext);
-  void write(const QString &fileName);
+  void write(const QString &fileName, const QString &map);
 
 private:
   QTextDocument * const m_document;

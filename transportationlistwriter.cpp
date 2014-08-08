@@ -4,6 +4,8 @@
 #include <QPushButton>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QFile>
+#include <QUuid>
 #include "transportationlistwriter.h"
 #include "documentwriter.h"
 
@@ -82,7 +84,7 @@ TransportationListWriter::~TransportationListWriter()
     qDebug() << "TransportationListWriter() deconstructed";
 }
 
-void TransportationListWriter::prepare(QList<SMarker *> _m_markers, int **_distance_matrix_in_meters, int **_distance_matrix_in_seconds)
+void TransportationListWriter::prepare(QList<SMarker *> _m_markers, int **_distance_matrix_in_meters, int **_distance_matrix_in_seconds, QWidget *_mapwidget)
 {
     setOriginalValues();
     if(m_markers.length() > 0)
@@ -150,6 +152,8 @@ void TransportationListWriter::prepare(QList<SMarker *> _m_markers, int **_dista
     empty_bags_of_kaarsresten_neededEdit->setValue(empty_bags_of_kaarsresten_needed);
     startTimeEdit->setTime(QTime(8,0));
     editExpectedArrivalTime(startTimeEdit->time());
+
+    mapwidget = _mapwidget;
     ready = true;
 
     qDebug() << "[TransportationListWriter::prepare()]" << "Done";
@@ -254,7 +258,19 @@ void TransportationListWriter::print()
     //qDebug() << "[Vervoerslijst]" << "Totaal lading:" << ui->totalWeightEdit->text() << "kg and " << ui->totalVolumeEdit->text() << "liter";
 
 
-    translist_doc->write(name_vervoerslijst);
+    //make screenshot of the QWidget "mapwidget" so that we have a screenshot of the route (built by Google Maps)
+    //see also http://qt-project.org/doc/qt-4.8/desktop-screenshot.html
+    //         http://stackoverflow.com/questions/2430877/how-to-save-a-qpixmap-object-to-a-file
+    //     and http://qt-project.org/doc/qt-5/quuid.html#createUuid
+    QPixmap pixmap = QPixmap::grabWidget(mapwidget);
+
+    QString filename_map = name_vervoerslijst;
+    filename_map.append(QUuid::createUuid ()).append(".png");
+    QFile file(filename_map);
+    file.open(QIODevice::WriteOnly);
+    pixmap.save(&file, "PNG");
+
+    translist_doc->write(name_vervoerslijst, filename_map);
 }
 
 

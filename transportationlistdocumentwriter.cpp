@@ -105,9 +105,10 @@ void TransportationListDocumentWriter::addGraph(QList<int> values, const QString
 }
 
 
-void TransportationListDocumentWriter::write(const QString &fileName)
+void TransportationListDocumentWriter::write(const QString &fileName, const QString &map)
 {
-    m_cursor.insertText("</TBODY></TABLE></BODY></HTML>");
+    QString document_tail= "</TBODY></TABLE><IMG src=\"<vvimroutetool>GOOGLEMAPS</vvimroutetool>\"</BODY></HTML>";
+    m_cursor.insertText(document_tail.replace("<vvimroutetool>GOOGLEMAPS</vvimroutetool>",map));
 
     QString fn = fileName;
     if(!(fn.right(4) == ".doc"))
