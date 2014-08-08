@@ -252,7 +252,7 @@ void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
             QString("var marker = new google.maps.Marker({") +
             QString("position: new google.maps.LatLng(%1, %2),").arg(north).arg(east) +
             QString("map: map,") +
-            QString("title: %1").arg("\""+caption+"\"") +
+            QString("title: %1").arg("\"Ophaalpunt: "+ophaalpunt.naam+"\"") +
             QString("});") +
             QString("markers.push(marker);");
     qDebug() << str;
@@ -291,7 +291,7 @@ void Form::setMarker(double east, double north, SLevering levering)
             QString("var marker = new google.maps.Marker({") +
             QString("position: new google.maps.LatLng(%1, %2),").arg(north).arg(east) +
             QString("map: map,") +
-            QString("title: %1").arg("\""+caption+"\"") +
+            QString("title: %1").arg("\"Levering: "+levering.name+"\"") +
             QString("});") +
             QString("markers.push(marker);");
     qDebug() << str;
