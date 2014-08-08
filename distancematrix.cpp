@@ -84,7 +84,9 @@ QString DistanceMatrix::buildQjsonUrl(QList <SMarker*> markers, int origins_star
 
     while(it != markers.end())  // <vvim> markers.at(end) ?
     {
-        QString address_to_look_up = prepareForUrl((*it)->caption);
+        //QString address_to_look_up = prepareForUrl((*it)->caption);
+        QString address_to_look_up = QString("%1,%2").arg((*it)->north).arg((*it)->east);
+
         qDebug() << "!! !!" << address_to_look_up << "!! !!";
 
         if( (i >= origins_start) && (i <= origins_end) )
@@ -126,7 +128,8 @@ QString DistanceMatrix::buildQjsonUrl(QList <SMarker*> markers)
         //origins += QString::number((*it)->north) + "," + QString::number((*it)->east) + "|";
 
         // op naam : zoals gevraagd, maar url is langer
-        QString address_to_look_up = prepareForUrl((*it)->caption);
+        //QString address_to_look_up = prepareForUrl((*it)->caption);
+        QString address_to_look_up = QString("%1,%2").arg((*it)->north).arg((*it)->east);
         origins += address_to_look_up + "|";
         ++it;
     }
