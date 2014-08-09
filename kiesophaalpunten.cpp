@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QApplication>
+#include <QHeaderView>
 #include <QMessageBox>
 #include "kiesophaalpunten.h"
 
@@ -38,8 +39,34 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     warning = new QPalette();
     warning->setColor(QPalette::Text,Qt::red);
 
+    sortingascending = true;
+
     legeAanmeldingenLabel = new QLabel(tr("Aanmeldingen:"));
     legeAanmeldingenList = new QListWidget();
+
+    legeAanmeldingenTree = new QTreeWidget();
+    legeAanmeldingenTree->setColumnCount(9);
+
+    QStringList labels;
+    labels << "Ophaalpunt" << "Kurk (kg)" << "Kurk (zakken)" << "Kaars (kg)" << "Kaars (zakken)"
+           << "Postcode"   << "Aanmelding_id" << "Ophaalpunt_id" << "Opmerkingen";
+    legeAanmeldingenTree->setHeaderLabels(labels);
+
+    /*
+        #define OPHAALPUNT Qt::UserRole         0
+        #define WEIGHT_KURK OPHAALPUNT+1        1
+        #define ZAK_KURK WEIGHT_KURK+1          2
+        #define WEIGHT_KAARS ZAK_KURK+1         3
+        #define ZAK_KAARS WEIGHT_KAARS+1        4
+        #define ADRES ZAK_KAARS+1               5
+        #define AANMELDING_ID ADRES+1           6
+        #define OPHAALPUNT_ID AANMELDING_ID+1   7
+        #define OPMERKINGEN OPHAALPUNT_ID+1     8
+    */
+    legeAanmeldingenTree->setColumnHidden(6,true);
+    legeAanmeldingenTree->setColumnHidden(7,true);
+
+    connect(legeAanmeldingenTree->header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(sortTreeWidget(int)));
 
     totalWeightLabel = new QLabel(tr("Totaal gewicht:"));
     totalVolumeLabel = new QLabel(tr("Totaal volume:"));
@@ -82,6 +109,7 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(legeAanmeldingenLabel);
     layout->addWidget(legeAanmeldingenList);
+    layout->addWidget(legeAanmeldingenTree);
     layout->addLayout(weightAndVolumeLayout);
     layout->addWidget(buttonBox);
     setLayout(layout);
@@ -193,9 +221,11 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
     legeAanmeldingenList->clear();
     legeAanmeldingenList->setSortingEnabled(true);
 
+    legeAanmeldingenTree->clear();
+
     QSqlQuery query("SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten,"
                           " CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES,"
-                          " aanmelding.id, ophaalpunten.id, aanmelding.opmerkingen"
+                          " aanmelding.id, ophaalpunten.id, aanmelding.opmerkingen, ophaalpunten.postcode "
                    " FROM aanmelding, ophaalpunten"
                    " WHERE ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL");
 
@@ -226,6 +256,10 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
             item->setFlags(item->flags() &~ Qt::ItemIsSelectable);
             item->setCheckState(Qt::Unchecked); // http://www.qtcentre.org/threads/7032-QListWidget-with-check-box-s , thank you J-P Nurmi
             legeAanmeldingenList->addItem(item);
+
+            addToTreeWidget(ophaalpunt, query.value(1).toDouble(), query.value(2).toDouble(),
+                            query.value(3).toDouble(), query.value(4).toDouble(), query.value(9).toString(),
+                            query.value(6).toInt(), query.value(7).toInt(), query.value(8).toString());
         }
     }
     else
@@ -332,4 +366,37 @@ void KiesOphaalpunten::initialise()
     populateLegeAanmeldingen();
 
     uncheckAll();
+}
+
+void KiesOphaalpunten::addToTreeWidget(QString NaamOphaalpunt, double WeightKurk, double WeightKaars,
+                                   double ZakKurk, double ZakKaars, QString postcode,
+                                   int AanmeldingId, int OphaalpuntId, QString Opmerkingen)
+{
+    QTreeWidgetItem *item = new QTreeWidgetItem(legeAanmeldingenTree);
+    item->setText(0, NaamOphaalpunt);
+    item->setText(1, QString("%1 kg").arg(WeightKurk));
+    item->setText(2, QString::number(ZakKurk));
+    item->setText(3, QString("%1 kg").arg(WeightKaars));
+    item->setText(4, QString::number(ZakKaars));
+    item->setText(5, postcode);
+    item->setText(6, QString::number(AanmeldingId));
+    item->setText(7, QString::number(OphaalpuntId));
+    item->setText(8, Opmerkingen);
+
+    item->setFlags(item->flags()|Qt::ItemIsUserCheckable);
+    item->setCheckState(0,Qt::Unchecked);
+    //legeAanmeldingenTree->addTopLevelItem(item);
+}
+
+void KiesOphaalpunten::sortTreeWidget(int column)
+{
+    qDebug() << "<vvim>" << "for use of filters in KiesOphaalpunten::QTreeWidgetItem, think legeAanmeldingenTree->itemBelow(headeritem)->isHidden();";
+    qDebug() << "<vvim>" << "[KiesOphaalpunten::sortTreeWidget]" << "goes wrong for sorting numbers, see" << "http://stackoverflow.com/questions/363200/is-it-possible-to-sort-numbers-in-a-qtreewidget-column";
+    // goes wrong for sorting numbers, see
+    // http://stackoverflow.com/questions/363200/is-it-possible-to-sort-numbers-in-a-qtreewidget-column
+    if(sortingascending)
+        legeAanmeldingenTree->sortByColumn(column,Qt::AscendingOrder);
+    else
+        legeAanmeldingenTree->sortByColumn(column,Qt::DescendingOrder);
+    sortingascending = !sortingascending;
 }
