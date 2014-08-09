@@ -19,16 +19,16 @@
     <vvim> : might not be used as this, probably have to use an Item-class that inherits QListWidgetItem
 **/
 
-#define OPHAALPUNT Qt::UserRole
-#define WEIGHT_KURK OPHAALPUNT+1
-#define ZAK_KURK WEIGHT_KURK+1
-#define WEIGHT_KAARS ZAK_KURK+1
-#define ZAK_KAARS WEIGHT_KAARS+1
-#define ADRES ZAK_KAARS+1
-#define AANMELDING_ID ADRES+1
-#define OPHAALPUNT_ID AANMELDING_ID+1
-#define OPMERKINGEN OPHAALPUNT_ID+1
-
+#define OPHAALPUNT 0
+#define WEIGHT_KURK 1
+#define ZAK_KURK 2
+#define WEIGHT_KAARS 3
+#define ZAK_KAARS 4
+#define POSTCODE 5
+#define AANMELDING_ID 6
+#define OPHAALPUNT_ID 7
+#define OPMERKINGEN 8
+#define VOLLEDIGADRES 9
 
 KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     QWidget(parent)
@@ -42,14 +42,13 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     sortingascending = true;
 
     legeAanmeldingenLabel = new QLabel(tr("Aanmeldingen:"));
-    legeAanmeldingenList = new QListWidget();
 
     legeAanmeldingenTree = new QTreeWidget();
-    legeAanmeldingenTree->setColumnCount(9);
+    legeAanmeldingenTree->setColumnCount(10);
 
     QStringList labels;
     labels << "Ophaalpunt" << "Kurk (kg)" << "Kurk (zakken)" << "Kaars (kg)" << "Kaars (zakken)"
-           << "Postcode"   << "Aanmelding_id" << "Ophaalpunt_id" << "Opmerkingen";
+           << "Postcode"   << "Aanmelding_id" << "Ophaalpunt_id" << "Opmerkingen" << "Volledig adres";
     legeAanmeldingenTree->setHeaderLabels(labels);
 
     /*
@@ -58,13 +57,15 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
         #define ZAK_KURK WEIGHT_KURK+1          2
         #define WEIGHT_KAARS ZAK_KURK+1         3
         #define ZAK_KAARS WEIGHT_KAARS+1        4
-        #define ADRES ZAK_KAARS+1               5
+        #define POSTCODE                        5
         #define AANMELDING_ID ADRES+1           6
         #define OPHAALPUNT_ID AANMELDING_ID+1   7
         #define OPMERKINGEN OPHAALPUNT_ID+1     8
+        #define VOLLEDIGADRES                   9
     */
-    legeAanmeldingenTree->setColumnHidden(6,true);
-    legeAanmeldingenTree->setColumnHidden(7,true);
+    legeAanmeldingenTree->setColumnHidden(6,true);  // aanmelding_id
+    legeAanmeldingenTree->setColumnHidden(7,true);  // ophaalpunt_id
+    legeAanmeldingenTree->setColumnHidden(9,true);  // volledig adres
 
     connect(legeAanmeldingenTree->header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(sortTreeWidget(int)));
 
@@ -97,8 +98,6 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     connect(buttonBox, SIGNAL(rejected()),this, SLOT(reject()));
     connect(resetButton, SIGNAL(pressed()), this, SLOT(uncheckAll()));
     connect(allButton, SIGNAL(pressed()), this, SLOT(checkAll()));
-    connect(legeAanmeldingenList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(itemSelected(QListWidgetItem*)));
-    qDebug() << "<vvim> BUG: als een item geselecteerd wordt met SPATIE, dan wordt er niets bijgeteld?????";
 
     QHBoxLayout *weightAndVolumeLayout = new QHBoxLayout();
     weightAndVolumeLayout->addWidget(totalWeightLabel);
@@ -108,7 +107,6 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
 
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(legeAanmeldingenLabel);
-    layout->addWidget(legeAanmeldingenList);
     layout->addWidget(legeAanmeldingenTree);
     layout->addLayout(weightAndVolumeLayout);
     layout->addWidget(buttonBox);
@@ -123,54 +121,32 @@ void KiesOphaalpunten::checkAll()
 {
     total_weight = 0;
     total_volume = 0;
-    for (int i = 0; i < legeAanmeldingenList->count(); i++)
+    QTreeWidgetItemIterator it(legeAanmeldingenTree);
+    while(*it)
     {
-        QListWidgetItem * aanmelding = legeAanmeldingenList->item(i);
-        aanmelding->setCheckState(Qt::Checked);
-        total_weight += aanmelding->data(WEIGHT_KAARS).toDouble() + aanmelding->data(WEIGHT_KURK).toDouble();
-        total_volume += (aanmelding->data(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->data(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
+        QTreeWidgetItem * aanmelding = *it;
+        aanmelding->setCheckState(0,Qt::Checked);
+        total_weight += aanmelding->text(WEIGHT_KAARS).toDouble() + aanmelding->text(WEIGHT_KURK).toDouble();
+        total_volume += (aanmelding->text(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->text(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
+
+        it++;
     }
 
-    //foreach (QListWidgetItem *aanmelding, legeAanmeldingenList)
-    //    will not work as QListWidget is not a _list_ in a container way, it's a simple _list_view_ .
-    //    see http://www.qtcentre.org/threads/40430-how-can-iterate-foreach-item-in-QListWidget
     setTotalWeightTotalVolume();
 }
 
 void KiesOphaalpunten::uncheckAll()
 {
-    for (int i = 0; i < legeAanmeldingenList->count(); i++)
+    QTreeWidgetItemIterator it(legeAanmeldingenTree);
+    while(*it)
     {
-        legeAanmeldingenList->item(i)->setCheckState(Qt::Unchecked);
+        QTreeWidgetItem * aanmelding = *it;
+        aanmelding->setCheckState(0,Qt::Unchecked);
+        it++;
     }
     total_weight = 0;
     total_volume = 0;
     setTotalWeightTotalVolume();
-}
-
-void KiesOphaalpunten::itemSelected(QListWidgetItem* aanmelding)
-{
-    if(aanmelding->checkState() == Qt::Unchecked)
-    {
-        aanmelding->setCheckState(Qt::Checked);
-        total_weight += aanmelding->data(WEIGHT_KAARS).toDouble() + aanmelding->data(WEIGHT_KURK).toDouble();
-        total_volume += (aanmelding->data(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->data(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
-    }
-    else
-    {
-        aanmelding->setCheckState(Qt::Unchecked);
-        total_weight -= aanmelding->data(WEIGHT_KAARS).toDouble() + aanmelding->data(WEIGHT_KURK).toDouble();
-        total_volume -= (aanmelding->data(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->data(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
-    }
-
-    setTotalWeightTotalVolume();
-}
-
-
-void KiesOphaalpunten::itemSelected()
-{
-    QListWidgetItem* aanmelding = legeAanmeldingenList->currentItem();
-    itemSelected(aanmelding);
 }
 
 void KiesOphaalpunten::setTotalWeightTotalVolume()
@@ -179,14 +155,17 @@ void KiesOphaalpunten::setTotalWeightTotalVolume()
           // <vvim> BUG: als een item geselecteerd wordt met SPATIE, dan wordt er niets bijgeteld?????";
             total_weight = 0;
             total_volume = 0;
-            for (int i = 0; i < legeAanmeldingenList->count(); i++)
+
+            QTreeWidgetItemIterator it(legeAanmeldingenTree);
+            while(*it)
             {
-                QListWidgetItem * aanmelding = legeAanmeldingenList->item(i);
-                if(aanmelding->checkState() == Qt::Checked)
+                QTreeWidgetItem * aanmelding = *it;
+                if(aanmelding->checkState(0) == Qt::Checked)
                 {
-                    total_weight += aanmelding->data(WEIGHT_KAARS).toDouble() + aanmelding->data(WEIGHT_KURK).toDouble();
-                    total_volume += (aanmelding->data(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->data(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
+                    total_weight += aanmelding->text(WEIGHT_KAARS).toDouble() + aanmelding->text(WEIGHT_KURK).toDouble();
+                    total_volume += (aanmelding->text(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->text(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
                 }
+                it++;
             }
             ///////////////// dit zou niet nodig moeten zijn
 
@@ -218,9 +197,6 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
 
-    legeAanmeldingenList->clear();
-    legeAanmeldingenList->setSortingEnabled(true);
-
     legeAanmeldingenTree->clear();
 
     QSqlQuery query("SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten,"
@@ -234,32 +210,11 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
         while (query.next())
         {
             QString ophaalpunt = query.value(0).toString();
-            double weight = query.value(1).toDouble()+query.value(2).toDouble();
-            double volume = (query.value(3).toDouble() * settings.value("zak_kurk_volume").toDouble()) +(query.value(4).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
             QString ophaalpunt_adres = query.value(5).toString();
-            QListWidgetItem * item = new QListWidgetItem();
-
-            // ! <vvim> TODO: setDate takes a QVariant, you should use SOphaalpunt here!!!
-            //          item->setData(OPHAALPUNT, new SOphaalpunt_with_all_data);
-            //   http://www.qtcentre.org/archive/index.php/t-53454.html
-            item->setData(Qt::DisplayRole,QString("%1 (%2 kg , %3 liter)").arg(ophaalpunt).arg(weight).arg(volume));
-            item->setData(OPHAALPUNT,ophaalpunt);
-            item->setData(WEIGHT_KURK,query.value(1).toDouble());
-            item->setData(WEIGHT_KAARS,query.value(2).toDouble());
-            item->setData(ZAK_KURK,query.value(3).toDouble());
-            item->setData(ZAK_KAARS,query.value(4).toDouble());
-            item->setData(ADRES,ophaalpunt_adres);
-            item->setData(AANMELDING_ID,query.value(6).toInt());
-            item->setData(OPHAALPUNT_ID,query.value(7).toInt());
-            item->setData(OPMERKINGEN,query.value(8).toString());
-            item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-            item->setFlags(item->flags() &~ Qt::ItemIsSelectable);
-            item->setCheckState(Qt::Unchecked); // http://www.qtcentre.org/threads/7032-QListWidget-with-check-box-s , thank you J-P Nurmi
-            legeAanmeldingenList->addItem(item);
 
             addToTreeWidget(ophaalpunt, query.value(1).toDouble(), query.value(2).toDouble(),
                             query.value(3).toDouble(), query.value(4).toDouble(), query.value(9).toString(),
-                            query.value(6).toInt(), query.value(7).toInt(), query.value(8).toString());
+                            query.value(6).toInt(), query.value(7).toInt(), query.value(8).toString() ,ophaalpunt_adres);
         }
     }
     else
@@ -302,33 +257,35 @@ void KiesOphaalpunten::accept()
             return;
     }
 
+    // could be done better by using a new member of KiesOphaalpunten
+    //      QMap <int, SOphaalpunt *> m_map_aanmeldingen
+    // we fill m_map_aanmeldingen in 'populateLegeAanmeldingen' with the id number of the aanmeldingen and the information in SOphaalpunt
+    // therefore we do not need all the SetData() in the QListWidgetItems, only the id for the QMap.
+    // We can let this id be the same as the id in the table 'aanmelding'.
+    //
+    // Then this code will be simply Qt::Checked() => listOfAanmeldingen->append(m_map_aanmeldingen[aanmelding->data(AANMELDING_ID).toInt()];
     QList<SOphaalpunt> *listOfAanmeldingen = new QList<SOphaalpunt>();
-    for(int i = 0 ; i < legeAanmeldingenList->count(); i++)
+    QTreeWidgetItemIterator it(legeAanmeldingenTree);
+    while(*it)
     {
-        // could be done better by using a new member of KiesOphaalpunten
-        //      QMap <int, SOphaalpunt *> m_map_aanmeldingen
-        // we fill m_map_aanmeldingen in 'populateLegeAanmeldingen' with the id number of the aanmeldingen and the information in SOphaalpunt
-        // therefore we do not need all the SetData() in the QListWidgetItems, only the id for the QMap.
-        // We can let this id be the same as the id in the table 'aanmelding'.
-        //
-        // Then this code will be simply Qt::Checked() => listOfAanmeldingen->append(m_map_aanmeldingen[aanmelding->data(AANMELDING_ID).toInt()];
-        QListWidgetItem *aanmelding = legeAanmeldingenList->item(i);
-        if(aanmelding->checkState() == Qt::Checked)
+        QTreeWidgetItem * aanmelding = *it;
+        if(aanmelding->checkState(0) == Qt::Checked)
         {
             SOphaalpunt _ophaalpunt(
-                            aanmelding->data(OPHAALPUNT).toString(),   // naam
-                            aanmelding->data(WEIGHT_KURK).toDouble(),  // kg_kurk
-                            aanmelding->data(WEIGHT_KAARS).toDouble(), // kg_kaarsresten
-                            aanmelding->data(ZAK_KURK).toDouble(),     // zakken_kurk
-                            aanmelding->data(ZAK_KAARS).toDouble(),    // zakken_kaarsresten
-                            aanmelding->data(ADRES).toString(),        // adres
-                            aanmelding->data(AANMELDING_ID).toInt(),   // aanmelding_id
-                            aanmelding->data(OPHAALPUNT_ID).toInt(),   // ophaalpunt_id
-                            aanmelding->data(OPMERKINGEN).toString()   // speciale_opmerkingen
+                            aanmelding->text(OPHAALPUNT),   // naam
+                            aanmelding->text(WEIGHT_KURK).toDouble(),  // kg_kurk
+                            aanmelding->text(WEIGHT_KAARS).toDouble(), // kg_kaarsresten
+                            aanmelding->text(ZAK_KURK).toDouble(),     // zakken_kurk
+                            aanmelding->text(ZAK_KAARS).toDouble(),    // zakken_kaarsresten
+                            aanmelding->text(VOLLEDIGADRES),        // adres
+                            aanmelding->text(AANMELDING_ID).toInt(),   // aanmelding_id
+                            aanmelding->text(OPHAALPUNT_ID).toInt(),   // ophaalpunt_id
+                            aanmelding->text(OPMERKINGEN)   // speciale_opmerkingen
                         );
-
             listOfAanmeldingen->append(_ophaalpunt);
         }
+        it++;
+
     }
     emit aanmelding_for_route(listOfAanmeldingen);
 
@@ -346,7 +303,7 @@ KiesOphaalpunten::~KiesOphaalpunten()
     qDebug() << "start to deconstruct KiesOphaalpunten()";
     delete warning;
     delete normal;
-    delete legeAanmeldingenList;
+    delete legeAanmeldingenTree;
     delete legeAanmeldingenLabel;
     delete totalWeightLabel;
     delete totalVolumeLabel;
@@ -370,7 +327,8 @@ void KiesOphaalpunten::initialise()
 
 void KiesOphaalpunten::addToTreeWidget(QString NaamOphaalpunt, double WeightKurk, double WeightKaars,
                                    double ZakKurk, double ZakKaars, QString postcode,
-                                   int AanmeldingId, int OphaalpuntId, QString Opmerkingen)
+                                   int AanmeldingId, int OphaalpuntId, QString Opmerkingen,
+                                   QString VolledigAdres)
 {
     QTreeWidgetItem *item = new QTreeWidgetItem(legeAanmeldingenTree);
     item->setText(0, NaamOphaalpunt);
@@ -382,6 +340,7 @@ void KiesOphaalpunten::addToTreeWidget(QString NaamOphaalpunt, double WeightKurk
     item->setText(6, QString::number(AanmeldingId));
     item->setText(7, QString::number(OphaalpuntId));
     item->setText(8, Opmerkingen);
+    item->setText(9, VolledigAdres);
 
     item->setFlags(item->flags()|Qt::ItemIsUserCheckable);
     item->setCheckState(0,Qt::Unchecked);

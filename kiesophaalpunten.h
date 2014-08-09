@@ -31,7 +31,6 @@ signals:
 public slots:
 private:
     //use QTableWidget to work with different columns: http://qt-project.org/wiki/How_to_Use_QTableWidget
-    QListWidget *legeAanmeldingenList;
     QTreeWidget *legeAanmeldingenTree;
     QLabel *legeAanmeldingenLabel, *totalWeightLabel, *totalVolumeLabel;
     QLineEdit *totalWeightEdit, *totalVolumeEdit;
@@ -44,13 +43,11 @@ private:
     void populateLegeAanmeldingen();
     void setTotalWeightTotalVolume();
 
-    void addToTreeWidget(QString NaamOphaalpunt, double WeightKurk, double WeightKaars, double ZakKurk, double ZakKaars, QString postcode, int AanmeldingId, int OphaalpuntId, QString Opmerkingen);
+    void addToTreeWidget(QString NaamOphaalpunt, double WeightKurk, double WeightKaars, double ZakKurk, double ZakKaars, QString postcode, int AanmeldingId, int OphaalpuntId, QString Opmerkingen, QString VolledigAdres);
 
     bool sortingascending;
 
 private slots:
-    void itemSelected(QListWidgetItem* aanmelding);
-    void itemSelected();
     void checkAll();
     void uncheckAll();
     void accept();
