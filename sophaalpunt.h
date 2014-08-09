@@ -13,24 +13,34 @@ struct SOphaalpunt
     SOphaalpunt()
     {
         naam = "";
+        street = "";
+        housenr = "";
+        busnr = "";
+        postalcode = "";
+        plaats = "";
+        country = "";
         kg_kurk = 0;
         kg_kaarsresten = 0;
         zakken_kurk = 0;
         zakken_kaarsresten = 0;
-        adres = "";
         aanmelding_id = -1;
         ophaalpunt_id = -1;
         opmerkingen = "";
     };
 
-    SOphaalpunt(QString _naam, double _kg_kurk, double _kg_kaarsresten, double _zakken_kurk, double _zakken_kaarsresten, QString _adres, int _aanmelding_id, int _ophaalpunt_id, QString _opmerkingen)
+    SOphaalpunt(QString _naam, QString _street, QString _housenr, QString _busnr, QString _postalcode, QString _plaats, QString _country, double _kg_kurk, double _kg_kaarsresten, double _zakken_kurk, double _zakken_kaarsresten, int _aanmelding_id, int _ophaalpunt_id, QString _opmerkingen)
     {
         naam = _naam;
         kg_kurk = _kg_kurk;
         kg_kaarsresten = _kg_kaarsresten;
         zakken_kurk = _zakken_kurk;
         zakken_kaarsresten = _zakken_kaarsresten;
-        adres = _adres;
+        street = _street;
+        housenr = _housenr;
+        busnr = _busnr;
+        postalcode = _postalcode;
+        plaats = _plaats;
+        country = _country;
         aanmelding_id = _aanmelding_id;
         ophaalpunt_id = _ophaalpunt_id;
         opmerkingen = _opmerkingen;
@@ -47,11 +57,44 @@ struct SOphaalpunt
         return kg_kurk + kg_kaarsresten;
     }
 
+    QString getNameAndAddress()
+    {
+        QString nameandaddress = "";
+
+        if(!naam.trimmed().isEmpty())
+            nameandaddress.append(naam).append(", ");
+
+        nameandaddress.append(getAddress());
+
+        return nameandaddress;
+    };
+
+    QString getAddress()
+    {
+        QString address = "";
+
+        address.append(street).append(" ").append(housenr);
+
+        if(!busnr.trimmed().isEmpty())
+            address.append(" bus ").append(busnr);
+
+        address.append(", ").append(postalcode).append(" ").append(plaats).append(", ").append(country);
+
+        return address;
+    };
+
     void PrintInformation()
     {
-        qDebug() << ". type: Ophaalpunt" << ophaalpunt_id << "( aanmelding:" << aanmelding_id << ")";
-        qDebug() << "..." << naam;
-        qDebug() << "..." << adres;
+        qDebug() << ". type: Ophaalpunt #" << ophaalpunt_id << "( aanmelding:" << aanmelding_id << ")";
+        qDebug() << "... naam       :" << naam;
+        qDebug() << "... street     :" << street;
+        qDebug() << "... housenr    :" << housenr;
+        qDebug() << "... busnr      :" << busnr;
+        qDebug() << "... postalcode :" << postalcode;
+        qDebug() << "... plaats     :" << plaats;
+        qDebug() << "... country    :" << country;
+        qDebug() << "... ... getAddress()       :" << getAddress();
+        qDebug() << "... ... getNameAndAddress():" << getNameAndAddress();
         qDebug() << "..." << opmerkingen;
         qDebug() << "... kurk: " << kg_kurk << "kg, "<< zakken_kurk << "zakken";
         qDebug() << "... kaars: " << kg_kaarsresten << "kg, "<< zakken_kaarsresten << "zakken";
@@ -62,7 +105,12 @@ struct SOphaalpunt
     double kg_kaarsresten;
     double zakken_kurk;
     double zakken_kaarsresten;
-    QString adres;
+    QString street;
+    QString housenr;
+    QString busnr;
+    QString postalcode;
+    QString plaats;
+    QString country;
     int aanmelding_id;
     int ophaalpunt_id;
     QString opmerkingen;

@@ -29,7 +29,7 @@ struct SMarker
 
     SMarker(double _east, double _north, SOphaalpunt _ophaalpunt)
     {
-        east = _east; north = _north; caption = QString("%1, %2").arg(_ophaalpunt.naam).arg(_ophaalpunt.adres); ophaalpunt = _ophaalpunt; distancematrixindex = -1;
+        east = _east; north = _north; caption = _ophaalpunt.getNameAndAddress(); ophaalpunt = _ophaalpunt; distancematrixindex = -1;
         ophaling = true; levering = false;
     };
 

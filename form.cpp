@@ -233,7 +233,7 @@ void Form::setMarker(double east, double north, QString caption)
 
 void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
 {
-    QString caption = QString("%1, %2").arg(ophaalpunt.naam).arg(ophaalpunt.adres);
+    QString caption = ophaalpunt.getNameAndAddress();
     for (int i=0; i<m_markers.size(); i++)
     {
         if (m_markers[i]->caption == caption)

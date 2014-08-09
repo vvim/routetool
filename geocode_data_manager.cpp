@@ -108,7 +108,7 @@ void GeocodeDataManager::giveNextMarker()
         marker_type = Ophaalpunt;
         qDebug() << "<vvim>: hier een korte pauze inlassen zodat de naam van de marker correct blijft?";
         ophaalpunt_to_mark = markersToBeDone->takeFirst(); // Removes the first item in the list and returns it.
-        getCoordinates(QString("%1, %2").arg(ophaalpunt_to_mark.naam).arg(ophaalpunt_to_mark.adres));
+        getCoordinates(ophaalpunt_to_mark.getNameAndAddress());
     }
 }
 

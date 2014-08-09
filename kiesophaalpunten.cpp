@@ -19,16 +19,20 @@
     <vvim> : might not be used as this, probably have to use an Item-class that inherits QListWidgetItem
 **/
 
-#define OPHAALPUNT 0
+#define OPHAALPUNT_NAAM 0
 #define WEIGHT_KURK 1
 #define ZAK_KURK 2
 #define WEIGHT_KAARS 3
 #define ZAK_KAARS 4
-#define POSTCODE 5
-#define AANMELDING_ID 6
-#define OPHAALPUNT_ID 7
-#define OPMERKINGEN 8
-#define VOLLEDIGADRES 9
+#define AANMELDING_ID 5
+#define OPHAALPUNT_ID 6
+#define OPMERKINGEN 7
+#define STRAAT 8
+#define HUISNR 9
+#define BUSNR 10
+#define POSTCODE 11
+#define PLAATS 12
+#define LAND 13
 
 KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     QWidget(parent)
@@ -44,28 +48,20 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     legeAanmeldingenLabel = new QLabel(tr("Aanmeldingen:"));
 
     legeAanmeldingenTree = new QTreeWidget();
-    legeAanmeldingenTree->setColumnCount(10);
+    legeAanmeldingenTree->setColumnCount(14);
 
     QStringList labels;
     labels << "Ophaalpunt" << "Kurk (kg)" << "Kurk (zakken)" << "Kaars (kg)" << "Kaars (zakken)"
-           << "Postcode"   << "Aanmelding_id" << "Ophaalpunt_id" << "Opmerkingen" << "Volledig adres";
+           << "Aanmelding_id" << "Ophaalpunt_id" << "Opmerkingen"
+           << "Straat" << "Nr" << "Bus" << "Postcode" << "Plaats" << "Land";
     legeAanmeldingenTree->setHeaderLabels(labels);
 
-    /*
-        #define OPHAALPUNT Qt::UserRole         0
-        #define WEIGHT_KURK OPHAALPUNT+1        1
-        #define ZAK_KURK WEIGHT_KURK+1          2
-        #define WEIGHT_KAARS ZAK_KURK+1         3
-        #define ZAK_KAARS WEIGHT_KAARS+1        4
-        #define POSTCODE                        5
-        #define AANMELDING_ID ADRES+1           6
-        #define OPHAALPUNT_ID AANMELDING_ID+1   7
-        #define OPMERKINGEN OPHAALPUNT_ID+1     8
-        #define VOLLEDIGADRES                   9
-    */
-    legeAanmeldingenTree->setColumnHidden(6,true);  // aanmelding_id
-    legeAanmeldingenTree->setColumnHidden(7,true);  // ophaalpunt_id
-    legeAanmeldingenTree->setColumnHidden(9,true);  // volledig adres
+    legeAanmeldingenTree->setColumnHidden(AANMELDING_ID,true);
+    legeAanmeldingenTree->setColumnHidden(OPHAALPUNT_ID,true);
+
+    legeAanmeldingenTree->setColumnHidden(STRAAT,true);
+    legeAanmeldingenTree->setColumnHidden(HUISNR,true);
+    legeAanmeldingenTree->setColumnHidden(BUSNR,true);
 
     connect(legeAanmeldingenTree->header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(sortTreeWidget(int)));
     connect(legeAanmeldingenTree, SIGNAL(clicked(QModelIndex)), this, SLOT(setTotalWeightTotalVolume()));
@@ -192,7 +188,7 @@ void KiesOphaalpunten::setTotalWeightTotalVolume()
 
 void KiesOphaalpunten::populateLegeAanmeldingen()
 {
-    // TODO neem dit uit de databank : mysql> select * from aanmelding where ophaalronde_datum is NULL;
+    qDebug() << "[KiesOphaalpunten::populateLegeAanmeldingen()]" << "ook datum van laatste contact en laatste ophaling toevoegen";
 
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -201,8 +197,8 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
     legeAanmeldingenTree->clear();
 
     QSqlQuery query("SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten,"
-                          " CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES,"
-                          " aanmelding.id, ophaalpunten.id, aanmelding.opmerkingen, ophaalpunten.postcode "
+                          " aanmelding.id, ophaalpunten.id, aanmelding.opmerkingen,"
+                          " ophaalpunten.straat, ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land "
                    " FROM aanmelding, ophaalpunten"
                    " WHERE ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL");
 
@@ -210,12 +206,23 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
     {
         while (query.next())
         {
-            QString ophaalpunt = query.value(0).toString();
-            QString ophaalpunt_adres = query.value(5).toString();
+            QString ophaalpunt_naam = query.value(0).toString();
 
-            addToTreeWidget(ophaalpunt, query.value(1).toDouble(), query.value(2).toDouble(),
-                            query.value(3).toDouble(), query.value(4).toDouble(), query.value(9).toString(),
-                            query.value(6).toInt(), query.value(7).toInt(), query.value(8).toString() ,ophaalpunt_adres);
+            addToTreeWidget(    ophaalpunt_naam,
+                                query.value(1).toDouble(),  // kg_kurk
+                                query.value(2).toDouble(),  // kg_kaars
+                                query.value(3).toDouble(),  // zakken_kurk
+                                query.value(4).toDouble(),  // zakken_kaars
+                                query.value(5).toInt(),     // aanmelding_id
+                                query.value(6).toInt(),     // ophaalpunt_id
+                                query.value(7).toString(),  // opmerkingen (uit table aanmelding)
+                                query.value(8).toString(),  // straat
+                                query.value(9).toString(),  // huisnr
+                                query.value(10).toString(), // busnr
+                                query.value(11).toString(), // postcode
+                                query.value(12).toString(), // plaats
+                                query.value(13).toString()  // land
+                            );
         }
     }
     else
@@ -272,16 +279,22 @@ void KiesOphaalpunten::accept()
         QTreeWidgetItem * aanmelding = *it;
         if(aanmelding->checkState(0) == Qt::Checked)
         {
+
             SOphaalpunt _ophaalpunt(
-                            aanmelding->text(OPHAALPUNT),   // naam
-                            weightColumnToDouble(aanmelding->text(WEIGHT_KURK)),  // kg_kurk
-                            weightColumnToDouble(aanmelding->text(WEIGHT_KAARS)), // kg_kaarsresten
-                            aanmelding->text(ZAK_KURK).toDouble(),     // zakken_kurk
-                            aanmelding->text(ZAK_KAARS).toDouble(),    // zakken_kaarsresten
-                            aanmelding->text(VOLLEDIGADRES),        // adres
-                            aanmelding->text(AANMELDING_ID).toInt(),   // aanmelding_id
-                            aanmelding->text(OPHAALPUNT_ID).toInt(),   // ophaalpunt_id
-                            aanmelding->text(OPMERKINGEN)   // speciale_opmerkingen
+                            aanmelding->text(OPHAALPUNT_NAAM),                      //_naam
+                            aanmelding->text(STRAAT),                               //_street
+                            aanmelding->text(HUISNR),                               //_housenr
+                            aanmelding->text(BUSNR),                                //_busnr
+                            aanmelding->text(POSTCODE),                             //_postalcode
+                            aanmelding->text(PLAATS),                               //_plaats
+                            aanmelding->text(LAND),                                 //_country
+                            weightColumnToDouble(aanmelding->text(WEIGHT_KURK)),    //_kg_kurk
+                            weightColumnToDouble(aanmelding->text(WEIGHT_KAARS)),   //_kg_kaarsresten
+                            aanmelding->text(ZAK_KURK).toDouble(),                  //_zakken_kurk
+                            aanmelding->text(ZAK_KAARS).toDouble(),                 //_zakken_kaarsresten
+                            aanmelding->text(AANMELDING_ID).toInt(),                //_aanmelding_id
+                            aanmelding->text(OPHAALPUNT_ID).toInt(),                //_ophaalpunt_id
+                            aanmelding->text(OPMERKINGEN)                           //_opmerkingen
                         );
             listOfAanmeldingen->append(_ophaalpunt);
         }
@@ -327,21 +340,24 @@ void KiesOphaalpunten::initialise()
 }
 
 void KiesOphaalpunten::addToTreeWidget(QString NaamOphaalpunt, double WeightKurk, double WeightKaars,
-                                   double ZakKurk, double ZakKaars, QString postcode,
-                                   int AanmeldingId, int OphaalpuntId, QString Opmerkingen,
-                                   QString VolledigAdres)
+                                   double ZakKurk, double ZakKaars, int AanmeldingId, int OphaalpuntId, QString Opmerkingen,
+                                   QString Straat, QString HuisNr, QString BusNr, QString Postcode, QString Plaats, QString Land)
 {
     QTreeWidgetItem *item = new QTreeWidgetItem(legeAanmeldingenTree);
-    item->setText(0, NaamOphaalpunt);
-    item->setText(1, QString("%1 kg").arg(WeightKurk));
-    item->setText(2, QString::number(ZakKurk));
-    item->setText(3, QString("%1 kg").arg(WeightKaars));
-    item->setText(4, QString::number(ZakKaars));
-    item->setText(5, postcode);
-    item->setText(6, QString::number(AanmeldingId));
-    item->setText(7, QString::number(OphaalpuntId));
-    item->setText(8, Opmerkingen);
-    item->setText(9, VolledigAdres);
+    item->setText(OPHAALPUNT_NAAM, NaamOphaalpunt);
+    item->setText(WEIGHT_KURK, QString("%1 kg").arg(WeightKurk));
+    item->setText(ZAK_KURK, QString::number(ZakKurk));
+    item->setText(WEIGHT_KAARS, QString("%1 kg").arg(WeightKaars));
+    item->setText(ZAK_KAARS, QString::number(ZakKaars));
+    item->setText(AANMELDING_ID, QString::number(AanmeldingId));
+    item->setText(OPHAALPUNT_ID, QString::number(OphaalpuntId));
+    item->setText(OPMERKINGEN, Opmerkingen);
+    item->setText(STRAAT, Straat);
+    item->setText(HUISNR, HuisNr);
+    item->setText(BUSNR, BusNr);
+    item->setText(POSTCODE, Postcode);
+    item->setText(PLAATS, Plaats);
+    item->setText(LAND, Land);
 
     item->setFlags(item->flags()|Qt::ItemIsUserCheckable);
     item->setCheckState(0,Qt::Unchecked);
