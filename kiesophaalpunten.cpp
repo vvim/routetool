@@ -68,6 +68,7 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     legeAanmeldingenTree->setColumnHidden(9,true);  // volledig adres
 
     connect(legeAanmeldingenTree->header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(sortTreeWidget(int)));
+    connect(legeAanmeldingenTree, SIGNAL(clicked(QModelIndex)), this, SLOT(setTotalWeightTotalVolume()));
 
     totalWeightLabel = new QLabel(tr("Totaal gewicht:"));
     totalVolumeLabel = new QLabel(tr("Totaal volume:"));
@@ -126,7 +127,7 @@ void KiesOphaalpunten::checkAll()
     {
         QTreeWidgetItem * aanmelding = *it;
         aanmelding->setCheckState(0,Qt::Checked);
-        total_weight += aanmelding->text(WEIGHT_KAARS).toDouble() + aanmelding->text(WEIGHT_KURK).toDouble();
+        total_weight += getWeightOfItem(aanmelding);
         total_volume += (aanmelding->text(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->text(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
 
         it++;
@@ -162,7 +163,7 @@ void KiesOphaalpunten::setTotalWeightTotalVolume()
                 QTreeWidgetItem * aanmelding = *it;
                 if(aanmelding->checkState(0) == Qt::Checked)
                 {
-                    total_weight += aanmelding->text(WEIGHT_KAARS).toDouble() + aanmelding->text(WEIGHT_KURK).toDouble();
+                    total_weight += getWeightOfItem(aanmelding);
                     total_volume += (aanmelding->text(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->text(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
                 }
                 it++;
@@ -273,8 +274,8 @@ void KiesOphaalpunten::accept()
         {
             SOphaalpunt _ophaalpunt(
                             aanmelding->text(OPHAALPUNT),   // naam
-                            aanmelding->text(WEIGHT_KURK).toDouble(),  // kg_kurk
-                            aanmelding->text(WEIGHT_KAARS).toDouble(), // kg_kaarsresten
+                            weightColumnToDouble(aanmelding->text(WEIGHT_KURK)),  // kg_kurk
+                            weightColumnToDouble(aanmelding->text(WEIGHT_KAARS)), // kg_kaarsresten
                             aanmelding->text(ZAK_KURK).toDouble(),     // zakken_kurk
                             aanmelding->text(ZAK_KAARS).toDouble(),    // zakken_kaarsresten
                             aanmelding->text(VOLLEDIGADRES),        // adres
@@ -358,4 +359,20 @@ void KiesOphaalpunten::sortTreeWidget(int column)
     else
         legeAanmeldingenTree->sortByColumn(column,Qt::DescendingOrder);
     sortingascending = !sortingascending;
+}
+
+double KiesOphaalpunten::weightColumnToDouble(QString kg)
+{
+    // turn "220 kg" in "220"
+    QString temp = kg;
+    temp.chop(3);
+    return temp.toDouble();
+}
+
+double KiesOphaalpunten::getWeightOfItem(QTreeWidgetItem* item)
+{
+    double weight_kaars = weightColumnToDouble(item->text(WEIGHT_KAARS));
+    double weight_kurk = weightColumnToDouble(item->text(WEIGHT_KURK));
+
+    return weight_kaars + weight_kurk;
 }

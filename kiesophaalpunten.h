@@ -39,13 +39,13 @@ private:
     QPalette *warning, *normal;
     double total_weight, total_volume;
     double maximum_weight, maximum_volume;
+    bool sortingascending;
 
     void populateLegeAanmeldingen();
-    void setTotalWeightTotalVolume();
 
     void addToTreeWidget(QString NaamOphaalpunt, double WeightKurk, double WeightKaars, double ZakKurk, double ZakKaars, QString postcode, int AanmeldingId, int OphaalpuntId, QString Opmerkingen, QString VolledigAdres);
-
-    bool sortingascending;
+    double weightColumnToDouble(QString kg);
+    double getWeightOfItem(QTreeWidgetItem* item);
 
 private slots:
     void checkAll();
@@ -53,6 +53,7 @@ private slots:
     void accept();
     void reject();
     void sortTreeWidget(int column);
+    void setTotalWeightTotalVolume();
 };
 
 #endif // KIESOPHAALPUNTEN_H
