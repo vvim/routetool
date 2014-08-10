@@ -63,7 +63,7 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     legeAanmeldingenTree->setColumnHidden(HUISNR,true);
     legeAanmeldingenTree->setColumnHidden(BUSNR,true);
 
-    connect(legeAanmeldingenTree->header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(sortTreeWidget(int)));
+    connect(legeAanmeldingenTree->header(), SIGNAL(sectionClicked(int)), this, SLOT(sortTreeWidget(int)));
     connect(legeAanmeldingenTree, SIGNAL(clicked(QModelIndex)), this, SLOT(setTotalWeightTotalVolume()));
 
     totalWeightLabel = new QLabel(tr("Totaal gewicht:"));
