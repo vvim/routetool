@@ -151,7 +151,27 @@ void NieuweAanmelding::resetValues()
 
     toonOphaalpunt->setEnabled(false);
 
-    setMinimumWidth(600);
+    //setMinimumWidth(600);
+}
+
+void NieuweAanmelding::aanmeldingVoorOphaalpunt(int ophaalpunt_id)
+{
+    resetValues();
+    QSqlQuery query;
+    query.prepare("SELECT * FROM ophaalpunten WHERE id = :id");
+    query.bindValue(":id", ophaalpunt_id);
+
+    if(!query.exec())
+        qDebug() << "[NieuweAanmelding::aanmeldingVoorOphaalpunt()]" << "SELECT FAILED!" << query.lastError();
+    else
+    {
+        if (query.next())
+        {
+            locationEdit->setText(query.value(2).toString());
+        }
+    }
+
+    this->show();
 }
 
 NieuweAanmelding::~NieuweAanmelding()

@@ -12,7 +12,6 @@
 #include <QComboBox>
 #include <QTextEdit>
 #include <QSqlRelationalTableModel>
-//#include "metadateedit.h"
 
 extern QSettings settings;
 
@@ -26,6 +25,7 @@ public:
 
     void showOphaalpunt(int ophaalpunt_id);
     void createNewOphaalpunt();
+    void showAanmeldingButton(bool show_button);
 
 private:
     int codeIndex;
@@ -83,6 +83,8 @@ private:
     QLabel *extra_informatieLabel;
     QTextEdit *extra_informatieEdit;
 
+    QPushButton *aanmeldingButton;
+
     QDateEdit *lastContactDateEdit;
     QDateEdit *contactAgainOnEdit;
 
@@ -92,9 +94,11 @@ private slots:
     void reset();
     void toggleIntercommunale(int);
     void toggleFrequentie(int);
+    void nieuweAanmeldingButtonPressed();
 
 signals:
     void infoChanged();
+    void nieuweAanmelding(int ophaalpunt_id);
 };
 
 #endif // INFOOPHAALPUNT_H

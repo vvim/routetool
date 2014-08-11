@@ -32,7 +32,10 @@ public:
     explicit NieuweAanmelding(QWidget *parent = 0);
     ~NieuweAanmelding();
     void resetValues();
-    
+
+public slots:
+    void aanmeldingVoorOphaalpunt(int ophaalpunt_id);
+
 private:
     QLabel *locationLabel;
     MyLineEdit *locationEdit;

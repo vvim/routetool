@@ -5,6 +5,7 @@
 #include <math.h>
 #include <QFormLayout>
 #include <QMessageBox>
+#include "nieuweaanmelding.h"
 
 #define CODE_INTERCOMMUNALE 1
 
@@ -158,16 +159,19 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     resetButton = new QPushButton(tr("Reset"));
     buttonBox->addButton(resetButton,QDialogButtonBox::ResetRole);
 
+    aanmeldingButton = new QPushButton(tr("Nieuwe Aanmelding"));
+    buttonBox->addButton(aanmeldingButton,QDialogButtonBox::ActionRole);
+    aanmeldingButton->setHidden(true);
+
     connect(buttonBox, SIGNAL(accepted()),this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()),this, SLOT(reject()));
     connect(resetButton, SIGNAL(pressed()), this, SLOT(reset()));
     connect(codeComboBox,SIGNAL(currentIndexChanged(int)), this, SLOT(toggleIntercommunale(int)));
     connect(attest_nodigCheckBox,SIGNAL(stateChanged(int)), this, SLOT(toggleFrequentie(int)));
-
+    connect(aanmeldingButton, SIGNAL(pressed()), this, SLOT(nieuweAanmeldingButtonPressed()));
 
 
     //connect(__elke_Edit,SIGNAL(TextChanged), this, SLOT (setFlagInfoChanged());
-
 
     // Grid Layout? FormLayout?
     // http://doc.qt.digia.com/qq/qq25-formlayout.html
@@ -215,6 +219,7 @@ InfoOphaalpunt::~InfoOphaalpunt()
 {
     qDebug() << "start to deconstruct InfoOphaalpunt()";
     delete  resetButton;
+    delete  aanmeldingButton;
     delete  buttonBox;
     delete  ophaalpuntLabel;
     delete  ophaalpuntEdit;
@@ -257,8 +262,8 @@ InfoOphaalpunt::~InfoOphaalpunt()
     delete  frequentie_attestComboBox;
     delete  extra_informatieLabel;
     delete  extra_informatieEdit;
-    delete lastContactDateEdit;
-    delete contactAgainOnEdit;
+    delete  lastContactDateEdit;
+    delete  contactAgainOnEdit;
     qDebug() << "InfoOphaalpunt() deconstructed";
 }
 
@@ -369,6 +374,16 @@ void InfoOphaalpunt::accept()
 void InfoOphaalpunt::reject()
 {
     this->close();
+}
+
+void InfoOphaalpunt::showAanmeldingButton(bool show_button)
+{
+    qDebug() << "[InfoOphaalpunt::showAanmeldingButton(bool show_button)]" << "show_button" << show_button << "id" << id;
+    // show_button is passed to InfoOphaalpunt before id is set, so id will probably == 0 ...
+//    if (id > 0)
+        aanmeldingButton->setHidden(!show_button);
+//    else
+//        aanmeldingButton->setHidden(true);
 }
 
 void InfoOphaalpunt::showOphaalpunt(int ophaalpunt_id)
@@ -495,4 +510,12 @@ void InfoOphaalpunt::toggleFrequentie(int attest)
     else
         frequentie_attestComboBox->setEnabled(false);
 
+}
+
+void InfoOphaalpunt::nieuweAanmeldingButtonPressed()
+{
+    qDebug() << "[InfoOphaalpunt::nieuweAanmelding()]" << "button 'Nieuwe Aanmelding' pressed";
+    qDebug() << "[InfoOphaalpunt::nieuweAanmelding()]" << "nieuwe aanmelding, ophaalpunt_id" << id;
+    if(id > 0)
+        emit nieuweAanmelding(id);
 }

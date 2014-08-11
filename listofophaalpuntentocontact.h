@@ -2,6 +2,7 @@
 #define LISTOFOPHAALPUNTENTOCONTACT_H
 
 #include "infoophaalpunt.h"
+#include "nieuweaanmelding.h"
 #include <QListWidget>
 
 extern QSettings settings;
@@ -23,6 +24,7 @@ private slots:
 
 private:
     InfoOphaalpunt *info;
+    NieuweAanmelding *nieuweaanmeldingWidget;
     QListWidget *contactList;
     QDialogButtonBox *buttonBox;
     QLabel *label;
