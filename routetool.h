@@ -9,6 +9,7 @@
 #include "kiesophaalpunten.h"
 #include "levering.h"
 #include "listofophaalpuntentocontact.h"
+#include "ophaalpuntenwidget.h"
 
 extern QSettings settings;
 
@@ -36,6 +37,7 @@ private:
     KiesOphaalpunten kiesOphaalpuntenWidget;
     Levering leveringWidget;
     ListOfOphaalpuntenToContact contactListWidget;
+    OphaalpuntenWidget ophaalpuntenWidget;
 
 private slots:
     void showNieuweAanmelding();
@@ -45,6 +47,7 @@ private slots:
     void showNieuweLevering();
     void showBijWieNogNooitOpgehaald();
     void showVoorspelling();
+    void showOphaalpuntenWidget();
 };
 
 #endif // ROUTETOOL_H

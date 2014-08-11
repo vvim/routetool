@@ -1,11 +1,17 @@
 #include <QDebug>
 #include <QSqlQuery>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 #include "ophaalpuntenwidget.h"
 
 OphaalpuntenWidget::OphaalpuntenWidget(QWidget *parent) :
     QWidget(parent)
 {
     info = new InfoOphaalpunt();
+    info->showAanmeldingButton(true);
+    info->setWindowTitle(tr("info over ophaalpunt"));
+
+    nieuweaanmeldingWidget = new NieuweAanmelding();
 
     ophaalpuntLabel = new QLabel(tr("Ophaalpunt:")); //wordt een keuzelijst uit de databank!
     ophaalpuntEdit = new MyLineEdit(); //wordt een keuzelijst uit de databank!
@@ -13,7 +19,25 @@ OphaalpuntenWidget::OphaalpuntenWidget(QWidget *parent) :
     toonOphaalpunt->setEnabled(false);
 
     connect(toonOphaalpunt, SIGNAL(clicked()), this, SLOT(toonOphaalpuntInformatie()));
-    connect(ophaalpuntEdit, SIGNAL(editingFinished()), this, SLOT(ophaalpuntChanged()));
+    connect(ophaalpuntEdit, SIGNAL(textChanged(QString)), this, SLOT(ophaalpuntChanged()));
+    connect(info,SIGNAL(nieuweAanmelding(int)),nieuweaanmeldingWidget,SLOT(aanmeldingVoorOphaalpunt(int)));
+
+    QHBoxLayout *layout = new QHBoxLayout();
+    layout->addWidget(ophaalpuntLabel);
+    layout->addWidget(ophaalpuntEdit);
+    layout->addWidget(toonOphaalpunt);
+
+    /* in case we want to add a buttonBox or so:
+    QVBoxLayout *mainlayout = new QVBoxLayout();
+    mainlayout->addLayout(layout);
+    */
+
+    setLayout(layout);
+
+    ophaalpuntEdit->setFocus(); // always setFocus() as last action: http://stackoverflow.com/questions/526761/set-qlineedit-focus-in-qt
+
+    setWindowTitle(tr("Bekijk informatie bestaande ophaalpunten"));
+    setMinimumWidth(600);
 }
 
 OphaalpuntenWidget::~OphaalpuntenWidget()
@@ -23,6 +47,7 @@ OphaalpuntenWidget::~OphaalpuntenWidget()
     delete completer;
     delete ophaalpuntEdit;
     delete info;
+    delete nieuweaanmeldingWidget;
     delete toonOphaalpunt;
     qDebug() << "OphaalpuntenWidget() deconstructed";
 }
@@ -49,8 +74,8 @@ void OphaalpuntenWidget::loadOphaalpunten()
 
         int id = query.value(7).toInt();
 
-        QString ophaalpunt = "";
-        ophaalpunt.append(", %1 %2, %3 %4, %5").arg(straat).arg(nr).arg(postcode).arg(plaats).arg(land);
+        QString ophaalpunt = naam;
+        ophaalpunt.append(QString(", %1 %2, %3 %4, %5").arg(straat).arg(nr).arg(postcode).arg(plaats).arg(land));
 
         ophaalpunten[ophaalpunt] = id;
 
@@ -82,4 +107,10 @@ void OphaalpuntenWidget::ophaalpuntChanged()
     else
         toonOphaalpunt->setEnabled(false);
 
+}
+
+void OphaalpuntenWidget::initialise()
+{
+    loadOphaalpunten();
+    ophaalpuntEdit->setText("");
 }

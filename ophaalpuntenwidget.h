@@ -5,6 +5,7 @@
 #include <QApplication>
 #include "mylineedit.h"
 #include "infoophaalpunt.h"
+#include "nieuweaanmelding.h"
 
 class OphaalpuntenWidget : public QWidget
 {
@@ -12,6 +13,8 @@ class OphaalpuntenWidget : public QWidget
 public:
     explicit OphaalpuntenWidget(QWidget *parent = 0);
     ~OphaalpuntenWidget();
+
+    void initialise();
     
 signals:
     
@@ -26,8 +29,10 @@ private:
     MyLineEdit *ophaalpuntEdit;
     InfoOphaalpunt *info;
     MyCompleter *completer;
-    QMap<QString, int> ophaalpunten;
     QPushButton* toonOphaalpunt;
+    NieuweAanmelding* nieuweaanmeldingWidget;
+
+    QMap<QString, int> ophaalpunten;
 };
 
 #endif // OPHAALPUNTENWIDGET_H

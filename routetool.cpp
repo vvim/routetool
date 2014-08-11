@@ -21,6 +21,7 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(ui->nieuweLeveringMenuButton, SIGNAL(triggered()), this, SLOT(showNieuweLevering()));
     connect(ui->wieNogNooitMenuButton, SIGNAL(triggered()), this, SLOT(showBijWieNogNooitOpgehaald()));
     connect(ui->voorspellingMenuButton, SIGNAL(triggered()), this, SLOT(showVoorspelling()));
+    connect(ui->toonOphaalpuntenMenuButton, SIGNAL(triggered()), this, SLOT(showOphaalpuntenWidget()));
 
     m_pForm = new Form(this);
     setCentralWidget(m_pForm);
@@ -81,4 +82,10 @@ void RouteTool::showVoorspelling()
 {
     contactListWidget.initialise();
     contactListWidget.show();
+}
+
+void RouteTool::showOphaalpuntenWidget()
+{
+    ophaalpuntenWidget.initialise();
+    ophaalpuntenWidget.show();
 }

@@ -28,6 +28,7 @@
      <string>Ophaalpunten</string>
     </property>
     <addaction name="nieuwOphaalpuntMenuButton"/>
+    <addaction name="toonOphaalpuntenMenuButton"/>
    </widget>
    <widget class="QMenu" name="menuMenuAanmeldingen">
     <property name="title">
@@ -103,6 +104,11 @@
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="toonOphaalpuntenMenuButton">
+   <property name="text">
+    <string>Ophaalpunten</string>
    </property>
   </action>
  </widget>
