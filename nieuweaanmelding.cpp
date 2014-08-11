@@ -257,7 +257,6 @@ void NieuweAanmelding::ophaalpuntChanged()
     }
     else
         toonOphaalpunt->setEnabled(false);
-
 }
 
 void NieuweAanmelding::toonOphaalpuntInformatie()
