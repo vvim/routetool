@@ -64,7 +64,7 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     legeAanmeldingenTree->setColumnHidden(HUISNR,true);
     legeAanmeldingenTree->setColumnHidden(BUSNR,true);
 
-    legeAanmeldingenTree->setColumnWidth(AANMELDING_DATE,140);
+    legeAanmeldingenTree->resizeColumnToContents(AANMELDING_DATE);
 
     connect(legeAanmeldingenTree->header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(sortTreeWidget(int)));
     connect(legeAanmeldingenTree, SIGNAL(clicked(QModelIndex)), this, SLOT(setTotalWeightTotalVolume()));
