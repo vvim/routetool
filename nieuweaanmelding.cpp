@@ -158,7 +158,7 @@ void NieuweAanmelding::aanmeldingVoorOphaalpunt(int ophaalpunt_id)
 {
     resetValues();
     QSqlQuery query;
-    query.prepare("SELECT * FROM ophaalpunten WHERE id = :id");
+    query.prepare("SELECT naam, contactpersoon FROM ophaalpunten WHERE id = :id");
     query.bindValue(":id", ophaalpunt_id);
 
     if(!query.exec())
@@ -167,7 +167,8 @@ void NieuweAanmelding::aanmeldingVoorOphaalpunt(int ophaalpunt_id)
     {
         if (query.next())
         {
-            locationEdit->setText(query.value(2).toString());
+            locationEdit->setText(query.value(0).toString());
+            nameEdit->setText(query.value(1).toString());
         }
     }
 
