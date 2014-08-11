@@ -24,6 +24,7 @@ private slots:
 
 private:
     void loadOphaalpunten();
+    bool completer_defined;
 
     QLabel *ophaalpuntLabel;
     MyLineEdit *ophaalpuntEdit;

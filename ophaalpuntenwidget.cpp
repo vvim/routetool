@@ -7,6 +7,7 @@
 OphaalpuntenWidget::OphaalpuntenWidget(QWidget *parent) :
     QWidget(parent)
 {
+    completer_defined = false; // ridiculous, should be able to test 'if(completer)' no? aargh...
     info = new InfoOphaalpunt();
     info->showAanmeldingButton(true);
     info->setWindowTitle(tr("info over ophaalpunt"));
@@ -44,11 +45,12 @@ OphaalpuntenWidget::~OphaalpuntenWidget()
 {
     qDebug() << "start to deconstruct OphaalpuntenWidget()";
     delete ophaalpuntLabel;
-    delete completer;
     delete ophaalpuntEdit;
     delete info;
     delete nieuweaanmeldingWidget;
     delete toonOphaalpunt;
+    if(completer_defined)
+        delete completer;
     qDebug() << "OphaalpuntenWidget() deconstructed";
 }
 
@@ -85,6 +87,10 @@ void OphaalpuntenWidget::loadOphaalpunten()
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
 #endif
+
+    if(completer_defined)
+        delete completer;
+    completer_defined = true;
 
     completer = new MyCompleter(words, this);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
