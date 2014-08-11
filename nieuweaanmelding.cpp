@@ -104,7 +104,7 @@ NieuweAanmelding::NieuweAanmelding(QWidget *parent) :
     layout->addWidget(opmerkingenEdit,5,1,3,6);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addWidget(nieuwOphaalpunt);
+    //mainLayout->addWidget(nieuwOphaalpunt); // not needed in my opinion
     mainLayout->addLayout(layout);
     mainLayout->addWidget(buttonBox);
     setLayout(mainLayout);
