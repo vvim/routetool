@@ -99,12 +99,6 @@ void TransportationListDocumentWriter::addOphaalpunt(const TransportationListDoc
                         );
 }
 
-void TransportationListDocumentWriter::addGraph(QList<int> values, const QString &subtext)
-{
-// <vvim> example to add Google Maps Image
-}
-
-
 void TransportationListDocumentWriter::write(const QString &fileName, const QString &map)
 {
     QString document_tail= "</TBODY></TABLE><IMG src=\"<vvimroutetool>GOOGLEMAPS</vvimroutetool>\"</BODY></HTML>";

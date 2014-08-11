@@ -69,8 +69,6 @@ public:
 
   void addAdres(const Adres &adres);
 
-  void addGraph(QList<int> values,
-                const QString &subtext);
   void write(const QString &fileName, const QString &map);
 
 private:
