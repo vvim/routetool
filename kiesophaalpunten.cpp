@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QHeaderView>
 #include <QMessageBox>
+#include <QDate>
 #include "kiesophaalpunten.h"
 
 /** userroles to store data from QListWidgetItem
@@ -19,20 +20,21 @@
     <vvim> : might not be used as this, probably have to use an Item-class that inherits QListWidgetItem
 **/
 
-#define OPHAALPUNT_NAAM 0
-#define WEIGHT_KURK 1
-#define ZAK_KURK 2
-#define WEIGHT_KAARS 3
-#define ZAK_KAARS 4
-#define AANMELDING_ID 5
-#define OPHAALPUNT_ID 6
-#define OPMERKINGEN 7
+#define AANMELDING_DATE 0
+#define OPHAALPUNT_NAAM 1
+#define WEIGHT_KURK 2
+#define ZAK_KURK 3
+#define WEIGHT_KAARS 4
+#define ZAK_KAARS 5
+#define AANMELDING_ID 6
+#define OPHAALPUNT_ID 7
 #define STRAAT 8
 #define HUISNR 9
 #define BUSNR 10
 #define POSTCODE 11
 #define PLAATS 12
 #define LAND 13
+#define OPMERKINGEN 14
 
 KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     QWidget(parent)
@@ -45,15 +47,14 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
 
     sortingascending = true;
 
-    legeAanmeldingenLabel = new QLabel(tr("Aanmeldingen:"));
+    legeAanmeldingenLabel = new QLabel(tr("Aanmeldingen - dubbelklik op een kolom om te sorteren:"));
 
     legeAanmeldingenTree = new QTreeWidget();
-    legeAanmeldingenTree->setColumnCount(14);
+    legeAanmeldingenTree->setColumnCount(OPMERKINGEN + 1);
 
     QStringList labels;
-    labels << "Ophaalpunt" << "Kurk (kg)" << "Kurk (zakken)" << "Kaars (kg)" << "Kaars (zakken)"
-           << "Aanmelding_id" << "Ophaalpunt_id" << "Opmerkingen"
-           << "Straat" << "Nr" << "Bus" << "Postcode" << "Plaats" << "Land";
+    labels << "Aanmeldingsdatum" << "Ophaalpunt" << "Kurk (kg)" << "Kurk (zakken)" << "Kaars (kg)" << "Kaars (zakken)"
+           << "Aanmelding_id" << "Ophaalpunt_id" << "Straat" << "Nr" << "Bus" << "Postcode" << "Plaats" << "Land" << "Opmerkingen";
     legeAanmeldingenTree->setHeaderLabels(labels);
 
     legeAanmeldingenTree->setColumnHidden(AANMELDING_ID,true);
@@ -63,7 +64,9 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     legeAanmeldingenTree->setColumnHidden(HUISNR,true);
     legeAanmeldingenTree->setColumnHidden(BUSNR,true);
 
-    connect(legeAanmeldingenTree->header(), SIGNAL(sectionClicked(int)), this, SLOT(sortTreeWidget(int)));
+    legeAanmeldingenTree->setColumnWidth(AANMELDING_DATE,140);
+
+    connect(legeAanmeldingenTree->header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(sortTreeWidget(int)));
     connect(legeAanmeldingenTree, SIGNAL(clicked(QModelIndex)), this, SLOT(setTotalWeightTotalVolume()));
 
     totalWeightLabel = new QLabel(tr("Totaal gewicht:"));
@@ -198,7 +201,7 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
 
     QSqlQuery query("SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten,"
                           " aanmelding.id, ophaalpunten.id, aanmelding.opmerkingen,"
-                          " ophaalpunten.straat, ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land "
+                          " ophaalpunten.straat, ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land, aanmelding.datum "
                    " FROM aanmelding, ophaalpunten"
                    " WHERE ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL");
 
@@ -221,7 +224,8 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
                                 query.value(10).toString(), // busnr
                                 query.value(11).toString(), // postcode
                                 query.value(12).toString(), // plaats
-                                query.value(13).toString()  // land
+                                query.value(13).toString(), // land
+                                query.value(14).toDate()    // datum
                             );
         }
     }
@@ -341,7 +345,8 @@ void KiesOphaalpunten::initialise()
 
 void KiesOphaalpunten::addToTreeWidget(QString NaamOphaalpunt, double WeightKurk, double WeightKaars,
                                    double ZakKurk, double ZakKaars, int AanmeldingId, int OphaalpuntId, QString Opmerkingen,
-                                   QString Straat, QString HuisNr, QString BusNr, QString Postcode, QString Plaats, QString Land)
+                                   QString Straat, QString HuisNr, QString BusNr, QString Postcode, QString Plaats, QString Land,
+                                   QDate Aanmeldingsdatum)
 {
     QTreeWidgetItem *item = new QTreeWidgetItem(legeAanmeldingenTree);
     item->setText(OPHAALPUNT_NAAM, NaamOphaalpunt);
@@ -358,6 +363,7 @@ void KiesOphaalpunten::addToTreeWidget(QString NaamOphaalpunt, double WeightKurk
     item->setText(POSTCODE, Postcode);
     item->setText(PLAATS, Plaats);
     item->setText(LAND, Land);
+    item->setText(AANMELDING_DATE, QLocale().toString(Aanmeldingsdatum,"dd MMM yyyy"));
 
     item->setFlags(item->flags()|Qt::ItemIsUserCheckable);
     item->setCheckState(0,Qt::Unchecked);

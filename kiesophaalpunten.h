@@ -43,7 +43,7 @@ private:
 
     void populateLegeAanmeldingen();
 
-    void addToTreeWidget(QString NaamOphaalpunt, double WeightKurk, double WeightKaars, double ZakKurk, double ZakKaars, int AanmeldingId, int OphaalpuntId, QString Opmerkingen, QString Straat, QString HuisNr, QString BusNr, QString Postcode, QString Plaats, QString Land);
+    void addToTreeWidget(QString NaamOphaalpunt, double WeightKurk, double WeightKaars, double ZakKurk, double ZakKaars, int AanmeldingId, int OphaalpuntId, QString Opmerkingen, QString Straat, QString HuisNr, QString BusNr, QString Postcode, QString Plaats, QString Land, QDate Aanmeldingsdatum);
     double weightColumnToDouble(QString kg);
     double getWeightOfItem(QTreeWidgetItem* item);
 
