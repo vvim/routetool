@@ -10,6 +10,7 @@
 Levering::Levering(QWidget *parent) :
     QWidget(parent)
 {
+    completer = NULL;
     info = new InfoOphaalpunt();
     locationLabel = new QLabel(tr("Bekende locatie:")); //wordt een keuzelijst uit de databank!
     locationEdit = new MyLineEdit(); //wordt een keuzelijst uit de databank!
@@ -111,7 +112,8 @@ Levering::~Levering()
     delete locationLabel;
     delete locationEdit;
     delete toonOphaalpunt;
-    delete completer;
+    if(completer)
+        delete completer;
     delete buttonBox;
     delete vulOphaalpuntIn;
     delete nameEdit;
@@ -185,6 +187,8 @@ void Levering::loadOphaalpunten()
     #endif
 
 
+    if(completer)
+        delete completer;
 
     completer = new MyCompleter(words, this);
     completer->setCaseSensitivity(Qt::CaseInsensitive);

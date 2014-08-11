@@ -18,6 +18,7 @@ Form::Form(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Form)
 {
+    completer = NULL;
     matrices_up_to_date = false;
     after_calculating_distance_matrix_continue_to_tsp = false;
     after_calculating_distance_matrix_continue_to_transportationlist = false;
@@ -108,9 +109,9 @@ Form::Form(QWidget *parent) :
     /** version from database **/
     QStringList words; // "don't come easy, to me, la la la laaa la la"
 
-    #ifndef QT_NO_CURSOR
-        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    #endif
+#ifndef QT_NO_CURSOR
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
 
     QSqlQuery query("SELECT naam, straat, nr, bus, postcode, plaats, land FROM ophaalpunten");
         while (query.next()) {
@@ -124,11 +125,13 @@ Form::Form(QWidget *parent) :
             words << naam.append(", %1 %2, %3 %4, %5").arg(straat).arg(nr).arg(postcode).arg(plaats).arg(land);
         }
 
-    #ifndef QT_NO_CURSOR
-        QApplication::restoreOverrideCursor();
-    #endif
+#ifndef QT_NO_CURSOR
+    QApplication::restoreOverrideCursor();
+#endif
 
 
+    if(completer)
+        delete completer;
 
     completer = new MyCompleter(words, this);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
@@ -145,7 +148,8 @@ Form::~Form()
 {
     qDebug() << "start to deconstruct Form()";
     delete ui;
-    delete completer;
+    if(completer)
+        delete completer;
     qDebug() << "<vvim> ~Form() deconstructor: no need to delete distance_matrix_in_meters and distance_matrix_in_seconds, this has been done by the class DistanceMatrix";
     qDebug() << "<vvim> ~Form() deconstructor: must we also delete all contents of QList <SMarker*> m_markers ?";
     qDebug() << "Form() deconstructed";
@@ -521,37 +525,6 @@ void Form::add_levering(SLevering levering)
 {
     m_geocodeDataManager.pushLevering(levering);
 }
-
-/**
-
-    I believe this function is a copy/paste accident, must try out. Was already included in version 20140519
-
-QAbstractItemModel *Form::modelFromFile(const QString& fileName)
-{
-    // <vvim> is this function ever used???
-    qDebug() << "\n\n++++++++" << "<vvim> is this function ever used???" << "QAbstractItemModel *Form::modelFromFile(const QString& fileName) in form.cpp" << "++++++++\n\n";
-    QFile file(fileName);
-    if (!file.open(QFile::ReadOnly))
-        return new QStringListModel(completer);
-
-#ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-#endif
-    QStringList words;
-
-    while (!file.atEnd()) {
-        QByteArray line = file.readLine();
-        if (!line.isEmpty())
-            words << line.trimmed();
-    }
-
-#ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
-#endif
-    return new QStringListModel(words, completer);
-}
-
-**/
 
 void Form::keyPressEvent( QKeyEvent *k )
 {

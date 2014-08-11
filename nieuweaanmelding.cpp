@@ -19,6 +19,8 @@ NieuweAanmelding::NieuweAanmelding(QWidget *parent) :
         * eventueel opmerkingen
     **/
 
+    completer = NULL;
+
     info = new InfoOphaalpunt();
 
     locationLabel = new QLabel(tr("Ophaalpunt:")); //wordt een keuzelijst uit de databank!
@@ -196,7 +198,8 @@ NieuweAanmelding::~NieuweAanmelding()
     delete opmerkingenLabel;
     delete opmerkingenEdit;
     delete buttonBox;
-    delete completer;
+    if(completer)
+        delete completer;
     qDebug() << "NieuweAanmelding() deconstructed";
 }
 
@@ -290,6 +293,9 @@ void NieuweAanmelding::loadOphaalpunten()
     #endif
 
 
+
+    if(completer)
+        delete completer;
 
     completer = new MyCompleter(words, this);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
