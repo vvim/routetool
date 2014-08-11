@@ -59,7 +59,7 @@ NieuweAanmelding::NieuweAanmelding(QWidget *parent) :
     // zie mapper zoals custom widget mapper om ID te linken ??
     connect(toonOphaalpunt, SIGNAL(clicked()), this, SLOT(toonOphaalpuntInformatie()));
     connect(nieuwOphaalpunt, SIGNAL(clicked()), this, SLOT(createNewOphaalpunt()));
-    connect(locationEdit, SIGNAL(editingFinished()), this, SLOT(ophaalpuntChanged()));
+    connect(locationEdit, SIGNAL(textChanged(QString)), this, SLOT(ophaalpuntChanged()));
 
     connect(info, SIGNAL(infoChanged()), this, SLOT(loadOphaalpunten()));
 
