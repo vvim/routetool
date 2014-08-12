@@ -4,6 +4,7 @@
 #include <QSqlError>
 #include <math.h>
 #include <QFormLayout>
+#include <QHBoxLayout>
 #include <QMessageBox>
 #include "nieuweaanmelding.h"
 
@@ -58,6 +59,7 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     nrEdit = new QLineEdit();
     busLabel = new QLabel(tr("Bus:"));
     busEdit = new QLineEdit();
+
     postcodeLabel = new QLabel(tr("Postcode:"));
     postcodeEdit = new QLineEdit();
     plaatsLabel = new QLabel(tr("Plaats:"));
@@ -176,15 +178,31 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
 
     //connect(__elke_Edit,SIGNAL(TextChanged), this, SLOT (setFlagInfoChanged());
 
+    QHBoxLayout *adresLayout_rule1 = new QHBoxLayout();
+    adresLayout_rule1->addWidget(straatEdit);
+    adresLayout_rule1->addWidget(nrLabel);
+    adresLayout_rule1->addWidget(nrEdit);
+    adresLayout_rule1->addWidget(busLabel);
+    adresLayout_rule1->addWidget(busEdit);
+
+    QHBoxLayout *adresLayout_rule2 = new QHBoxLayout();
+    adresLayout_rule2->addWidget(postcodeEdit);
+    adresLayout_rule2->addWidget(plaatsLabel);
+    adresLayout_rule2->addWidget(plaatsEdit);
+
     // Grid Layout? FormLayout?
     // http://doc.qt.digia.com/qq/qq25-formlayout.html
     QFormLayout *layout = new QFormLayout;
     layout->addRow(tr("Ophaalpunt:"), ophaalpuntEdit);
+    layout->addRow(straatLabel,adresLayout_rule1);
+    layout->addRow(postcodeLabel,adresLayout_rule2);
+/*
     layout->addRow(tr("Straat:"), straatEdit);
     layout->addRow(tr("Nummer:"), nrEdit);
     layout->addRow(tr("Bus:"), busEdit);
     layout->addRow(tr("Postcode:"), postcodeEdit);
     layout->addRow(tr("Plaats:"), plaatsEdit);
+*/
     layout->addRow(tr("Land:"), landEdit);
     // horizontal line
     layout->addRow(tr("Materiaal:"), kurkCheckBox);
