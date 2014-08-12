@@ -3,7 +3,7 @@
 
 #include "infoophaalpunt.h"
 #include "nieuweaanmelding.h"
-#include <QListWidget>
+#include <QTreeWidget>
 
 extern QSettings settings;
 
@@ -19,18 +19,22 @@ public:
     void show_never_contacted_ophaalpunten();
 
 private slots:
-    void showOphaalpunt(QListWidgetItem*);
+    void showOphaalpunt(QTreeWidgetItem*);
     void ok_button_pushed();
+    void sortTreeWidget(int column);
 
 private:
     InfoOphaalpunt *info;
     NieuweAanmelding *nieuweaanmeldingWidget;
-    QListWidget *contactList;
+    QTreeWidget *contactTree;
     QDialogButtonBox *buttonBox;
     QLabel *label;
 
+    bool sortingascending;
+
     void UpdateOphaalpunt(int ophaalpuntid);
     void UpdateAllOphaalpunten();
+    void addToTreeWidget(QString NaamOphaalpunt, int OphaalpuntId, QString Postcode, QDate LastContactDate, QDate LastOphalingDate, QDate ForecastNewOphalingDate, bool color_item = false);
 };
 
 #endif // LISTOFOPHAALPUNTENTOCONTACT_H

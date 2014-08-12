@@ -4,33 +4,49 @@
 #include <QDebug>
 #include <QApplication>
 #include <QVBoxLayout>
+#include <QHeaderView>
 
-#define OPHAALPUNT_ID Qt::UserRole
+#define OPHAALPUNT_NAAM 0
+#define OPHAALPUNT_ID 1
+#define POSTCODE 2
+#define LAST_CONTACT_DATE 3
+#define LAST_OPHALING_DATE 4
+#define FORECAST_NEW_OPHALING_DATE 5
 
 ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
     QWidget(parent)
 {
+    sortingascending = true;
+
     label = new QLabel();
-    contactList = new QListWidget();
     info = new InfoOphaalpunt();
     nieuweaanmeldingWidget = new NieuweAanmelding();
     buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok);
 
+    contactTree = new QTreeWidget();
+
+    contactTree->setColumnCount(FORECAST_NEW_OPHALING_DATE + 1);
+
+    QStringList labels;
+    labels << "Ophaalpunt" << "Ophaalpunt_id" << "Postcode" << "Laatste contact" << "Laatste ophaling" << "Voorspelde ophaling";
+    contactTree->setHeaderLabels(labels);
+    contactTree->setColumnHidden(OPHAALPUNT_ID,true);
+
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(label);
-    layout->addWidget(contactList);
+    layout->addWidget(contactTree);
     layout->addWidget(buttonBox);
 
     setLayout(layout);
     setMinimumWidth(600);
     setWindowTitle(tr("Lijst van te contacteren ophaalpunten:"));
 
-    connect(contactList,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(showOphaalpunt(QListWidgetItem*)));
     connect(buttonBox,SIGNAL(accepted()),this,SLOT(ok_button_pushed()));
     connect(info,SIGNAL(nieuweAanmelding(int)),nieuweaanmeldingWidget,SLOT(aanmeldingVoorOphaalpunt(int)));
+    connect(contactTree->header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(sortTreeWidget(int)));
+    connect(contactTree,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(showOphaalpunt(QTreeWidgetItem*)));
 
-
-    qDebug() << "<vvim> TODO: should we call UptodateAllOphaalpunten() everytime we initialise the contactList?";
+    qDebug() << "<vvim> TODO: should we call UptodateAllOphaalpunten() everytime we initialise the contactTree?";
     UpdateAllOphaalpunten();
 }
 
@@ -39,7 +55,7 @@ ListOfOphaalpuntenToContact::~ListOfOphaalpuntenToContact()
     qDebug() << "start to deconstruct ListOfOphaalpuntenToContact()";
     delete info;
     delete nieuweaanmeldingWidget;
-    delete contactList;
+    delete contactTree;
     delete buttonBox;
     delete label;
     qDebug() << "ListOfOphaalpuntenToContact() deconstructed";
@@ -213,8 +229,7 @@ void ListOfOphaalpuntenToContact::initialise()
     label->setText(tr("Hieronder de lijst met ophaalpunten die al een historiek hebben en gecontacteerd dienen te worden.\n"
                       "Dubbelklik op een ophaalpunt om de informatie te zien."));
 
-    contactList->clear();
-    contactList->setSortingEnabled(false); // sort it by database: contact_again_on ASC ?
+    contactTree->clear();
 
     QSqlQuery query("SELECT id, naam, postcode, last_contact_date, contact_again_on, last_ophaling_date, forecast_new_ophaling_date "
                     "FROM ophaalpunten "
@@ -225,21 +240,16 @@ void ListOfOphaalpuntenToContact::initialise()
     {
         while (query.next())
         {
-            QListWidgetItem * item = new QListWidgetItem();
-
             int ophaalpunt_id = query.value(0).toInt();
             QString ophaalpunt_naam = query.value(1).toString();
             ophaalpunt_naam.replace("\n"," ");
             QString ophaalpunt_postcode = query.value(2).toString();
             QDate last_contact_date = query.value(3).toDate();
             QDate contact_again_on = query.value(4).toDate();
+            QDate last_ophaling_date = query.value(5).toDate();
+            QDate forecast_ophaling_date = query.value(6).toDate();
 
-            QString item_name = "";
-            item_name.append(QLocale().toString(contact_again_on,"d MMM yyyy")).append(" - ").append(ophaalpunt_naam).append(" (postcode: ").append(ophaalpunt_postcode).append(")");
-            item->setData(Qt::DisplayRole,item_name);
-
-            item->setData(OPHAALPUNT_ID,ophaalpunt_id);
-            contactList->addItem(item);
+            addToTreeWidget(ophaalpunt_naam, ophaalpunt_id, ophaalpunt_postcode, last_contact_date, last_ophaling_date, forecast_ophaling_date);
         }
     }
     else
@@ -248,16 +258,18 @@ void ListOfOphaalpuntenToContact::initialise()
         qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
     }
 
+    contactTree->setColumnWidth(OPHAALPUNT_NAAM,100);
+
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
 #endif
 }
 
-void ListOfOphaalpuntenToContact::showOphaalpunt(QListWidgetItem* item)
+void ListOfOphaalpuntenToContact::showOphaalpunt(QTreeWidgetItem* item)
 {
     info->showAanmeldingButton(true);
     info->setWindowTitle(tr("info over ophaalpunt"));
-    info->showOphaalpunt(item->data(OPHAALPUNT_ID).toInt());
+    info->showOphaalpunt(item->text(OPHAALPUNT_ID).toInt());
 }
 
 void ListOfOphaalpuntenToContact::ok_button_pushed()
@@ -273,11 +285,10 @@ void ListOfOphaalpuntenToContact::show_never_contacted_ophaalpunten()
     label->setText(tr("Hieronder de lijst met ophaalpunten die nog geen ophaalhistoriek hebben.\n"
                       "Dubbelklik op een ophaalpunt om de informatie te zien."));
 
-    contactList->clear();
-    contactList->setSortingEnabled(true); // sorting is okay
+    contactTree->clear();
 
     QSqlQuery query;
-    query.prepare("SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode "
+    query.prepare("SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode , ophaalpunten.last_contact_date, ophaalpunten.contact_again_on, ophaalpunten.last_ophaling_date, ophaalpunten.forecast_new_ophaling_date "
                   "FROM ophaalpunten WHERE not exists "
                       "(select null from ophalinghistoriek "
                        "where ophalinghistoriek.ophaalpunt = ophaalpunten.id);");
@@ -286,36 +297,32 @@ void ListOfOphaalpuntenToContact::show_never_contacted_ophaalpunten()
     {
         while (query.next())
         {
-            QListWidgetItem * item = new QListWidgetItem();
+            bool aanmelding_running = false;
 
             int ophaalpunt_id = query.value(0).toInt();
             QString ophaalpunt_naam = query.value(1).toString();
             ophaalpunt_naam.replace("\n"," ");
             QString ophaalpunt_postcode = query.value(2).toString();
-
-            QString item_name = "";
-            item_name.append(ophaalpunt_postcode).append(": ").append(ophaalpunt_naam);
+            QDate last_contact_date = query.value(3).toDate();
+            QDate contact_again_on = query.value(4).toDate();
+            QDate last_ophaling_date = query.value(5).toDate();
+            QDate forecast_ophaling_date = query.value(6).toDate();
 
             QSqlQuery query2;
             query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal"); // and ophaalronde is NULL
-            query2.bindValue(":ophaal",query.value(0).toInt());
+            query2.bindValue(":ophaal", ophaalpunt_id);
 
             if(query2.exec())
             {
                 if (query2.next())
                 {
-                    item_name.append(tr(" ( ** dit ophaalpunt heeft een aanmelding lopende)"));
-                    item->setForeground(Qt::blue);
+                    aanmelding_running = true;
                 }
             }
             else
                 qDebug() << "something went wrong with checking for an existing aanmelding";
 
-            qDebug() << "[show_never_contacted_ophaalpunten] ..adding ophaalpunt" << ophaalpunt_id << "to list:" << item_name;
-            item->setData(Qt::DisplayRole,item_name);
-
-            item->setData(OPHAALPUNT_ID,ophaalpunt_id);
-            contactList->addItem(item);
+            addToTreeWidget(ophaalpunt_naam, ophaalpunt_id, ophaalpunt_postcode, last_contact_date, last_ophaling_date, forecast_ophaling_date, aanmelding_running);
         }
     }
     else
@@ -328,5 +335,42 @@ void ListOfOphaalpuntenToContact::show_never_contacted_ophaalpunten()
     QApplication::restoreOverrideCursor();
 #endif
 
+    contactTree->resizeColumnToContents(OPHAALPUNT_NAAM);
+
     this->show();
+}
+
+void ListOfOphaalpuntenToContact::sortTreeWidget(int column)
+{
+    qDebug() << "<vvim>" << "[ListOfOphaalpuntenToContact::sortTreeWidget]" << "goes wrong for sorting numbers, see" << "http://stackoverflow.com/questions/363200/is-it-possible-to-sort-numbers-in-a-qtreewidget-column";
+    qDebug() << "<vvim>" << "read http://stackoverflow.com/questions/13075643/sorting-by-date-in-qtreewidget" << "The model you use for the tree view need to return QDate or QDateTime for the column in the data() function";
+    // goes wrong for sorting numbers, see
+    // http://stackoverflow.com/questions/363200/is-it-possible-to-sort-numbers-in-a-qtreewidget-column
+    if(sortingascending)
+        contactTree->sortByColumn(column,Qt::AscendingOrder);
+    else
+        contactTree->sortByColumn(column,Qt::DescendingOrder);
+    sortingascending = !sortingascending;
+}
+
+void ListOfOphaalpuntenToContact::addToTreeWidget(QString NaamOphaalpunt, int OphaalpuntId, QString Postcode,
+                                                  QDate LastContactDate, QDate LastOphalingDate, QDate ForecastNewOphalingDate,
+                                                  bool color_item)
+{
+    QTreeWidgetItem *item = new QTreeWidgetItem(contactTree);
+    item->setText(OPHAALPUNT_NAAM, NaamOphaalpunt);
+    item->setText(OPHAALPUNT_ID, QString().number(OphaalpuntId));
+    item->setText(POSTCODE, Postcode);
+    item->setText(LAST_CONTACT_DATE, QLocale().toString(LastContactDate,"dd MMM yyyy"));
+    item->setText(LAST_OPHALING_DATE, QLocale().toString(LastOphalingDate,"dd MMM yyyy"));
+    item->setText(FORECAST_NEW_OPHALING_DATE, QLocale().toString(ForecastNewOphalingDate,"dd MMM yyyy"));
+
+    //item->setFlags(item->flags()|Qt::ItemIsUserCheckable);
+    //item->setCheckState(0,Qt::Unchecked);
+
+    if(color_item)
+    {
+        for (int i = 0 ; i < contactTree->columnCount(); i++)
+        item->setForeground(i,Qt::blue);
+    }
 }
