@@ -88,6 +88,8 @@ private:
     QDateEdit *lastContactDateEdit;
     QDateEdit *contactAgainOnEdit;
 
+    QCheckBox *everContactedBeforeCheckBox;
+
 private slots:
     void accept();
     void reject();
@@ -95,6 +97,7 @@ private slots:
     void toggleIntercommunale(int);
     void toggleFrequentie(int);
     void nieuweAanmeldingButtonPressed();
+    void everContactedBeforeCheckBoxToggled(bool);
 
 signals:
     void infoChanged();

@@ -141,7 +141,6 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     lastContactDateEdit->setLocale(QLocale::Dutch);
     lastContactDateEdit->setCalendarPopup(true);  //zie http://stackoverflow.com/questions/7031962/qdateedit-calendar-popup
 
-    lastContactDateEdit->setEnabled(false);
 
     contactAgainOnEdit = new QDateEdit();
     contactAgainOnEdit->setDisplayFormat("dd MMM yyyy");
@@ -149,7 +148,6 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     contactAgainOnEdit->setCalendarPopup(true);  //zie http://stackoverflow.com/questions/7031962/qdateedit-calendar-popup
 
     contactAgainOnEdit->setEnabled(false);
-
 
     buttonBox = new QDialogButtonBox;
     buttonBox->addButton(tr("Wijzigingen opslaan"),
@@ -170,6 +168,11 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     connect(attest_nodigCheckBox,SIGNAL(stateChanged(int)), this, SLOT(toggleFrequentie(int)));
     connect(aanmeldingButton, SIGNAL(pressed()), this, SLOT(nieuweAanmeldingButtonPressed()));
 
+    everContactedBeforeCheckBox = new QCheckBox(tr("ja, laatste contact bekend"));
+    everContactedBeforeCheckBox->setChecked(false);
+    everContactedBeforeCheckBoxToggled(everContactedBeforeCheckBox->checkState() == Qt::Checked);
+    connect(everContactedBeforeCheckBox, SIGNAL(toggled(bool)), this, SLOT(everContactedBeforeCheckBoxToggled(bool)));
+
 
     //connect(__elke_Edit,SIGNAL(TextChanged), this, SLOT (setFlagInfoChanged());
 
@@ -184,7 +187,7 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     layout->addRow(tr("Plaats:"), plaatsEdit);
     layout->addRow(tr("Land:"), landEdit);
     // horizontal line
-    layout->addRow(tr("Ophaalpunt:"), kurkCheckBox);
+    layout->addRow(tr("Materiaal:"), kurkCheckBox);
     layout->addRow(tr(""), parafineCheckBox);
     layout->addRow(tr("Soort ophaalpunt:"), codeComboBox);
     layout->addRow(tr("Indien intercommunale, welke?"), code_intercommunaleComboBox);
@@ -203,8 +206,9 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     layout->addRow(tr(""), email2Edit);
     // horizontal line
     layout->addRow(tr("Extra informatie:"), extra_informatieEdit);
-    layout->addRow(tr("Contacteer op:"), contactAgainOnEdit);
+    layout->addRow(tr("Al ooit gecontacteerd?"), everContactedBeforeCheckBox);
     layout->addRow(tr("Laatste contact (ophaling):"), lastContactDateEdit);
+    layout->addRow(tr("Contacteer op:"), contactAgainOnEdit);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addLayout(layout);
@@ -264,6 +268,7 @@ InfoOphaalpunt::~InfoOphaalpunt()
     delete  extra_informatieEdit;
     delete  lastContactDateEdit;
     delete  contactAgainOnEdit;
+    delete  everContactedBeforeCheckBox;
     qDebug() << "InfoOphaalpunt() deconstructed";
 }
 
@@ -277,7 +282,7 @@ void InfoOphaalpunt::accept()
         QSqlQuery query;
 
         //ESCAPING QUERY: http://stackoverflow.com/questions/19045281/insert-strings-that-contain-or-to-the-database-table-qt and http://qt-project.org/doc/qt-5/qsqlquery.html#prepare
-        query.prepare("UPDATE ophaalpunten SET naam = :naam, kurk = :kurk, parafine = :parafine, code = :code, code_intercommunale = :code_intercommunale, straat = :straat, nr = :nr, bus = :bus, postcode = :postcode, plaats = :plaats, land = :land, openingsuren = :openingsuren, contactpersoon = :contactpersoon, telefoonnummer1 = :telefoonnummer1, telefoonnummer2 = :telefoonnummer2, email1 = :email1, email2 = :email2, taalvoorkeur = :taalvoorkeur, preferred_contact = :preferred_contact, attest_nodig = :attest_nodig, frequentie_attest = :frequentie_attest, extra_informatie = :extra_informatie WHERE id = :id");
+        query.prepare("UPDATE ophaalpunten SET naam = :naam, kurk = :kurk, parafine = :parafine, code = :code, code_intercommunale = :code_intercommunale, straat = :straat, nr = :nr, bus = :bus, postcode = :postcode, plaats = :plaats, land = :land, openingsuren = :openingsuren, contactpersoon = :contactpersoon, telefoonnummer1 = :telefoonnummer1, telefoonnummer2 = :telefoonnummer2, email1 = :email1, email2 = :email2, taalvoorkeur = :taalvoorkeur, preferred_contact = :preferred_contact, attest_nodig = :attest_nodig, frequentie_attest = :frequentie_attest, extra_informatie = :extra_informatie, last_contact_date = :last_contact_date WHERE id = :id");
         query.bindValue(":naam",ophaalpuntEdit->text());
         query.bindValue(":kurk",kurkCheckBox->isChecked());
         query.bindValue(":parafine",parafineCheckBox->isChecked());
@@ -302,11 +307,18 @@ void InfoOphaalpunt::accept()
         query.bindValue(":extra_informatie",extra_informatieEdit->toPlainText());
         query.bindValue(":id",id);
 
-        /*  // update  "last_contact_date" and  "contact_again_on" ? for now: no
+        if(everContactedBeforeCheckBox->checkState() == Qt::Checked)
+        {
+            query.bindValue(":last_contact_date",lastContactDateEdit->date());
+        }
+        else
+        {
+            // results in "0000-00-00" instead of a real NULL. What can I do?
+            qDebug() << "[InfoOphaalpunt::accept()]" << "results in '0000-00-00'' instead of a real NULL. What can I do?";
+            query.bindValue(":last_contact_date","NULL");
+        }
 
-            QDateEdit testing;
-            if(testing.date() == lastContactDateEdit->date())
-                => never changed, no update needed
+        /*  // update  "contact_again_on" ? for now: no
 
             + working on code of class MetaDateEdit()
         */
@@ -330,8 +342,8 @@ void InfoOphaalpunt::accept()
         /** insert into db **/
         QSqlQuery query;
 
-        query.prepare("INSERT INTO ophaalpunten (id,timestamp,naam, kurk, parafine, code, code_intercommunale, straat, nr, bus, postcode, plaats, land, openingsuren, contactpersoon, telefoonnummer1, telefoonnummer2, email1, email2, taalvoorkeur, preferred_contact, attest_nodig, frequentie_attest, extra_informatie)"
-                      "                  VALUES (NULL, NULL, :naam, :kurk, :parafine, :code, :code_intercommunale, :straat, :nr, :bus, :postcode, :plaats, :land, :openingsuren, :contactpersoon, :telefoonnummer1, :telefoonnummer2, :email1, :email2, :taalvoorkeur, :preferred_contact, :attest_nodig, :frequentie_attest, :extra_informatie)");
+        query.prepare("INSERT INTO ophaalpunten (id,timestamp,naam, kurk, parafine, code, code_intercommunale, straat, nr, bus, postcode, plaats, land, openingsuren, contactpersoon, telefoonnummer1, telefoonnummer2, email1, email2, taalvoorkeur, preferred_contact, attest_nodig, frequentie_attest, extra_informatie, last_contact_date, contact_again_on)"
+                      "                  VALUES (NULL, NULL, :naam, :kurk, :parafine, :code, :code_intercommunale, :straat, :nr, :bus, :postcode, :plaats, :land, :openingsuren, :contactpersoon, :telefoonnummer1, :telefoonnummer2, :email1, :email2, :taalvoorkeur, :preferred_contact, :attest_nodig, :frequentie_attest, :extra_informatie, :last_contact_date, NULL)");
 
         query.bindValue(":naam",ophaalpuntEdit->text());
         query.bindValue(":kurk",kurkCheckBox->isChecked());
@@ -355,6 +367,13 @@ void InfoOphaalpunt::accept()
         query.bindValue(":attest_nodig",attest_nodigCheckBox->isChecked());
         query.bindValue(":frequentie_attest",frequentie_attestComboBox->currentIndex());
         query.bindValue(":extra_informatie",extra_informatieEdit->toPlainText());
+
+        if(everContactedBeforeCheckBox->checkState() == Qt::Checked)
+        {
+            query.bindValue(":last_contact_date",lastContactDateEdit->date());
+        }
+        else
+            query.bindValue(":last_contact_date","NULL");
 
 
         if(!query.exec())
@@ -446,12 +465,15 @@ void InfoOphaalpunt::reset()
             extra_informatieEdit->setText(query.value(23).toString());
             if(!query.value(24).isNull())
             {
+                everContactedBeforeCheckBox->setChecked(true);
                 lastContactDateEdit->setDate(query.value(24).toDate());
             }
             else
             {
-                lastContactDateEdit->setDate(QDate());
+                everContactedBeforeCheckBox->setChecked(false);
+                lastContactDateEdit->setDate(QDate().currentDate());
             }
+
             if(!query.value(25).isNull())
             {
                 contactAgainOnEdit->setDate(query.value(25).toDate());
@@ -489,10 +511,15 @@ void InfoOphaalpunt::reset()
         toggleFrequentie(Qt::Unchecked);
         extra_informatieEdit->clear();
 
-        lastContactDateEdit->setDate(QDate());
+        everContactedBeforeCheckBox->setChecked(false);
+
+        lastContactDateEdit->setDate(QDate().currentDate());
 
         contactAgainOnEdit->setDate(QDate());
     }
+
+    everContactedBeforeCheckBoxToggled(everContactedBeforeCheckBox->checkState() == Qt::Checked);
+
 }
 
 void InfoOphaalpunt::toggleIntercommunale(int soort)
@@ -518,4 +545,9 @@ void InfoOphaalpunt::nieuweAanmeldingButtonPressed()
     qDebug() << "[InfoOphaalpunt::nieuweAanmelding()]" << "nieuwe aanmelding, ophaalpunt_id" << id;
     if(id > 0)
         emit nieuweAanmelding(id);
+}
+
+void InfoOphaalpunt::everContactedBeforeCheckBoxToggled(bool visible)
+{
+    lastContactDateEdit->setVisible(visible);
 }
