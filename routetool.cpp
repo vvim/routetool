@@ -81,7 +81,7 @@ void RouteTool::showBijWieNogNooitOpgehaald()
 
 void RouteTool::showBijWieOuderDanJaarWidget()
 {
-    qDebug() << "call contactListWidget with those locations that haven't been visited for over a year";
+    contactListWidget.show_one_year_ophaalpunten(); // does 'init' & 'show' in one go.
 }
 
 void RouteTool::showVoorspelling()

@@ -17,6 +17,7 @@ public:
 
     void initialise();
     void show_never_contacted_ophaalpunten();
+    void show_one_year_ophaalpunten();
 
 private slots:
     void showOphaalpunt(QTreeWidgetItem*);
