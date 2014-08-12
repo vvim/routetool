@@ -47,92 +47,141 @@ ListOfOphaalpuntenToContact::~ListOfOphaalpuntenToContact()
 
 void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
 {
+    qDebug() << "[ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)]" << "ophaalpuntid = " << ophaalpuntid;
+
     QSqlQuery query;
-    query.prepare("SELECT ophalinghistoriek.ophalingsdatum, ophaalpunten.last_contact_date, ophaalpunten.contact_again_on FROM `ophalinghistoriek`, ophaalpunten where ophalinghistoriek.ophaalpunt = ophaalpunten.id AND ophalinghistoriek.ophaalpunt= :ophaal order by ophalinghistoriek.ophalingsdatum desc;");
+    query.prepare("SELECT ophalinghistoriek.ophalingsdatum, ophaalpunten.last_contact_date, ophaalpunten.contact_again_on, "
+                        " ophaalpunten.last_ophaling_date,  ophaalpunten.forecast_new_ophaling_date "
+                  " FROM `ophalinghistoriek`, ophaalpunten "
+                  " WHERE ophalinghistoriek.ophaalpunt = ophaalpunten.id AND ophalinghistoriek.ophaalpunt= :ophaal "
+                  " ORDER BY ophalinghistoriek.ophalingsdatum DESC;");
     query.bindValue(":ophaal",ophaalpuntid);
     if(query.exec())
     {
         if (query.next())
         {
-            QDate laatste_ophaling = query.value(0).toDate();
-            qDebug() << "laatste ophaling voor punt" << ophaalpuntid << "was" << laatste_ophaling << "ofte" << laatste_ophaling.toString();
+            QDate laatste_ophaling_taken_from_Ophaalhistoriek = query.value(0).toDate();
 
-            QDate ophaalpunt_LastContactDate = query.value(1).toDate();
-            QDate ophaalpunt_ContactAgainOn = query.value(2).toDate();
+            // not used: QDate ophaalpunt_LastContactDate_taken_from_Ophaalpunten = query.value(1).toDate();
+            // not used: QDate ophaalpunt_ContactAgainOn_taken_from_Ophaalpunten = query.value(2).toDate();
+            QDate ophaalpunt_LastOphalingDate_taken_from_Ophaalpunten = query.value(3).toDate();
+            QDate ophaalpunt_ForecastNewOphalingDate_taken_from_Ophaalpunten = query.value(4).toDate();
+
+            /**
+              1. we moeten ervoor zorgen dat de OPHAALPUNTEN.last_ophaling_date altijd correct is ingevuld:
+                    qMax(ophaalpunt_LastOphalingDate_taken_from_Ophaalpunten, laatste_ophaling_taken_from_Ophaalhistoriek)
+
+              2. de last_contact_date wordt bijgehouden door Geert
+
+              3. opnieuw contacteren op wordt ook door Geert bijgehouden, maar mag nooit meer dan een jaar later zijn
+
+              4. voorspelling 'forecast_new_ophaling_date' wordt in deze functie berekend, maar mag nooit meer dan een jaar later zijn
+                    qMin(gemiddelde, 365)
+            **/
+
+
+            /// A] berekenen van GEMIDDELD aantal dagen tussen ophalingen (om voorspelling / ForeCast te berekenen)
 
             int aantal_ophalingen = 0;
             int aantal_dagen_tussen_verschillende_ophalingen = 0;
-            QDate temp_ophaling = laatste_ophaling;
+            QDate temp_ophaling = laatste_ophaling_taken_from_Ophaalhistoriek;
             while(query.next())
             {
+                /// we kijken niet verder terug dan 5 ophalingen
                 if(aantal_ophalingen >= 5)
                     break;
-                QDate oudere_ophaling = query.value(0).toDate();
+                QDate oudere_ophaling = query.value(0).toDate(); // from table OPHAAL_HISTORIEK
                 aantal_dagen_tussen_verschillende_ophalingen += oudere_ophaling.daysTo(temp_ophaling);
                 qDebug() << "....ophaling" << aantal_ophalingen << "gebeurde op" << oudere_ophaling.toString() << ", totaal dagen:" << aantal_dagen_tussen_verschillende_ophalingen;
                 aantal_ophalingen++;
                 temp_ophaling = oudere_ophaling;
             }
             qDebug() << "..einde van de while-loop na" << aantal_ophalingen << "loops. Totaal: "<< aantal_dagen_tussen_verschillende_ophalingen;
+
             if(aantal_ophalingen > 0)
             {
+                /// B] hebben we meer dan 2 voorspellingen, dan kunnen we een gemiddelde berekenen
+                qDebug() << "..Aantal ophalingen:" << aantal_ophalingen << "> 0 => we kunnen een gemiddelde berekenen";
+
                 int gemiddelde = aantal_dagen_tussen_verschillende_ophalingen / aantal_ophalingen;
+
+                /// we zetten een voorspelling / ForeCast nooit verder in de tijd dan 365 dagen
                 if(gemiddelde > 365)
                 {
-                    qDebug() << "Gemiddelde blijkt groter dan een jaar: " << gemiddelde << "dagen, afronden naar 1 jaar.";
+                    qDebug() << "....Gemiddelde blijkt groter dan een jaar: " << gemiddelde << "dagen, afronden naar 1 jaar.";
                     gemiddelde = 365;
                 }
                 qDebug() << "..gemiddeld:" << gemiddelde;
-                //if CURRENTDATE > laatste_ophaling + GEMIDDELDE : contact == current_date (-1) ()
-                qDebug() << "..dus ophaalpunt te contacteren rond:" << laatste_ophaling.addDays(gemiddelde).toString() << "(waarde van laatste_ophaling verandert ook?)" << laatste_ophaling.toString();
 
-                QSqlQuery query_lastcontact_and_contact_on;
+                QDate max_of_laatste_ophaling = qMax(laatste_ophaling_taken_from_Ophaalhistoriek, ophaalpunt_LastOphalingDate_taken_from_Ophaalpunten);
 
-                //  << "** IF last_ophaling > current_value of field (oplossen door waarde op te vragen in eerste SELECT ?? )")
-                //  << "** IF last_ophaling > TODAY
-                QString q = QString("UPDATE ophaalpunten SET last_contact_date = %1 , contact_again_on = %2 WHERE id = %3;").arg(laatste_ophaling.toString()).arg(qMax(laatste_ophaling.addDays(gemiddelde), qMax(QDate().currentDate(),ophaalpunt_ContactAgainOn)).toString()).arg(ophaalpuntid);
-                query_lastcontact_and_contact_on.prepare("UPDATE ophaalpunten SET last_contact_date = :last_ophaling , contact_again_on = :contact_again WHERE id = :id;");
-                query_lastcontact_and_contact_on.bindValue(":last_ophaling",laatste_ophaling);
+                QSqlQuery query_forecast;
+                query_forecast.prepare(" UPDATE ophaalpunten "
+                                       " SET last_ophaling_date = :last_ophaling, forecast_new_ophaling_date = :forecast "
+                                       " WHERE id = :id ");
+                query_forecast.bindValue(":last_ophaling",max_of_laatste_ophaling);
+                query_forecast.bindValue(":forecast",qMax(ophaalpunt_ForecastNewOphalingDate_taken_from_Ophaalpunten, max_of_laatste_ophaling.addDays(gemiddelde)));
+                query_forecast.bindValue(":id",ophaalpuntid);
 
-                    qDebug() << "...datum controle:";
-                    qDebug() << ".....laatste_ophaling:" << laatste_ophaling.toString();
-                    qDebug() << ".....huidige waarde in DB: ophaalpunt_LastContactDate:" << ophaalpunt_LastContactDate.toString();
-                    qDebug() << "...Neem het maximum van de volgende drie als de nieuwe 'contact_again_date':";
-                    qDebug() << ".....huidige waarde in DB: ophaalpunt_ContactAgainOn:" << ophaalpunt_ContactAgainOn.toString();
-                    qDebug() << ".....vandaag:" << QDate().currentDate().toString();
-                    qDebug() << ".....voorspelling:" << laatste_ophaling.addDays(gemiddelde).toString();
-                    qDebug() << "...Maximum is:" << qMax(laatste_ophaling.addDays(gemiddelde), qMax(QDate().currentDate(),ophaalpunt_ContactAgainOn));
-                    qDebug() << "<vvim> TODO: na 2 jaar gebruiken tabel AANMELDING gebruiken ipv OPHAALHISTORIEK?";
+                qDebug() << "...datum controle:";
+                qDebug() << ".....laatste_ophaling:" << laatste_ophaling_taken_from_Ophaalhistoriek.toString();
+                qDebug() << ".....huidige waarde in DB: ophaalpunt_LastContactDate:" << ophaalpunt_LastOphalingDate_taken_from_Ophaalpunten.toString();
+                qDebug() << "....... max:" << max_of_laatste_ophaling.toString();
+                qDebug() << "...voorspelling is dus:";
+                qDebug() << ".....berekend:" << max_of_laatste_ophaling.addDays(gemiddelde);
+                qDebug() << ".....in de DB:" << ophaalpunt_ForecastNewOphalingDate_taken_from_Ophaalpunten;
+                qDebug() << "....... max:" << qMax(ophaalpunt_ForecastNewOphalingDate_taken_from_Ophaalpunten, max_of_laatste_ophaling.addDays(gemiddelde));
 
-                query_lastcontact_and_contact_on.bindValue(":contact_again ", qMax(laatste_ophaling.addDays(gemiddelde), qMax(QDate().currentDate(),ophaalpunt_ContactAgainOn)) );
-                query_lastcontact_and_contact_on.bindValue(":id",ophaalpuntid);
+                QString query_forecast_in_string = QString(" UPDATE ophaalpunten "
+                                                           " SET last_ophaling_date = %1, forecast_new_ophaling_date = %2 "
+                                                           " WHERE id = %3 ")
+                                                    .arg(max_of_laatste_ophaling.toString("dd MM yyyy"))
+                                                    .arg(qMax(ophaalpunt_ForecastNewOphalingDate_taken_from_Ophaalpunten, max_of_laatste_ophaling.addDays(gemiddelde)).toString("dd MM yyyy"))
+                                                    .arg(ophaalpuntid);
 
-                if(query_lastcontact_and_contact_on.exec())
-                    qDebug() << "..." << q << "done";
+                if(query_forecast.exec())
+                    qDebug() << "..." << query_forecast_in_string << "done";
                 else
-                    qDebug() << "..." << q << "went WRONG:" << query_lastcontact_and_contact_on.lastError();
+                    qDebug() << "..." << query_forecast_in_string << "went WRONG:" << query_forecast.lastError();
             }
             else
             {
-                qDebug() << "..minder dan 2 ophalingen, het heeft dus geen zin om het gemiddelde te berekenen. We kunnen wel het laatste contact invullen:";
-                QSqlQuery query_lastcontact_only;
-                //  << "** IF last_ophaling > current_value of field (oplossen door waarde op te vragen in eerste SELECT ?? )")
-                //  << "** IF last_ophaling > TODAY
-                QString q = QString("UPDATE ophaalpunten SET last_contact_date = %1 WHERE id = %2;").arg(laatste_ophaling.toString()).arg(ophaalpuntid);
-                query_lastcontact_only.prepare("UPDATE ophaalpunten SET last_contact_date = :last_ophaling WHERE id = :id;");
-                query_lastcontact_only.bindValue(":last_ophaling",laatste_ophaling);
-                query_lastcontact_only.bindValue(":id",ophaalpuntid);
+                /// C] zijn er nog geen 2 ophaalmomenten geweest, dan controleren we of de tabel OPHAALPUNTEN de juiste info heeft
+                qDebug() << "..Aantal ophalingen:" << aantal_ophalingen << "== 0 => we kunnen geen gemiddelde berekenen";
+                qDebug() << "...we kunnen wel testen of de tabel Ophaalpunten de juiste informatie heeft:";
+                qDebug() << "....laatste ophaling volgens tabel Ophaalpunten:" << ophaalpunt_LastOphalingDate_taken_from_Ophaalpunten;
+                qDebug() << "....laatste ophaling volgens tabel OphaalHistoriek:" << laatste_ophaling_taken_from_Ophaalhistoriek;
 
+                if(ophaalpunt_LastOphalingDate_taken_from_Ophaalpunten < laatste_ophaling_taken_from_Ophaalhistoriek)
+                {
+                    /// C.1] effectief, de datum in tabel OPHAALPUNTEN < de datum in tabel OPHAAL_HISTORIEK
+                    ///        => update tabel OPHAALPUNTEN
 
-                if(query_lastcontact_only.exec())
-                    qDebug() << "..." << q << "done";
-                else
-                    qDebug() << "..." << q << "went WRONG:" << query_lastcontact_only.lastError();
+                    QSqlQuery query_laatste_ophaling;
+                    query_laatste_ophaling.prepare(" UPDATE ophaalpunten "
+                                           " SET last_ophaling_date = :last_ophaling "
+                                           " WHERE id = :id ");
+                    query_laatste_ophaling.bindValue(":last_ophaling",laatste_ophaling_taken_from_Ophaalhistoriek);
+                    query_laatste_ophaling.bindValue(":id",ophaalpuntid);
+
+                    qDebug() << "...datum in ophaalpunten moet dus aangepast worden!!";
+
+                    QString query_laatste_ophaling_in_string = QString(" UPDATE ophaalpunten "
+                                                               " SET last_ophaling_date = %1 "
+                                                               " WHERE id = %2 ")
+                                                        .arg(laatste_ophaling_taken_from_Ophaalhistoriek.toString("dd MM yyyy"))
+                                                        .arg(ophaalpuntid);
+
+                    if(query_laatste_ophaling.exec())
+                        qDebug() << "..." << query_laatste_ophaling_in_string << "done";
+                    else
+                        qDebug() << "..." << query_laatste_ophaling_in_string << "went WRONG:" << query_laatste_ophaling.lastError();
+                }
             }
         }
     }
     else
-        qDebug() << "something went wrong with checking for an existing aanmelding";
+        qDebug() << "[ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)]" << "ophaalpuntid = " << ophaalpuntid << "-" << "something went wrong with checking for an existing aanmelding" << query.lastError();
 }
 
 
