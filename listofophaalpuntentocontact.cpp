@@ -308,7 +308,7 @@ void ListOfOphaalpuntenToContact::show_one_year_ophaalpunten()
             QDate forecast_ophaling_date = query.value(6).toDate();
 
             QSqlQuery query2;
-            query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal"); // and ophaalronde is NULL
+            query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal AND ophaalronde_datum is NULL"); // and ophaalronde is NULL
             query2.bindValue(":ophaal", ophaalpunt_id);
 
             if(query2.exec())
@@ -371,7 +371,7 @@ void ListOfOphaalpuntenToContact::show_never_contacted_ophaalpunten()
             QDate forecast_ophaling_date = query.value(6).toDate();
 
             QSqlQuery query2;
-            query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal"); // and ophaalronde is NULL
+            query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal AND ophaalronde_datum is NULL"); // and ophaalronde is NULL
             query2.bindValue(":ophaal", ophaalpunt_id);
 
             if(query2.exec())
