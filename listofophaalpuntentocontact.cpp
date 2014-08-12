@@ -216,9 +216,9 @@ void ListOfOphaalpuntenToContact::initialise()
     contactList->clear();
     contactList->setSortingEnabled(false); // sort it by database: contact_again_on ASC ?
 
-    QSqlQuery query("SELECT id, naam, postcode, last_contact_date, contact_again_on "
+    QSqlQuery query("SELECT id, naam, postcode, last_contact_date, contact_again_on, last_ophaling_date, forecast_new_ophaling_date "
                     "FROM ophaalpunten "
-                    "WHERE contact_again_on < date( CURDATE() + INTERVAL 1 DAY)"
+                    "WHERE forecast_new_ophaling_date < date( CURDATE() + INTERVAL 1 DAY)"
                     "ORDER BY postcode");
 
     if(query.exec())
