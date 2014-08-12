@@ -20,6 +20,7 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(ui->kiesOphaalpuntenMenuButton, SIGNAL(triggered()), this, SLOT(showKiesOphaalpunten()));
     connect(ui->nieuweLeveringMenuButton, SIGNAL(triggered()), this, SLOT(showNieuweLevering()));
     connect(ui->wieNogNooitMenuButton, SIGNAL(triggered()), this, SLOT(showBijWieNogNooitOpgehaald()));
+    connect(ui->ouderDanEenJaarMenuButton, SIGNAL(triggered()), this, SLOT(showBijWieOuderDanJaarWidget()));
     connect(ui->voorspellingMenuButton, SIGNAL(triggered()), this, SLOT(showVoorspelling()));
     connect(ui->toonOphaalpuntenMenuButton, SIGNAL(triggered()), this, SLOT(showOphaalpuntenWidget()));
 
@@ -76,6 +77,11 @@ void RouteTool::showNieuweLevering()
 void RouteTool::showBijWieNogNooitOpgehaald()
 {
     contactListWidget.show_never_contacted_ophaalpunten(); // does 'init' & 'show' in one go.
+}
+
+void RouteTool::showBijWieOuderDanJaarWidget()
+{
+    qDebug() << "call contactListWidget with those locations that haven't been visited for over a year";
 }
 
 void RouteTool::showVoorspelling()

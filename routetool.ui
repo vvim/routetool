@@ -48,6 +48,7 @@
      <string>Bellijst</string>
     </property>
     <addaction name="voorspellingMenuButton"/>
+    <addaction name="ouderDanEenJaarMenuButton"/>
     <addaction name="wieNogNooitMenuButton"/>
    </widget>
    <addaction name="menuMenuOphaalpunten"/>
@@ -89,6 +90,11 @@
   <action name="voorspellingMenuButton">
    <property name="text">
     <string>Voorspelling</string>
+   </property>
+  </action>
+  <action name="ouderDanEenJaarMenuButton">
+   <property name="text">
+    <string>Ophaalpunten > 1 jaar</string>
    </property>
   </action>
   <action name="wieNogNooitMenuButton">
