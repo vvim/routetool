@@ -29,7 +29,6 @@ signals:
     
 public slots:
 private:
-    //use QTableWidget to work with different columns: http://qt-project.org/wiki/How_to_Use_QTableWidget
     QTreeView *legeAanmeldingenTreeView;
     MySortFilterProxyModel *legeAanmeldingenModel;
     QStandardItemModel *model;
