@@ -38,7 +38,7 @@ OphaalpuntenWidget::OphaalpuntenWidget(QWidget *parent) :
     ophaalpuntEdit->setFocus(); // always setFocus() as last action: http://stackoverflow.com/questions/526761/set-qlineedit-focus-in-qt
 
     setWindowTitle(tr("Bekijk informatie bestaande ophaalpunten"));
-    setMinimumWidth(600);
+    setMinimumSize(600, 300);
 }
 
 OphaalpuntenWidget::~OphaalpuntenWidget()
