@@ -9,17 +9,7 @@
 #include <QDate>
 #include "kiesophaalpunten.h"
 
-/** userroles to store data from QListWidgetItem
-
-    see http://qt-project.org/doc/qt-4.8/qt.html#ItemDataRole-enum and
-    +---------------+-------+--------------------------------------------------------------------+
-    | Constant      | Value | Description                                                        |
-    | Qt::UserRole  | 32    | The first role that can be used for application-specific purposes. |
-    +---------------+-------+--------------------------------------------------------------------+
-
-    <vvim> : might not be used as this, probably have to use an Item-class that inherits QListWidgetItem
-**/
-
+/*
 #define AANMELDING_DATE 0
 #define OPHAALPUNT_NAAM 1
 #define WEIGHT_KURK 2
@@ -35,10 +25,14 @@
 #define PLAATS 12
 #define LAND 13
 #define OPMERKINGEN 14
+*/
 
 KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     QWidget(parent)
 {
+    model = NULL;
+    legeAanmeldingenModel = NULL;
+
     normal = new QPalette();
     normal->setColor(QPalette::Text,Qt::AutoColor);
 
@@ -49,25 +43,13 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
 
     legeAanmeldingenLabel = new QLabel(tr("Aanmeldingen - dubbelklik op een kolom om te sorteren:"));
 
-    legeAanmeldingenTree = new QTreeWidget();
-    legeAanmeldingenTree->setColumnCount(OPMERKINGEN + 1);
+    legeAanmeldingenTreeView = new QTreeView();
 
-    QStringList labels;
-    labels << "Aanmeldingsdatum" << "Ophaalpunt" << "Kurk (kg)" << "Kurk (zakken)" << "Kaars (kg)" << "Kaars (zakken)"
-           << "Aanmelding_id" << "Ophaalpunt_id" << "Straat" << "Nr" << "Bus" << "Postcode" << "Plaats" << "Land" << "Opmerkingen";
-    legeAanmeldingenTree->setHeaderLabels(labels);
+    legeAanmeldingenTreeView->setRootIsDecorated(false);
+    legeAanmeldingenTreeView->setAlternatingRowColors(true);
+    legeAanmeldingenTreeView->setSortingEnabled(true);
+    legeAanmeldingenTreeView->sortByColumn(1, Qt::AscendingOrder);
 
-    legeAanmeldingenTree->setColumnHidden(AANMELDING_ID,true);
-    legeAanmeldingenTree->setColumnHidden(OPHAALPUNT_ID,true);
-
-    legeAanmeldingenTree->setColumnHidden(STRAAT,true);
-    legeAanmeldingenTree->setColumnHidden(HUISNR,true);
-    legeAanmeldingenTree->setColumnHidden(BUSNR,true);
-
-    legeAanmeldingenTree->resizeColumnToContents(AANMELDING_DATE);
-
-    connect(legeAanmeldingenTree->header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(sortTreeWidget(int)));
-    connect(legeAanmeldingenTree, SIGNAL(clicked(QModelIndex)), this, SLOT(setTotalWeightTotalVolume()));
 
     totalWeightLabel = new QLabel(tr("Totaal gewicht:"));
     totalVolumeLabel = new QLabel(tr("Totaal volume:"));
@@ -99,6 +81,10 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     connect(resetButton, SIGNAL(pressed()), this, SLOT(uncheckAll()));
     connect(allButton, SIGNAL(pressed()), this, SLOT(checkAll()));
 
+    //why does this one not work???
+    connect(legeAanmeldingenModel, SIGNAL(checkChanges()), this, SLOT(setTotalWeightTotalVolume()));
+    /* --> now we need to use this one instead: */ connect(legeAanmeldingenTreeView, SIGNAL(clicked(QModelIndex)), this, SLOT(setTotalWeightTotalVolume()));
+
     QHBoxLayout *weightAndVolumeLayout = new QHBoxLayout();
     weightAndVolumeLayout->addWidget(totalWeightLabel);
     weightAndVolumeLayout->addWidget(totalWeightEdit);
@@ -107,7 +93,7 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
 
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(legeAanmeldingenLabel);
-    layout->addWidget(legeAanmeldingenTree);
+    layout->addWidget(legeAanmeldingenTreeView);
     layout->addLayout(weightAndVolumeLayout);
     layout->addWidget(buttonBox);
     setLayout(layout);
@@ -121,15 +107,16 @@ void KiesOphaalpunten::checkAll()
 {
     total_weight = 0;
     total_volume = 0;
-    QTreeWidgetItemIterator it(legeAanmeldingenTree);
-    while(*it)
-    {
-        QTreeWidgetItem * aanmelding = *it;
-        aanmelding->setCheckState(0,Qt::Checked);
-        total_weight += getWeightOfItem(aanmelding);
-        total_volume += (aanmelding->text(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->text(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
 
-        it++;
+    for(int i = 0; i < model->rowCount(); i++)
+    {
+        QStandardItem* item = model->itemFromIndex(model->index(i,OPHAALPUNT_NAAM));
+        item->setCheckState(Qt::Checked);
+        total_weight += getWeightOfRow(i);
+        total_volume += getVolumeOfRow(i);
+        qDebug() << "total weight:" << total_weight;
+        qDebug() << "total volume:" << total_volume;
+        qDebug() << "----";
     }
 
     setTotalWeightTotalVolume();
@@ -137,12 +124,10 @@ void KiesOphaalpunten::checkAll()
 
 void KiesOphaalpunten::uncheckAll()
 {
-    QTreeWidgetItemIterator it(legeAanmeldingenTree);
-    while(*it)
+    for(int i = 0; i < model->rowCount(); i++)
     {
-        QTreeWidgetItem * aanmelding = *it;
-        aanmelding->setCheckState(0,Qt::Unchecked);
-        it++;
+        QStandardItem* item = model->itemFromIndex(model->index(i,OPHAALPUNT_NAAM));
+        item->setCheckState(Qt::Unchecked);
     }
     total_weight = 0;
     total_volume = 0;
@@ -156,16 +141,14 @@ void KiesOphaalpunten::setTotalWeightTotalVolume()
             total_weight = 0;
             total_volume = 0;
 
-            QTreeWidgetItemIterator it(legeAanmeldingenTree);
-            while(*it)
+            for(int i = 0; i < model->rowCount(); i++)
             {
-                QTreeWidgetItem * aanmelding = *it;
-                if(aanmelding->checkState(0) == Qt::Checked)
+                QStandardItem* item = model->itemFromIndex(model->index(i,OPHAALPUNT_NAAM));
+                if(item->checkState() == Qt::Checked)
                 {
-                    total_weight += getWeightOfItem(aanmelding);
-                    total_volume += (aanmelding->text(ZAK_KURK).toDouble() * settings.value("zak_kurk_volume").toDouble()) + (aanmelding->text(ZAK_KAARS).toDouble() * settings.value("zak_kaarsresten_volume").toDouble());
+                    total_weight += getWeightOfRow(i);
+                    total_volume += getVolumeOfRow(i);
                 }
-                it++;
             }
             ///////////////// dit zou niet nodig moeten zijn
 
@@ -197,7 +180,7 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
 
-    legeAanmeldingenTree->clear();
+    initModel();
 
     QSqlQuery query("SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten,"
                           " aanmelding.id, ophaalpunten.id, aanmelding.opmerkingen,"
@@ -211,7 +194,7 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
         {
             QString ophaalpunt_naam = query.value(0).toString();
 
-            addToTreeWidget(    ophaalpunt_naam,
+            addToTreeModel(     ophaalpunt_naam,
                                 query.value(1).toDouble(),  // kg_kurk
                                 query.value(2).toDouble(),  // kg_kaars
                                 query.value(3).toDouble(),  // zakken_kurk
@@ -277,37 +260,38 @@ void KiesOphaalpunten::accept()
     //
     // Then this code will be simply Qt::Checked() => listOfAanmeldingen->append(m_map_aanmeldingen[aanmelding->data(AANMELDING_ID).toInt()];
     QList<SOphaalpunt> *listOfAanmeldingen = new QList<SOphaalpunt>();
-    QTreeWidgetItemIterator it(legeAanmeldingenTree);
-    while(*it)
+
+    for(int i = 0; i < model->rowCount(); i++)
     {
-        QTreeWidgetItem * aanmelding = *it;
-        if(aanmelding->checkState(0) == Qt::Checked)
+        QStandardItem* item = model->itemFromIndex(model->index(i,OPHAALPUNT_NAAM));
+        if(item->checkState() == Qt::Checked)
         {
 
             SOphaalpunt _ophaalpunt(
-                            aanmelding->text(OPHAALPUNT_NAAM),                      //_naam
-                            aanmelding->text(STRAAT),                               //_street
-                            aanmelding->text(HUISNR),                               //_housenr
-                            aanmelding->text(BUSNR),                                //_busnr
-                            aanmelding->text(POSTCODE),                             //_postalcode
-                            aanmelding->text(PLAATS),                               //_plaats
-                            aanmelding->text(LAND),                                 //_country
-                            weightColumnToDouble(aanmelding->text(WEIGHT_KURK)),    //_kg_kurk
-                            weightColumnToDouble(aanmelding->text(WEIGHT_KAARS)),   //_kg_kaarsresten
-                            aanmelding->text(ZAK_KURK).toDouble(),                  //_zakken_kurk
-                            aanmelding->text(ZAK_KAARS).toDouble(),                 //_zakken_kaarsresten
-                            aanmelding->text(AANMELDING_ID).toInt(),                //_aanmelding_id
-                            aanmelding->text(OPHAALPUNT_ID).toInt(),                //_ophaalpunt_id
-                            aanmelding->text(OPMERKINGEN)                           //_opmerkingen
+                            model->itemFromIndex(model->index(i,OPHAALPUNT_NAAM))->data(Qt::DisplayRole).toString(),                      //_naam
+                            model->itemFromIndex(model->index(i,STRAAT))->data(Qt::DisplayRole).toString(),                               //_street
+                            model->itemFromIndex(model->index(i,HUISNR))->data(Qt::DisplayRole).toString(),                               //_housenr
+                            model->itemFromIndex(model->index(i,BUSNR))->data(Qt::DisplayRole).toString(),                                //_busnr
+                            model->itemFromIndex(model->index(i,POSTCODE))->data(Qt::DisplayRole).toString(),                             //_postalcode
+                            model->itemFromIndex(model->index(i,PLAATS))->data(Qt::DisplayRole).toString(),                               //_plaats
+                            model->itemFromIndex(model->index(i,LAND))->data(Qt::DisplayRole).toString(),                                 //_country
+                            model->itemFromIndex(model->index(i,WEIGHT_KURK))->data(Qt::DisplayRole).toDouble(),    //_kg_kurk
+                            model->itemFromIndex(model->index(i,WEIGHT_KAARS))->data(Qt::DisplayRole).toDouble(),    //_kg_kaarsresten
+                            model->itemFromIndex(model->index(i,ZAK_KURK))->data(Qt::DisplayRole).toDouble(),                  //_zakken_kurk
+                            model->itemFromIndex(model->index(i,ZAK_KAARS))->data(Qt::DisplayRole).toDouble(),                 //_zakken_kaarsresten
+                            model->itemFromIndex(model->index(i,AANMELDING_ID))->data(Qt::DisplayRole).toInt(),                //_aanmelding_id
+                            model->itemFromIndex(model->index(i,OPHAALPUNT_ID))->data(Qt::DisplayRole).toInt(),                //_ophaalpunt_id
+                            model->itemFromIndex(model->index(i,OPMERKINGEN))->data(Qt::DisplayRole).toString()                           //_opmerkingen
                         );
             listOfAanmeldingen->append(_ophaalpunt);
-        }
-        it++;
 
+            _ophaalpunt.PrintInformation();
+        }
     }
     emit aanmelding_for_route(listOfAanmeldingen);
 
-    qDebug() << "<vvim> TODO add data to the database so that we can reconstruct 'ophaalrondes'.";
+    // qDebug() << "<vvim> TODO add data to the database so that we can reconstruct 'ophaalrondes'.";
+    // -> is done when the TransportationList is compiled! , see function TransportationListWriter::print()
     this->close();
 }
 
@@ -321,7 +305,6 @@ KiesOphaalpunten::~KiesOphaalpunten()
     qDebug() << "start to deconstruct KiesOphaalpunten()";
     delete warning;
     delete normal;
-    delete legeAanmeldingenTree;
     delete legeAanmeldingenLabel;
     delete totalWeightLabel;
     delete totalVolumeLabel;
@@ -330,6 +313,9 @@ KiesOphaalpunten::~KiesOphaalpunten()
     delete resetButton;
     delete allButton;
     delete buttonBox;
+    delete model;
+    delete legeAanmeldingenModel;
+    delete legeAanmeldingenTreeView;
     qDebug() << "KiesOphaalpunten() deconstructed";
 }
 
@@ -343,58 +329,84 @@ void KiesOphaalpunten::initialise()
     uncheckAll();
 }
 
-void KiesOphaalpunten::addToTreeWidget(QString NaamOphaalpunt, double WeightKurk, double WeightKaars,
+void KiesOphaalpunten::addToTreeModel(QString NaamOphaalpunt, double WeightKurk, double WeightKaars,
                                    double ZakKurk, double ZakKaars, int AanmeldingId, int OphaalpuntId, QString Opmerkingen,
                                    QString Straat, QString HuisNr, QString BusNr, QString Postcode, QString Plaats, QString Land,
                                    QDate Aanmeldingsdatum)
 {
-    QTreeWidgetItem *item = new QTreeWidgetItem(legeAanmeldingenTree);
-    item->setText(OPHAALPUNT_NAAM, NaamOphaalpunt);
-    item->setText(WEIGHT_KURK, QString("%1 kg").arg(WeightKurk));
-    item->setText(ZAK_KURK, QString::number(ZakKurk));
-    item->setText(WEIGHT_KAARS, QString("%1 kg").arg(WeightKaars));
-    item->setText(ZAK_KAARS, QString::number(ZakKaars));
-    item->setText(AANMELDING_ID, QString::number(AanmeldingId));
-    item->setText(OPHAALPUNT_ID, QString::number(OphaalpuntId));
-    item->setText(OPMERKINGEN, Opmerkingen);
-    item->setText(STRAAT, Straat);
-    item->setText(HUISNR, HuisNr);
-    item->setText(BUSNR, BusNr);
-    item->setText(POSTCODE, Postcode);
-    item->setText(PLAATS, Plaats);
-    item->setText(LAND, Land);
-    item->setText(AANMELDING_DATE, QLocale().toString(Aanmeldingsdatum,"dd MMM yyyy"));
+    model->insertRow(0);
+    //model->setData(model->index(0, OPHAALPUNT_NAAM), NaamOphaalpunt);
+    model->setData(model->index(0, WEIGHT_KURK), WeightKurk);
+    model->setData(model->index(0, ZAK_KURK), ZakKurk);
+    model->setData(model->index(0, WEIGHT_KAARS), WeightKaars);
+    model->setData(model->index(0, ZAK_KAARS), ZakKaars);
+    model->setData(model->index(0, AANMELDING_ID), AanmeldingId);
+    model->setData(model->index(0, OPHAALPUNT_ID), OphaalpuntId);
+    model->setData(model->index(0, OPMERKINGEN), Opmerkingen);
+    model->setData(model->index(0, STRAAT), Straat);
+    model->setData(model->index(0, HUISNR), HuisNr);
+    model->setData(model->index(0, BUSNR), BusNr);
+    model->setData(model->index(0, POSTCODE), Postcode);
+    model->setData(model->index(0, PLAATS), Plaats);
+    model->setData(model->index(0, LAND), Land);
+    model->setData(model->index(0, AANMELDING_DATE), Aanmeldingsdatum);
 
-    item->setFlags(item->flags()|Qt::ItemIsUserCheckable);
-    item->setCheckState(0,Qt::Unchecked);
-    //legeAanmeldingenTree->addTopLevelItem(item);
+    // to make the row 'checkable'
+    QStandardItem* item0 = new QStandardItem(true);
+    item0->setCheckable(true);
+    item0->setCheckState(Qt::Unchecked);
+    item0->setText(NaamOphaalpunt);
+    model->setItem(0, OPHAALPUNT_NAAM, item0);
 }
 
-void KiesOphaalpunten::sortTreeWidget(int column)
+double KiesOphaalpunten::getWeightOfRow(const int row)
 {
-    qDebug() << "<vvim>" << "for use of filters in KiesOphaalpunten::QTreeWidgetItem, think legeAanmeldingenTree->itemBelow(headeritem)->isHidden();";
-    qDebug() << "<vvim>" << "[KiesOphaalpunten::sortTreeWidget]" << "goes wrong for sorting numbers, see" << "http://stackoverflow.com/questions/363200/is-it-possible-to-sort-numbers-in-a-qtreewidget-column";
-    // goes wrong for sorting numbers, see
-    // http://stackoverflow.com/questions/363200/is-it-possible-to-sort-numbers-in-a-qtreewidget-column
-    if(sortingascending)
-        legeAanmeldingenTree->sortByColumn(column,Qt::AscendingOrder);
-    else
-        legeAanmeldingenTree->sortByColumn(column,Qt::DescendingOrder);
-    sortingascending = !sortingascending;
-}
+    double weight_kaars = model->itemFromIndex(model->index(row,WEIGHT_KAARS))->data(Qt::DisplayRole).toDouble();
+    double weight_kurk = model->itemFromIndex(model->index(row,WEIGHT_KURK))->data(Qt::DisplayRole).toDouble();
 
-double KiesOphaalpunten::weightColumnToDouble(QString kg)
-{
-    // turn "220 kg" in "220"
-    QString temp = kg;
-    temp.chop(3);
-    return temp.toDouble();
-}
-
-double KiesOphaalpunten::getWeightOfItem(QTreeWidgetItem* item)
-{
-    double weight_kaars = weightColumnToDouble(item->text(WEIGHT_KAARS));
-    double weight_kurk = weightColumnToDouble(item->text(WEIGHT_KURK));
-
+    qDebug() << "[KiesOphaalpunten::getWeightOfItem]" << "kaars:" << weight_kaars  << "kurk:" << weight_kurk;
     return weight_kaars + weight_kurk;
+}
+
+
+double KiesOphaalpunten::getVolumeOfRow(const int row)
+{
+    double volume_kaars = model->itemFromIndex(model->index(row,ZAK_KAARS))->data(Qt::DisplayRole).toDouble() * settings.value("zak_kaarsresten_volume").toDouble();
+    double volume_kurk = model->itemFromIndex(model->index(row,ZAK_KURK))->data(Qt::DisplayRole).toDouble()* settings.value("zak_kurk_volume").toDouble();
+
+    qDebug() << "[KiesOphaalpunten::getVolumeOfItem]" << "kaars:" << volume_kaars  << "kurk:" << volume_kurk;
+    return volume_kaars + volume_kurk;
+}
+
+void KiesOphaalpunten::initModel()
+{
+    qDebug() << "[KiesOphaalpunten::initModel]" << "start";
+    if(model)
+        delete model;
+    if(legeAanmeldingenModel)
+        delete legeAanmeldingenModel;
+
+    QStringList labels;
+    labels << "Ophaalpunt" << "Aanmeldingsdatum" << "Kurk (kg)" << "Kurk (zakken)" << "Kaars (kg)" << "Kaars (zakken)"
+           << "Aanmelding_id" << "Ophaalpunt_id" << "Straat" << "Nr" << "Bus" << "Postcode" << "Plaats" << "Land" << "Opmerkingen";
+
+    model = new QStandardItemModel(0, labels.count());
+
+    legeAanmeldingenModel = new MySortFilterProxyModel(this);
+    legeAanmeldingenModel->setDynamicSortFilter(true);
+    legeAanmeldingenModel->setSourceModel(model);
+
+    for(int i = 0; i < labels.count(); i++)
+    {
+       model->setHeaderData(i,Qt::Horizontal, /* QObject::tr( */ labels[i] /*)*/ );  // why does 'tr()' not work? -> QString& instead of QString...
+    }
+
+    legeAanmeldingenTreeView->setModel(legeAanmeldingenModel);
+
+    legeAanmeldingenTreeView->hideColumn(AANMELDING_ID);
+    legeAanmeldingenTreeView->hideColumn(OPHAALPUNT_ID);
+
+    legeAanmeldingenTreeView->hideColumn(STRAAT);
+    legeAanmeldingenTreeView->hideColumn(HUISNR);
+    legeAanmeldingenTreeView->hideColumn(BUSNR);
 }

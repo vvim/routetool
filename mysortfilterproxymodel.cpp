@@ -33,3 +33,33 @@ bool MySortFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex
         return QString::localeAwareCompare(leftString, rightString) < 0;
     }
 }
+
+QVariant MySortFilterProxyModel::data(const QModelIndex &index, int role) const
+{
+    // not used: int row = index.row();
+    int col = index.column();
+
+    switch(role)
+    {
+
+    case Qt::DisplayRole:
+        if((col == WEIGHT_KURK) || (col == WEIGHT_KAARS))
+            return QString("%1 kg").arg(QSortFilterProxyModel::data(index,role).toString());
+        if(col == AANMELDING_DATE)
+            return QLocale().toString(QSortFilterProxyModel::data(index,role).toDate(),"d MMM yyyy");
+        break;
+    }
+
+    return QSortFilterProxyModel::data(index,role);
+}
+
+bool MySortFilterProxyModel::setData(const QModelIndex & index, const QVariant & value, int role)
+{
+    qDebug() << "setData called" << value << role;
+    bool result = QSortFilterProxyModel::setData(index, value, role);
+    if (role == Qt::CheckStateRole)
+    {
+        emit checkChanges();
+    }
+    return result;
+}

@@ -2,16 +2,15 @@
 #define KIESOPHAALPUNTEN_H
 
 #include <QWidget>
-#include <QListWidget>
-#include <QListWidgetItem>
-#include <QTreeWidget>
-#include <QTreeWidgetItem>
 #include <QLabel>
+#include <QTreeView>
 #include <QLineEdit>
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QSettings>
+#include <QStandardItemModel>
 #include "sophaalpunt.h"
+#include "mysortfilterproxymodel.h"
 
 extern QSettings settings;
 
@@ -31,7 +30,9 @@ signals:
 public slots:
 private:
     //use QTableWidget to work with different columns: http://qt-project.org/wiki/How_to_Use_QTableWidget
-    QTreeWidget *legeAanmeldingenTree;
+    QTreeView *legeAanmeldingenTreeView;
+    MySortFilterProxyModel *legeAanmeldingenModel;
+    QStandardItemModel *model;
     QLabel *legeAanmeldingenLabel, *totalWeightLabel, *totalVolumeLabel;
     QLineEdit *totalWeightEdit, *totalVolumeEdit;
     QDialogButtonBox *buttonBox;
@@ -43,16 +44,16 @@ private:
 
     void populateLegeAanmeldingen();
 
-    void addToTreeWidget(QString NaamOphaalpunt, double WeightKurk, double WeightKaars, double ZakKurk, double ZakKaars, int AanmeldingId, int OphaalpuntId, QString Opmerkingen, QString Straat, QString HuisNr, QString BusNr, QString Postcode, QString Plaats, QString Land, QDate Aanmeldingsdatum);
-    double weightColumnToDouble(QString kg);
-    double getWeightOfItem(QTreeWidgetItem* item);
+    void addToTreeModel(QString NaamOphaalpunt, double WeightKurk, double WeightKaars, double ZakKurk, double ZakKaars, int AanmeldingId, int OphaalpuntId, QString Opmerkingen, QString Straat, QString HuisNr, QString BusNr, QString Postcode, QString Plaats, QString Land, QDate Aanmeldingsdatum);
+    double getWeightOfRow(const int row);
+    double getVolumeOfRow(const int row);
+    void initModel();
 
 private slots:
     void checkAll();
     void uncheckAll();
     void accept();
     void reject();
-    void sortTreeWidget(int column);
     void setTotalWeightTotalVolume();
 };
 
