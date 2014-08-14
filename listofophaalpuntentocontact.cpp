@@ -26,6 +26,8 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
     contactTree = new QTreeWidget();
 
     contactTree->setColumnCount(FORECAST_NEW_OPHALING_DATE + 1);
+    contactTree->setRootIsDecorated(false);
+    contactTree->setAlternatingRowColors(true);
 
     QStringList labels;
     labels << "Ophaalpunt" << "Ophaalpunt_id" << "Postcode" << "Laatste contact" << "Laatste ophaling" << "Voorspelde ophaling";
