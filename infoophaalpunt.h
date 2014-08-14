@@ -87,6 +87,8 @@ private:
 
     QDateEdit *lastContactDateEdit;
     QDateEdit *contactAgainOnEdit;
+    QDateEdit *lastOphalingEdit;
+    QDateEdit *forecastNewOphalingEdit;
 
     QCheckBox *everContactedBeforeCheckBox;
 

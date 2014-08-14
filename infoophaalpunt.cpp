@@ -151,6 +151,18 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
 
     contactAgainOnEdit->setEnabled(false);
 
+    lastOphalingEdit = new QDateEdit();
+    lastOphalingEdit->setDisplayFormat("dd MMM yyyy");
+    lastOphalingEdit->setLocale(QLocale::Dutch);
+    lastOphalingEdit->setCalendarPopup(true);  //zie http://stackoverflow.com/questions/7031962/qdateedit-calendar-popup
+
+    forecastNewOphalingEdit = new QDateEdit();
+    forecastNewOphalingEdit->setDisplayFormat("dd MMM yyyy");
+    forecastNewOphalingEdit->setLocale(QLocale::Dutch);
+    forecastNewOphalingEdit->setCalendarPopup(true);  //zie http://stackoverflow.com/questions/7031962/qdateedit-calendar-popup
+
+    forecastNewOphalingEdit->setEnabled(false);
+
     buttonBox = new QDialogButtonBox;
     buttonBox->addButton(tr("Wijzigingen opslaan"),
                  QDialogButtonBox::AcceptRole);
@@ -223,10 +235,15 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     layout->addRow(tr("Email:"), email1Edit);
     layout->addRow(tr(""), email2Edit);
     // horizontal line
+    layout->addRow(tr("Laatste ophaling:"), lastOphalingEdit);
+    layout->addRow(tr("Voorspelling nieuwe ophaling:"), forecastNewOphalingEdit);
+    // horizontal line
     layout->addRow(tr("Extra informatie:"), extra_informatieEdit);
     layout->addRow(tr("Al ooit gecontacteerd?"), everContactedBeforeCheckBox);
-    layout->addRow(tr("Laatste contact (ophaling):"), lastContactDateEdit);
-    layout->addRow(tr("Contacteer op:"), contactAgainOnEdit);
+    layout->addRow(tr("Laatste contact:"), lastContactDateEdit);
+
+    // this seems obsolete to me, nothing filled in database, maybe the user wants this functionality in the future?
+    //layout->addRow(tr("Contacteer op:"), contactAgainOnEdit);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addLayout(layout);
@@ -287,6 +304,8 @@ InfoOphaalpunt::~InfoOphaalpunt()
     delete  lastContactDateEdit;
     delete  contactAgainOnEdit;
     delete  everContactedBeforeCheckBox;
+    delete  lastOphalingEdit;
+    delete  forecastNewOphalingEdit;
     qDebug() << "InfoOphaalpunt() deconstructed";
 }
 
@@ -336,7 +355,10 @@ void InfoOphaalpunt::accept()
             query.bindValue(":last_contact_date","NULL");
         }
 
-        /*  // update  "contact_again_on" ? for now: no
+        /*  // update  "contact_again_on", "lastOphalingEdit", "forecastNewOphalingEdit" ?
+                for now: no:    A] "contact_again_on" is probably obsolete
+                                B] "lastOphalingEdit" is set by ListOfOphaalpuntenToContact
+                                C] "forecastNewOphalingEdit" is calculated by ListOfOphaalpuntenToContact
 
             + working on code of class MetaDateEdit()
         */
@@ -495,10 +517,33 @@ void InfoOphaalpunt::reset()
             if(!query.value(25).isNull())
             {
                 contactAgainOnEdit->setDate(query.value(25).toDate());
+                contactAgainOnEdit->setVisible(true);
             }
             else
             {
                 contactAgainOnEdit->setDate(QDate());
+                contactAgainOnEdit->setVisible(false);
+            }
+
+            if(!query.value(26).isNull())
+            {
+                lastOphalingEdit->setDate(query.value(26).toDate());
+                lastOphalingEdit->setVisible(true);
+            }
+            else
+            {
+                lastOphalingEdit->setDate(QDate());
+                lastOphalingEdit->setVisible(false);
+            }
+            if(!query.value(27).isNull())
+            {
+                forecastNewOphalingEdit->setDate(query.value(27).toDate());
+                forecastNewOphalingEdit->setVisible(true);
+            }
+            else
+            {
+                forecastNewOphalingEdit->setDate(QDate());
+                forecastNewOphalingEdit->setVisible(false);
             }
         }
     }
@@ -534,6 +579,13 @@ void InfoOphaalpunt::reset()
         lastContactDateEdit->setDate(QDate().currentDate());
 
         contactAgainOnEdit->setDate(QDate());
+        contactAgainOnEdit->setVisible(false);
+
+        lastOphalingEdit->setDate(QDate());
+        lastOphalingEdit->setVisible(false);
+
+        forecastNewOphalingEdit->setDate(QDate());
+        forecastNewOphalingEdit->setVisible(false);
     }
 
     everContactedBeforeCheckBoxToggled(everContactedBeforeCheckBox->checkState() == Qt::Checked);
