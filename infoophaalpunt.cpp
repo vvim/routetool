@@ -265,6 +265,7 @@ InfoOphaalpunt::~InfoOphaalpunt()
     qDebug() << "start to deconstruct InfoOphaalpunt()";
     delete  resetButton;
     delete  aanmeldingButton;
+    delete  showHistoriekButton;
     delete  buttonBox;
     delete  ophaalpuntLabel;
     delete  ophaalpuntEdit;
@@ -312,7 +313,6 @@ InfoOphaalpunt::~InfoOphaalpunt()
     delete  everContactedBeforeCheckBox;
     delete  lastOphalingEdit;
     delete  forecastNewOphalingEdit;
-    delete  showHistoriekButton;
     if(ophaalHistoriekDialog)
         delete ophaalHistoriekDialog;
     qDebug() << "InfoOphaalpunt() deconstructed";
