@@ -88,7 +88,8 @@ HEADERS  += routetool.h \
     transportationlistdocumentwriter.h \
     ophaalpuntenwidget.h \
     mysortfilterproxymodel.h \
-    ophaalhistoriekdialog.h
+    ophaalhistoriekdialog.h \
+    sophalinghistoriek.h
 
 FORMS    += routetool.ui \
     form.ui \
