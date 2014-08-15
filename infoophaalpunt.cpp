@@ -13,7 +13,7 @@
 InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     QWidget(parent)
 {
-
+    ophaalHistoriekDialog = NULL;
     ophaalpuntLabel = new QLabel(tr("Ophaalpunt:"));
     ophaalpuntEdit = new QLineEdit();
     kurkCheckBox = new QCheckBox(tr("Ophaalpunt voor kurk"));
@@ -174,6 +174,11 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     aanmeldingButton = new QPushButton(tr("Nieuwe Aanmelding"));
     buttonBox->addButton(aanmeldingButton,QDialogButtonBox::ActionRole);
     aanmeldingButton->setHidden(true);
+    // ?? aanmeldingButton->setVisible(false);
+
+    showHistoriekButton = new QPushButton(tr("Ophalingshistoriek"));
+    buttonBox->addButton(showHistoriekButton,QDialogButtonBox::ActionRole);
+    //hide ???
 
     connect(buttonBox, SIGNAL(accepted()),this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()),this, SLOT(reject()));
@@ -181,6 +186,7 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     connect(codeComboBox,SIGNAL(currentIndexChanged(int)), this, SLOT(toggleIntercommunale(int)));
     connect(attest_nodigCheckBox,SIGNAL(stateChanged(int)), this, SLOT(toggleFrequentie(int)));
     connect(aanmeldingButton, SIGNAL(pressed()), this, SLOT(nieuweAanmeldingButtonPressed()));
+    connect(showHistoriekButton, SIGNAL(clicked()), this, SLOT(showHistoriekButtonPressed()));
 
     everContactedBeforeCheckBox = new QCheckBox(tr("ja, laatste contact bekend"));
     everContactedBeforeCheckBox->setChecked(false);
@@ -306,12 +312,14 @@ InfoOphaalpunt::~InfoOphaalpunt()
     delete  everContactedBeforeCheckBox;
     delete  lastOphalingEdit;
     delete  forecastNewOphalingEdit;
+    delete  showHistoriekButton;
+    if(ophaalHistoriekDialog)
+        delete ophaalHistoriekDialog;
     qDebug() << "InfoOphaalpunt() deconstructed";
 }
 
 void InfoOphaalpunt::accept()
 {
-
     if(id > 0)
     {
         //changing existing ophaalpunt
@@ -441,6 +449,7 @@ void InfoOphaalpunt::showAanmeldingButton(bool show_button)
     // show_button is passed to InfoOphaalpunt before id is set, so id will probably == 0 ...
 //    if (id > 0)
         aanmeldingButton->setHidden(!show_button);
+        //   ???     aanmeldingButton->setVisible(true);
 //    else
 //        aanmeldingButton->setHidden(true);
 }
@@ -615,6 +624,20 @@ void InfoOphaalpunt::nieuweAanmeldingButtonPressed()
     qDebug() << "[InfoOphaalpunt::nieuweAanmelding()]" << "nieuwe aanmelding, ophaalpunt_id" << id;
     if(id > 0)
         emit nieuweAanmelding(id);
+}
+
+void InfoOphaalpunt::showHistoriekButtonPressed()
+{
+    qDebug() << "[InfoOphaalpunt::showHistoriek()]" << "button 'Show Historiek' pressed";
+    qDebug() << "[InfoOphaalpunt::showHistoriek()]" << "show historiek, ophaalpunt_id" << id;
+
+    if(id > 0) // else it has no use of course :-)
+    {
+        if(ophaalHistoriekDialog)
+            delete ophaalHistoriekDialog;
+        ophaalHistoriekDialog = new OphaalHistoriekDialog(id); // id;
+        ophaalHistoriekDialog->show();
+    }
 }
 
 void InfoOphaalpunt::everContactedBeforeCheckBoxToggled(bool visible)

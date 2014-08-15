@@ -12,6 +12,7 @@
 #include <QComboBox>
 #include <QTextEdit>
 #include <QSqlRelationalTableModel>
+#include "ophaalhistoriekdialog.h"
 
 extern QSettings settings;
 
@@ -83,7 +84,7 @@ private:
     QLabel *extra_informatieLabel;
     QTextEdit *extra_informatieEdit;
 
-    QPushButton *aanmeldingButton;
+    QPushButton *aanmeldingButton, *showHistoriekButton;
 
     QDateEdit *lastContactDateEdit;
     QDateEdit *contactAgainOnEdit;
@@ -92,6 +93,7 @@ private:
 
     QCheckBox *everContactedBeforeCheckBox;
 
+    OphaalHistoriekDialog *ophaalHistoriekDialog;
 private slots:
     void accept();
     void reject();
@@ -99,6 +101,7 @@ private slots:
     void toggleIntercommunale(int);
     void toggleFrequentie(int);
     void nieuweAanmeldingButtonPressed();
+    void showHistoriekButtonPressed();
     void everContactedBeforeCheckBoxToggled(bool);
 
 signals:
