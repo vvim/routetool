@@ -103,6 +103,8 @@ bool connectToDatabase()
 
 int main(int argc, char *argv[])
 {
+    debuglogfile = NULL;
+
     qDebug() << "<vvim> TODO: in databank table ophaalhistoriek kan Tourist Union het ophaalpuntid 0 hebben, terwijl in table ophaalpunten het id 131 heeft. Best ophaalhistoriek aanpassen!";
     QApplication a(argc, argv);
     QLocale curLocale(QLocale("nl_NL"));
@@ -121,8 +123,16 @@ int main(int argc, char *argv[])
     qDebug() << "remove DB";
     QSqlDatabase::removeDatabase(settings.value("db/databasename").toString());
 
+
+
     /*
-      how to correctly close the logfile? This gives errors:
+    if(debuglogfile)
+        fclose(debuglogfile);
+    if(debuglogfile)
+        delete debuglogfile;
+
+
+    how to correctly close the logfile? This gives errors:
     qDebug() << "close logfile";
     fclose(debuglogfile);
     qDebug() << "delete logfile";
@@ -131,34 +141,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-
-/**
-
-Als samenvatting van ons telefoontje:
-
--optimaliseringstool met 20 adressen: zo snel mogelijk 'debugd', graag ook met databank
- ophaalpunten geïncorporeerd (tegen 2 juli)
-
--tegen 2 juli: invoeren van meldingen van op te halen hoeveelheden:
-          * extra veld voor 'datum melding'. Na de ophaling moeten de effectief opgehaalde
-                  hoeveelheden natuurlijk ook terug ingevoerd worden (in gelijkaardige, maar
-                  andere velden + extra velden voor 'kilogrammen')
-
--planning: loopt uit, graag wat meer prioriteit voor dit project. De opleveringsdatum van alle
- werkzaamheden zou ten laatste 1 september moeten zijn (tenzij i.g.v. overmacht). In je nieuwe
- planning ontbreken nog de exportfuncties (tenzij dat onder iets anders vervat zit)? Misschien op
- 2 juli toch wat vollediger proberen op te lijsten.
-
-**/
-
-/**
-    * ophaalpunt dat zich heeft aangemled (kan je uit een keuzelijst kiezen)
-    * datum melding
-    * naam contactpersoon
-    * # zakken kurk    | echte # zakken  (aparte knop "melding ingeven" , "ophaalronde bevestigen"
-    * # kg kurk        | echte # kg
-    * # zakken kaars   | echte # zakken
-    * # kg kaars       | echte # kg
-    * eventueel opmerkingen
-**/
