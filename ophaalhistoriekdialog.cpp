@@ -15,11 +15,10 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
 
     QSqlQuery query;
     // id 	timestamp 	ophalingsdatum 	chauffeur 	ophaalpunt 	zakken_kurk 	kg_kurk 	zakken_kaarsresten 	kg_kaarsresten 	opmerkingen
-    query.prepare("SELECT ophalinghistoriek.ophalingsdatum, ophaalpunten.last_contact_date, ophaalpunten.contact_again_on, "
-                        " ophaalpunten.last_ophaling_date,  ophaalpunten.forecast_new_ophaling_date "
-                  " FROM `ophalinghistoriek`, ophaalpunten "
-                  " WHERE ophalinghistoriek.ophaalpunt = ophaalpunten.id AND ophalinghistoriek.ophaalpunt= :ophaal "
-                  " ORDER BY ophalinghistoriek.ophalingsdatum DESC;");
+    query.prepare("SELECT * "
+                  " FROM ophalinghistoriek"
+                  " WHERE ophaalpunt = :ophaal "
+                  " ORDER BY ophalingsdatum DESC;");
     query.bindValue(":ophaal",ophaalpunt_id);
 
     // does the table OPHALINGHISTORIEK has an 'id' as well? -> use this in the ListWidget, or is the date "ophalingsdatum" enough to now which 'historiek' has been selected?
@@ -30,7 +29,8 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
     while(query.next())
     {
         QListWidgetItem* item = new QListWidgetItem();
-        item->setText(QLocale().toString(query.value(0).toDate(), "d MMM yyyy"));
+        item->setText(QLocale().toString(query.value(2).toDate(), "d MMM yyyy")); // DB "ophalingsdatum"
+        //item->setData(OPHAAL_HIST_DETAILS,);
         ui->historiekListWidget->addItem(item);
     }
 

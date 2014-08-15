@@ -3,6 +3,9 @@
 
 #include <QDialog>
 #include "sophalinghistoriek.h"
+
+#define OPHAAL_HIST_DETAILS Qt::UserRole
+
 namespace Ui {
 class OphaalHistoriekDialog;
 }
