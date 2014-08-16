@@ -6,12 +6,12 @@
 #include <QVBoxLayout>
 #include <QHeaderView>
 
-#define OPHAALPUNT_NAAM 0
-#define OPHAALPUNT_ID 1
-#define POSTCODE 2
-#define LAST_CONTACT_DATE 3
-#define LAST_OPHALING_DATE 4
-#define FORECAST_NEW_OPHALING_DATE 5
+#define LIST_OPHAALPUNT_NAAM 0
+#define LIST_OPHAALPUNT_ID 1
+#define LIST_POSTCODE 2
+#define LIST_LAST_CONTACT_DATE 3
+#define LIST_LAST_OPHALING_DATE 4
+#define LIST_FORECAST_NEW_OPHALING_DATE 5
 
 ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
     QWidget(parent)
@@ -25,14 +25,14 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
 
     contactTree = new QTreeWidget();
 
-    contactTree->setColumnCount(FORECAST_NEW_OPHALING_DATE + 1);
+    contactTree->setColumnCount(LIST_FORECAST_NEW_OPHALING_DATE + 1);
     contactTree->setRootIsDecorated(false);
     contactTree->setAlternatingRowColors(true);
 
     QStringList labels;
     labels << "Ophaalpunt" << "Ophaalpunt_id" << "Postcode" << "Laatste contact" << "Laatste ophaling" << "Voorspelde ophaling";
     contactTree->setHeaderLabels(labels);
-    contactTree->setColumnHidden(OPHAALPUNT_ID,true);
+    contactTree->setColumnHidden(LIST_OPHAALPUNT_ID,true);
 
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(label);
@@ -260,7 +260,7 @@ void ListOfOphaalpuntenToContact::initialise()
         qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
     }
 
-    //contactTree->setColumnWidth(OPHAALPUNT_NAAM,100);
+    //contactTree->setColumnWidth(LIST_OPHAALPUNT_NAAM,100);
 
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
@@ -271,7 +271,7 @@ void ListOfOphaalpuntenToContact::showOphaalpunt(QTreeWidgetItem* item)
 {
     info->showAanmeldingButton(true);
     info->setWindowTitle(tr("info over ophaalpunt"));
-    info->showOphaalpunt(item->text(OPHAALPUNT_ID).toInt());
+    info->showOphaalpunt(item->text(LIST_OPHAALPUNT_ID).toInt());
 }
 
 void ListOfOphaalpuntenToContact::ok_button_pushed()
@@ -421,12 +421,12 @@ void ListOfOphaalpuntenToContact::addToTreeWidget(QString NaamOphaalpunt, int Op
                                                   bool color_item)
 {
     QTreeWidgetItem *item = new QTreeWidgetItem(contactTree);
-    item->setText(OPHAALPUNT_NAAM, NaamOphaalpunt);
-    item->setText(OPHAALPUNT_ID, QString().number(OphaalpuntId));
-    item->setText(POSTCODE, Postcode);
-    item->setText(LAST_CONTACT_DATE, QLocale().toString(LastContactDate,"dd MMM yyyy"));
-    item->setText(LAST_OPHALING_DATE, QLocale().toString(LastOphalingDate,"dd MMM yyyy"));
-    item->setText(FORECAST_NEW_OPHALING_DATE, QLocale().toString(ForecastNewOphalingDate,"dd MMM yyyy"));
+    item->setText(LIST_OPHAALPUNT_NAAM, NaamOphaalpunt);
+    item->setText(LIST_OPHAALPUNT_ID, QString().number(OphaalpuntId));
+    item->setText(LIST_POSTCODE, Postcode);
+    item->setText(LIST_LAST_CONTACT_DATE, QLocale().toString(LastContactDate,"dd MMM yyyy"));
+    item->setText(LIST_LAST_OPHALING_DATE, QLocale().toString(LastOphalingDate,"dd MMM yyyy"));
+    item->setText(LIST_FORECAST_NEW_OPHALING_DATE, QLocale().toString(ForecastNewOphalingDate,"dd MMM yyyy"));
 
     //item->setFlags(item->flags()|Qt::ItemIsUserCheckable);
     //item->setCheckState(0,Qt::Unchecked);
