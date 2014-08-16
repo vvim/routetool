@@ -55,7 +55,6 @@ QVariant MySortFilterProxyModel::data(const QModelIndex &index, int role) const
 
 bool MySortFilterProxyModel::setData(const QModelIndex & index, const QVariant & value, int role)
 {
-    qDebug() << "setData called" << value << role;
     bool result = QSortFilterProxyModel::setData(index, value, role);
     if (role == Qt::CheckStateRole)
     {
