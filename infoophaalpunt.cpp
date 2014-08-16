@@ -156,6 +156,8 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     lastOphalingEdit->setLocale(QLocale::Dutch);
     lastOphalingEdit->setCalendarPopup(true);  //zie http://stackoverflow.com/questions/7031962/qdateedit-calendar-popup
 
+    lastOphalingEdit->setEnabled(false);
+
     forecastNewOphalingEdit = new QDateEdit();
     forecastNewOphalingEdit->setDisplayFormat("dd MMM yyyy");
     forecastNewOphalingEdit->setLocale(QLocale::Dutch);
