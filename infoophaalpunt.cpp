@@ -175,12 +175,11 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
 
     aanmeldingButton = new QPushButton(tr("Nieuwe Aanmelding"));
     buttonBox->addButton(aanmeldingButton,QDialogButtonBox::ActionRole);
-    aanmeldingButton->setHidden(true);
-    // ?? aanmeldingButton->setVisible(false);
+    aanmeldingButton->setVisible(false);
 
     showHistoriekButton = new QPushButton(tr("Ophalingshistoriek"));
     buttonBox->addButton(showHistoriekButton,QDialogButtonBox::ActionRole);
-    //hide ???
+    showHistoriekButton->setVisible(false);
 
     connect(buttonBox, SIGNAL(accepted()),this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()),this, SLOT(reject()));
@@ -445,15 +444,11 @@ void InfoOphaalpunt::reject()
     this->close();
 }
 
-void InfoOphaalpunt::showAanmeldingButton(bool show_button)
+void InfoOphaalpunt::showAanmeldingAndHistoriekButton(bool show_button)
 {
     qDebug() << "[InfoOphaalpunt::showAanmeldingButton(bool show_button)]" << "show_button" << show_button << "id" << id;
-    // show_button is passed to InfoOphaalpunt before id is set, so id will probably == 0 ...
-//    if (id > 0)
-        aanmeldingButton->setHidden(!show_button);
-        //   ???     aanmeldingButton->setVisible(true);
-//    else
-//        aanmeldingButton->setHidden(true);
+    aanmeldingButton->setVisible(show_button);
+    showHistoriekButton->setVisible(show_button);
 }
 
 void InfoOphaalpunt::showOphaalpunt(int ophaalpunt_id)

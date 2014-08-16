@@ -9,7 +9,7 @@ OphaalpuntenWidget::OphaalpuntenWidget(QWidget *parent) :
 {
     completer = NULL;
     info = new InfoOphaalpunt();
-    info->showAanmeldingButton(true);
+    info->showAanmeldingAndHistoriekButton(true);
     info->setWindowTitle(tr("info over ophaalpunt"));
 
     nieuweaanmeldingWidget = new NieuweAanmelding();

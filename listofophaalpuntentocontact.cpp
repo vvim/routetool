@@ -269,7 +269,7 @@ void ListOfOphaalpuntenToContact::initialise()
 
 void ListOfOphaalpuntenToContact::showOphaalpunt(QTreeWidgetItem* item)
 {
-    info->showAanmeldingButton(true);
+    info->showAanmeldingAndHistoriekButton(true);
     info->setWindowTitle(tr("info over ophaalpunt"));
     info->showOphaalpunt(item->text(LIST_OPHAALPUNT_ID).toInt());
 }

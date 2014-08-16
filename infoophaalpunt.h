@@ -26,7 +26,7 @@ public:
 
     void showOphaalpunt(int ophaalpunt_id);
     void createNewOphaalpunt();
-    void showAanmeldingButton(bool show_button);
+    void showAanmeldingAndHistoriekButton(bool show_button);
 
 private:
     int codeIndex;

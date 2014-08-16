@@ -48,6 +48,7 @@ void RouteTool::showNieuweAanmelding()
 
 void RouteTool::showNieuwOphaalpunt()
 {
+    nieuwOphaalpuntWidget.showAanmeldingAndHistoriekButton(false);
     nieuwOphaalpuntWidget.createNewOphaalpunt();
     // this functions triggers "show()" AND resets the information in the dialogbox at the same time
 }
