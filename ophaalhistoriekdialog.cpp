@@ -10,8 +10,17 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
     QDialog(parent),
     ui(new Ui::OphaalHistoriekDialog)
 {
-    ui->setupUi(this);
     qDebug() << "showing OphaalHistoriekDialog for ophaalpunt_id" << ophaalpunt_id;
+
+    ui->setupUi(this);
+    QStringList labels;
+    labels << "Historiek Id" << "Ophalingsdatum" << "Chauffeur" << "Ophaalpunt"
+           << "Kurk (kg)" << "Kaars (kg)" << "Kurk (zakken)" << "Kaars (zakken)" << "Opmerkingen";
+
+
+
+    model = new QStandardItemModel(0, labels.count());
+    model->setHorizontalHeaderLabels(labels);
 
     QSqlQuery query;
     // id 	timestamp 	ophalingsdatum 	chauffeur 	ophaalpunt 	zakken_kurk 	kg_kurk 	zakken_kaarsresten 	kg_kaarsresten 	opmerkingen
@@ -28,26 +37,46 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
 
     while(query.next())
     {
-        QListWidgetItem* item = new QListWidgetItem();
-        item->setText(QLocale().toString(query.value(2).toDate(), "d MMM yyyy")); // DB "ophalingsdatum"
-        //item->setData(OPHAAL_HIST_DETAILS,);
-        ui->historiekListWidget->addItem(item);
+        int historiek_id = query.value(0).toInt();
+        QDate ophalingsdatum= query.value(2).toDate();
+        QString chauffeur = query.value(3).toString();
+        int ophaalpunt_id = query.value(4).toInt();
+        double zakken_kurk = query.value(5).toDouble();
+        double kg_kurk = query.value(6).toDouble();
+        double zakken_kaars = query.value(7).toDouble();
+        double kg_kaars = query.value(8).toDouble();
+        QString opmerkingen = query.value(9).toString();
+
+        addToTreeModel(historiek_id, ophalingsdatum, chauffeur, ophaalpunt_id, kg_kurk, kg_kaars, zakken_kurk, zakken_kaars, opmerkingen);
     }
 
-    if(ui->historiekListWidget->count() == 0)
+    if(model->rowCount() == 0)
     {
         //nothing in historiek? Tell user "empty!"
-        QListWidgetItem* item = new QListWidgetItem();
-        item->setText(tr("Geen ophaalhistoriek voor dit ophaalpunt"));
-        ui->historiekListWidget->addItem(item);
+        delete model;
+        model = new QStandardItemModel(0, 1);
+        QStandardItem * item_model = new QStandardItem();
+        item_model->setText(tr("Geen ophaalhistoriek voor dit ophaalpunt"));
+        model->appendRow(item_model);
     }
 
-    //connect( DOUBLECLICK, showDetails(ophalingsdatum) );
+    ui->historiekTreeView->setModel(model);
+    ui->historiekTreeView->setRootIsDecorated(false);
+    ui->historiekTreeView->setAlternatingRowColors(true);
+    ui->historiekTreeView->setColumnHidden(HIST_HISTORIEK_ID,true);
+    ui->historiekTreeView->setColumnHidden(HIST_OPHAALPUNT_ID,true);
+
+    ui->historiekTreeView->resizeColumnToContents(HIST_ZAK_KAARS);
+    ui->historiekTreeView->resizeColumnToContents(HIST_ZAK_KURK);
+    ui->historiekTreeView->resizeColumnToContents(HIST_WEIGHT_KAARS);
+    ui->historiekTreeView->resizeColumnToContents(HIST_WEIGHT_KURK);
+    ui->historiekTreeView->resizeColumnToContents(HIST_OPMERKINGEN);
 }
 
 OphaalHistoriekDialog::~OphaalHistoriekDialog()
 {
     qDebug() << "start to deconstruct OphaalHistoriekDialog()";
+    delete model;
     delete ui;
     qDebug() << "OphaalHistoriekDialog() deconstructed";
 }
@@ -60,4 +89,19 @@ void OphaalHistoriekDialog::on_buttonBox_accepted()
 void OphaalHistoriekDialog::on_buttonBox_rejected()
 {
     this->close();
+}
+
+void OphaalHistoriekDialog::addToTreeModel(int _historiek_id, QDate _ophalingsdatum, QString _chauffeur, int _ophaalpunt_id, double _kg_kurk, double _kg_kaarsresten, double _zakken_kurk, double _zakken_kaarsresten, QString _opmerkingen)
+{
+    model->insertRow(0);
+    //model->setData(model->index(0, OPHAALPUNT_NAAM), NaamOphaalpunt);
+    model->setData(model->index(0, HIST_HISTORIEK_ID), _historiek_id);
+    model->setData(model->index(0, HIST_OPHALINGSDATUM), _ophalingsdatum);
+    model->setData(model->index(0, HIST_CHAUFFEUR), _chauffeur);
+    model->setData(model->index(0, HIST_OPHAALPUNT_ID), _ophaalpunt_id);
+    model->setData(model->index(0, HIST_WEIGHT_KURK), _kg_kurk);
+    model->setData(model->index(0, HIST_WEIGHT_KAARS), _kg_kaarsresten);
+    model->setData(model->index(0, HIST_ZAK_KURK), _zakken_kurk);
+    model->setData(model->index(0, HIST_ZAK_KAARS), _zakken_kaarsresten);
+    model->setData(model->index(0, HIST_OPMERKINGEN), _opmerkingen);
 }

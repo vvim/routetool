@@ -2,9 +2,18 @@
 #define OPHAALHISTORIEKDIALOG_H
 
 #include <QDialog>
-#include "sophalinghistoriek.h"
+#include <QStandardItemModel>
+//#include "ophaalhistoriekproxymodel.h"
 
-#define OPHAAL_HIST_DETAILS Qt::UserRole
+#define HIST_HISTORIEK_ID 0
+#define HIST_OPHALINGSDATUM 1
+#define HIST_CHAUFFEUR 2
+#define HIST_OPHAALPUNT_ID 3
+#define HIST_WEIGHT_KURK 4
+#define HIST_WEIGHT_KAARS 5
+#define HIST_ZAK_KURK 6
+#define HIST_ZAK_KAARS 7
+#define HIST_OPMERKINGEN 8
 
 namespace Ui {
 class OphaalHistoriekDialog;
@@ -25,6 +34,8 @@ private slots:
 
 private:
     Ui::OphaalHistoriekDialog *ui;
+    QStandardItemModel *model;
+    void addToTreeModel(int _historiek_id, QDate _ophalingsdatum, QString _chauffeur, int _ophaalpunt_id, double _kg_kurk, double _kg_kaarsresten, double _zakken_kurk, double _zakken_kaarsresten, QString _opmerkingen);
 };
 
 #endif // OPHAALHISTORIEKDIALOG_H
