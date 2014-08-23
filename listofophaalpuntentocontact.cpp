@@ -6,6 +6,9 @@
 #include <QVBoxLayout>
 #include <QHeaderView>
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
 #define LIST_OPHAALPUNT_NAAM 0
 #define LIST_OPHAALPUNT_ID 1
 #define LIST_POSTCODE 2
@@ -48,24 +51,24 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
     connect(contactTree->header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(sortTreeWidget(int)));
     connect(contactTree,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(showOphaalpunt(QTreeWidgetItem*)));
 
-    qDebug() << "<vvim> TODO: should we call UptodateAllOphaalpunten() everytime we initialise the contactTree?";
+    vvimDebug() << "<vvim> TODO: should we call UptodateAllOphaalpunten() everytime we initialise the contactTree?";
     UpdateAllOphaalpunten();
 }
 
 ListOfOphaalpuntenToContact::~ListOfOphaalpuntenToContact()
 {
-    qDebug() << "start to deconstruct ListOfOphaalpuntenToContact()";
+    vvimDebug() << "start to deconstruct ListOfOphaalpuntenToContact()";
     delete info;
     delete nieuweaanmeldingWidget;
     delete contactTree;
     delete buttonBox;
     delete label;
-    qDebug() << "ListOfOphaalpuntenToContact() deconstructed";
+    vvimDebug() << "ListOfOphaalpuntenToContact() deconstructed";
 }
 
 void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
 {
-    qDebug() << "[ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)]" << "ophaalpuntid = " << ophaalpuntid;
+    vvimDebug() << "ophaalpuntid = " << ophaalpuntid;
 
     QSqlQuery query;
     query.prepare("SELECT ophalinghistoriek.ophalingsdatum, ophaalpunten.last_contact_date, ophaalpunten.contact_again_on, "
@@ -110,26 +113,26 @@ void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
                     break;
                 QDate oudere_ophaling = query.value(0).toDate(); // from table OPHAAL_HISTORIEK
                 aantal_dagen_tussen_verschillende_ophalingen += oudere_ophaling.daysTo(temp_ophaling);
-                qDebug() << "....ophaling" << aantal_ophalingen << "gebeurde op" << oudere_ophaling.toString() << ", totaal dagen:" << aantal_dagen_tussen_verschillende_ophalingen;
+                vvimDebug() << "....ophaling" << aantal_ophalingen << "gebeurde op" << oudere_ophaling.toString() << ", totaal dagen:" << aantal_dagen_tussen_verschillende_ophalingen;
                 aantal_ophalingen++;
                 temp_ophaling = oudere_ophaling;
             }
-            qDebug() << "..einde van de while-loop na" << aantal_ophalingen << "loops. Totaal: "<< aantal_dagen_tussen_verschillende_ophalingen;
+            vvimDebug() << "..einde van de while-loop na" << aantal_ophalingen << "loops. Totaal: "<< aantal_dagen_tussen_verschillende_ophalingen;
 
             if(aantal_ophalingen > 0)
             {
                 /// B] hebben we meer dan 2 voorspellingen, dan kunnen we een gemiddelde berekenen
-                qDebug() << "..Aantal ophalingen:" << aantal_ophalingen << "> 0 => we kunnen een gemiddelde berekenen";
+                vvimDebug() << "..Aantal ophalingen:" << aantal_ophalingen << "> 0 => we kunnen een gemiddelde berekenen";
 
                 int gemiddelde = aantal_dagen_tussen_verschillende_ophalingen / aantal_ophalingen;
 
                 /// we zetten een voorspelling / ForeCast nooit verder in de tijd dan 365 dagen
                 if(gemiddelde > 365)
                 {
-                    qDebug() << "....Gemiddelde blijkt groter dan een jaar: " << gemiddelde << "dagen, afronden naar 1 jaar.";
+                    vvimDebug() << "....Gemiddelde blijkt groter dan een jaar: " << gemiddelde << "dagen, afronden naar 1 jaar.";
                     gemiddelde = 365;
                 }
-                qDebug() << "..gemiddeld:" << gemiddelde;
+                vvimDebug() << "..gemiddeld:" << gemiddelde;
 
                 QDate max_of_laatste_ophaling = qMax(laatste_ophaling_taken_from_Ophaalhistoriek, ophaalpunt_LastOphalingDate_taken_from_Ophaalpunten);
 
@@ -141,14 +144,14 @@ void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
                 query_forecast.bindValue(":forecast",qMax(ophaalpunt_ForecastNewOphalingDate_taken_from_Ophaalpunten, max_of_laatste_ophaling.addDays(gemiddelde)));
                 query_forecast.bindValue(":id",ophaalpuntid);
 
-                qDebug() << "...datum controle:";
-                qDebug() << ".....laatste_ophaling:" << laatste_ophaling_taken_from_Ophaalhistoriek.toString();
-                qDebug() << ".....huidige waarde in DB: ophaalpunt_LastContactDate:" << ophaalpunt_LastOphalingDate_taken_from_Ophaalpunten.toString();
-                qDebug() << "....... max:" << max_of_laatste_ophaling.toString();
-                qDebug() << "...voorspelling is dus:";
-                qDebug() << ".....berekend:" << max_of_laatste_ophaling.addDays(gemiddelde);
-                qDebug() << ".....in de DB:" << ophaalpunt_ForecastNewOphalingDate_taken_from_Ophaalpunten;
-                qDebug() << "....... max:" << qMax(ophaalpunt_ForecastNewOphalingDate_taken_from_Ophaalpunten, max_of_laatste_ophaling.addDays(gemiddelde));
+                vvimDebug() << "...datum controle:";
+                vvimDebug() << ".....laatste_ophaling:" << laatste_ophaling_taken_from_Ophaalhistoriek.toString();
+                vvimDebug() << ".....huidige waarde in DB: ophaalpunt_LastContactDate:" << ophaalpunt_LastOphalingDate_taken_from_Ophaalpunten.toString();
+                vvimDebug() << "....... max:" << max_of_laatste_ophaling.toString();
+                vvimDebug() << "...voorspelling is dus:";
+                vvimDebug() << ".....berekend:" << max_of_laatste_ophaling.addDays(gemiddelde);
+                vvimDebug() << ".....in de DB:" << ophaalpunt_ForecastNewOphalingDate_taken_from_Ophaalpunten;
+                vvimDebug() << "....... max:" << qMax(ophaalpunt_ForecastNewOphalingDate_taken_from_Ophaalpunten, max_of_laatste_ophaling.addDays(gemiddelde));
 
                 QString query_forecast_in_string = QString(" UPDATE ophaalpunten "
                                                            " SET last_ophaling_date = %1, forecast_new_ophaling_date = %2 "
@@ -158,17 +161,17 @@ void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
                                                     .arg(ophaalpuntid);
 
                 if(query_forecast.exec())
-                    qDebug() << "..." << query_forecast_in_string << "done";
+                    vvimDebug() << "..." << query_forecast_in_string << "done";
                 else
-                    qDebug() << "..." << query_forecast_in_string << "went WRONG:" << query_forecast.lastError();
+                    vvimDebug() << "..." << query_forecast_in_string << "went WRONG:" << query_forecast.lastError();
             }
             else
             {
                 /// C] zijn er nog geen 2 ophaalmomenten geweest, dan controleren we of de tabel OPHAALPUNTEN de juiste info heeft
-                qDebug() << "..Aantal ophalingen:" << aantal_ophalingen << "== 0 => we kunnen geen gemiddelde berekenen";
-                qDebug() << "...we kunnen wel testen of de tabel Ophaalpunten de juiste informatie heeft:";
-                qDebug() << "....laatste ophaling volgens tabel Ophaalpunten:" << ophaalpunt_LastOphalingDate_taken_from_Ophaalpunten;
-                qDebug() << "....laatste ophaling volgens tabel OphaalHistoriek:" << laatste_ophaling_taken_from_Ophaalhistoriek;
+                vvimDebug() << "..Aantal ophalingen:" << aantal_ophalingen << "== 0 => we kunnen geen gemiddelde berekenen";
+                vvimDebug() << "...we kunnen wel testen of de tabel Ophaalpunten de juiste informatie heeft:";
+                vvimDebug() << "....laatste ophaling volgens tabel Ophaalpunten:" << ophaalpunt_LastOphalingDate_taken_from_Ophaalpunten;
+                vvimDebug() << "....laatste ophaling volgens tabel OphaalHistoriek:" << laatste_ophaling_taken_from_Ophaalhistoriek;
 
                 if(ophaalpunt_LastOphalingDate_taken_from_Ophaalpunten < laatste_ophaling_taken_from_Ophaalhistoriek)
                 {
@@ -182,7 +185,7 @@ void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
                     query_laatste_ophaling.bindValue(":last_ophaling",laatste_ophaling_taken_from_Ophaalhistoriek);
                     query_laatste_ophaling.bindValue(":id",ophaalpuntid);
 
-                    qDebug() << "...datum in ophaalpunten moet dus aangepast worden!!";
+                    vvimDebug() << "...datum in ophaalpunten moet dus aangepast worden!!";
 
                     QString query_laatste_ophaling_in_string = QString(" UPDATE ophaalpunten "
                                                                " SET last_ophaling_date = %1 "
@@ -191,15 +194,15 @@ void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
                                                         .arg(ophaalpuntid);
 
                     if(query_laatste_ophaling.exec())
-                        qDebug() << "..." << query_laatste_ophaling_in_string << "done";
+                        vvimDebug() << "..." << query_laatste_ophaling_in_string << "done";
                     else
-                        qDebug() << "..." << query_laatste_ophaling_in_string << "went WRONG:" << query_laatste_ophaling.lastError();
+                        vvimDebug() << "..." << query_laatste_ophaling_in_string << "went WRONG:" << query_laatste_ophaling.lastError();
                 }
             }
         }
     }
     else
-        qDebug() << "[ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)]" << "ophaalpuntid = " << ophaalpuntid << "-" << "something went wrong with checking for an existing aanmelding" << query.lastError();
+        vvimDebug() << "ophaalpuntid = " << ophaalpuntid << "-" << "something went wrong with checking for an existing aanmelding" << query.lastError();
 }
 
 
@@ -210,14 +213,14 @@ void ListOfOphaalpuntenToContact::UpdateAllOphaalpunten()
     query.prepare("SELECT DISTINCT ophaalpunt FROM `ophalinghistoriek`");
     if(query.exec())
     {
-        qDebug() << "\n\n ---------- START invullen voorspellingen:" << QDateTime().currentDateTime().toString();
+        vvimDebug() << "\n\n ---------- START invullen voorspellingen:" << QDateTime().currentDateTime().toString();
         while (query.next())
         {
-            qDebug() << "\nophaalpunt" << query.value(0).toInt();
+            vvimDebug() << "\nophaalpunt" << query.value(0).toInt();
             UpdateOphaalpunt(query.value(0).toInt());
         }
-        qDebug() << "\n\n ---------- END invullen voorspellingen:" << QDateTime().currentDateTime().toString();
-        qDebug() << "check with query SELECT id, `last_contact_date`, `contact_again_on` FROM `ophaalpunten` WHERE `last_contact_date` > 0";
+        vvimDebug() << "\n\n ---------- END invullen voorspellingen:" << QDateTime().currentDateTime().toString();
+        vvimDebug() << "check with query SELECT id, `last_contact_date`, `contact_again_on` FROM `ophaalpunten` WHERE `last_contact_date` > 0";
     }
 
 }
@@ -257,7 +260,7 @@ void ListOfOphaalpuntenToContact::initialise()
     }
     else
     {
-        qDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL";
+        vvimDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL";
         qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
     }
 
@@ -322,14 +325,14 @@ void ListOfOphaalpuntenToContact::show_one_year_ophaalpunten()
                 }
             }
             else
-                qDebug() << "something went wrong with checking for an existing aanmelding";
+                vvimDebug() << "something went wrong with checking for an existing aanmelding";
 
             addToTreeWidget(ophaalpunt_naam, ophaalpunt_id, ophaalpunt_postcode, last_contact_date, last_ophaling_date, forecast_ophaling_date, aanmelding_running);
         }
     }
     else
     {
-        qDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode FROM ophaalpunten WHERE not exists (select null from ophalinghistoriek where ophalinghistoriek.ophaalpunt = ophaalpunten.id)";
+        vvimDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode FROM ophaalpunten WHERE not exists (select null from ophalinghistoriek where ophalinghistoriek.ophaalpunt = ophaalpunten.id)";
         qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode FROM ophaalpunten WHERE not exists (select null from ophalinghistoriek where ophalinghistoriek.ophaalpunt = ophaalpunten.id)");
     }
 
@@ -385,14 +388,14 @@ void ListOfOphaalpuntenToContact::show_never_contacted_ophaalpunten()
                 }
             }
             else
-                qDebug() << "something went wrong with checking for an existing aanmelding";
+                vvimDebug() << "something went wrong with checking for an existing aanmelding";
 
             addToTreeWidget(ophaalpunt_naam, ophaalpunt_id, ophaalpunt_postcode, last_contact_date, last_ophaling_date, forecast_ophaling_date, aanmelding_running);
         }
     }
     else
     {
-        qDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode FROM ophaalpunten WHERE not exists (select null from ophalinghistoriek where ophalinghistoriek.ophaalpunt = ophaalpunten.id)";
+        vvimDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode FROM ophaalpunten WHERE not exists (select null from ophalinghistoriek where ophalinghistoriek.ophaalpunt = ophaalpunten.id)";
         qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode FROM ophaalpunten WHERE not exists (select null from ophalinghistoriek where ophalinghistoriek.ophaalpunt = ophaalpunten.id)");
     }
 
@@ -406,8 +409,8 @@ void ListOfOphaalpuntenToContact::show_never_contacted_ophaalpunten()
 }
 void ListOfOphaalpuntenToContact::sortTreeWidget(int column)
 {
-    qDebug() << "<vvim>" << "[ListOfOphaalpuntenToContact::sortTreeWidget]" << "goes wrong for sorting numbers, see" << "http://stackoverflow.com/questions/363200/is-it-possible-to-sort-numbers-in-a-qtreewidget-column";
-    qDebug() << "<vvim>" << "read http://stackoverflow.com/questions/13075643/sorting-by-date-in-qtreewidget" << "The model you use for the tree view need to return QDate or QDateTime for the column in the data() function";
+    vvimDebug() << "<vvim>" << "goes wrong for sorting numbers, see" << "http://stackoverflow.com/questions/363200/is-it-possible-to-sort-numbers-in-a-qtreewidget-column";
+    vvimDebug() << "<vvim>" << "read http://stackoverflow.com/questions/13075643/sorting-by-date-in-qtreewidget" << "The model you use for the tree view need to return QDate or QDateTime for the column in the data() function";
     // goes wrong for sorting numbers, see
     // http://stackoverflow.com/questions/363200/is-it-possible-to-sort-numbers-in-a-qtreewidget-column
     if(sortingascending)

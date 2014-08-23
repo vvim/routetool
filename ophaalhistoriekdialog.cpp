@@ -6,11 +6,14 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
 OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::OphaalHistoriekDialog)
 {
-    qDebug() << "showing OphaalHistoriekDialog for ophaalpunt_id" << ophaalpunt_id;
+    vvimDebug() << "showing OphaalHistoriekDialog for ophaalpunt_id" << ophaalpunt_id;
 
     ui->setupUi(this);
     QStringList labels;
@@ -33,7 +36,7 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
     // does the table OPHALINGHISTORIEK has an 'id' as well? -> use this in the ListWidget, or is the date "ophalingsdatum" enough to now which 'historiek' has been selected?
 
     if(!query.exec())
-        qDebug() << "[OphaalHistoriekDialog]" << "Something went wrong with querying ophaalpunt" << ophaalpunt_id << ":" << query.lastError();
+        vvimDebug() << "[OphaalHistoriekDialog]" << "Something went wrong with querying ophaalpunt" << ophaalpunt_id << ":" << query.lastError();
 
     while(query.next())
     {
@@ -75,10 +78,10 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
 
 OphaalHistoriekDialog::~OphaalHistoriekDialog()
 {
-    qDebug() << "start to deconstruct OphaalHistoriekDialog()";
+    vvimDebug() << "start to deconstruct OphaalHistoriekDialog()";
     delete model;
     delete ui;
-    qDebug() << "OphaalHistoriekDialog() deconstructed";
+    vvimDebug() << "OphaalHistoriekDialog() deconstructed";
 }
 
 void OphaalHistoriekDialog::on_buttonBox_accepted()

@@ -5,6 +5,9 @@
 #include <math.h>
 #include <QMessageBox>
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
 NieuweAanmelding::NieuweAanmelding(QWidget *parent) :
     QWidget(parent)
 {
@@ -164,7 +167,7 @@ void NieuweAanmelding::aanmeldingVoorOphaalpunt(int ophaalpunt_id)
     query.bindValue(":id", ophaalpunt_id);
 
     if(!query.exec())
-        qDebug() << "[NieuweAanmelding::aanmeldingVoorOphaalpunt()]" << "SELECT FAILED!" << query.lastError();
+        vvimDebug() << "[NieuweAanmelding::aanmeldingVoorOphaalpunt()]" << "SELECT FAILED!" << query.lastError();
     else
     {
         if (query.next())
@@ -179,7 +182,7 @@ void NieuweAanmelding::aanmeldingVoorOphaalpunt(int ophaalpunt_id)
 
 NieuweAanmelding::~NieuweAanmelding()
 {
-    qDebug() << "start to deconstruct NieuweAanmelding()";
+    vvimDebug() << "start to deconstruct NieuweAanmelding()";
     delete info;
     delete locationLabel;
     delete locationEdit;
@@ -200,7 +203,7 @@ NieuweAanmelding::~NieuweAanmelding()
     delete buttonBox;
     if(completer)
         delete completer;
-    qDebug() << "NieuweAanmelding() deconstructed";
+    vvimDebug() << "NieuweAanmelding() deconstructed";
 }
 
 void NieuweAanmelding::accept()

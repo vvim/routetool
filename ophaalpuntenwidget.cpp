@@ -4,6 +4,9 @@
 #include <QVBoxLayout>
 #include "ophaalpuntenwidget.h"
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
 OphaalpuntenWidget::OphaalpuntenWidget(QWidget *parent) :
     QWidget(parent)
 {
@@ -43,7 +46,7 @@ OphaalpuntenWidget::OphaalpuntenWidget(QWidget *parent) :
 
 OphaalpuntenWidget::~OphaalpuntenWidget()
 {
-    qDebug() << "start to deconstruct OphaalpuntenWidget()";
+    vvimDebug() << "start to deconstruct OphaalpuntenWidget()";
     delete ophaalpuntLabel;
     delete ophaalpuntEdit;
     delete info;
@@ -51,12 +54,12 @@ OphaalpuntenWidget::~OphaalpuntenWidget()
     delete toonOphaalpunt;
     if(completer)
     {
-        qDebug() << "completer _not_ NULL";
+        vvimDebug() << "completer _not_ NULL";
         delete completer;
     }
     else
-        qDebug() << "completer == NULL";
-    qDebug() << "OphaalpuntenWidget() deconstructed";
+        vvimDebug() << "completer == NULL";
+    vvimDebug() << "OphaalpuntenWidget() deconstructed";
 }
 
 void OphaalpuntenWidget::loadOphaalpunten()

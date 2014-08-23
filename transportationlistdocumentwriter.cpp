@@ -3,6 +3,9 @@
 #include <QPainter>
 #include <QDebug>
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
 // read http://doc.qt.digia.com/qq/qq27-odfwriter.html
 
 // interesting read on PDFs: https://qt-project.org/forums/viewthread/38065
@@ -74,9 +77,9 @@ TransportationListDocumentWriter::TransportationListDocumentWriter(QDate date_of
 
 TransportationListDocumentWriter::~TransportationListDocumentWriter()
 {
-  qDebug() << "start to deconstruct TransportationListDocumentWriter()";
+  vvimDebug() << "start to deconstruct TransportationListDocumentWriter()";
   delete m_document;
-  qDebug() << "TransportationListDocumentWriter() deconstructed";
+  vvimDebug() << "TransportationListDocumentWriter() deconstructed";
 }
 
 void TransportationListDocumentWriter::addOphaalpunt(const TransportationListDocumentWriter::Ophaalpunt &ophaalpunt)
@@ -110,7 +113,7 @@ void TransportationListDocumentWriter::write(const QString &fileName, const QStr
 
     QTextDocumentWriter writer(fn);
     writer.setFormat("plaintext");
-    qDebug() << "filename van document is:" << fn;
+    vvimDebug() << "filename van document is:" << fn;
     writer.write(m_document);
 }
 

@@ -1,6 +1,9 @@
 #include "configuration.h"
 #include <QDoubleValidator>
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
 Configuration::Configuration(QWidget *parent) :
     QWidget(parent)
 {
@@ -106,7 +109,7 @@ void Configuration::setOriginalValues()
 
 Configuration::~Configuration()
 {
-    qDebug() << "start to deconstruct Configuration()";
+    vvimDebug() << "start to deconstruct Configuration()";
     delete apiKeyEdit;
     delete db_databasenameEdit;
     delete db_hostEdit;
@@ -120,5 +123,5 @@ Configuration::~Configuration()
     delete max_volume_vrachtwagenEdit;
     delete startpuntEdit;
     delete resetButton;
-    qDebug() << "Configuration() deconstructed";
+    vvimDebug() << "Configuration() deconstructed";
 }

@@ -5,6 +5,9 @@
     #include <windows.h> // for Sleep
 #endif
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
 #include <QApplication>
 #include <QJson/Parser>
 #include <math.h>
@@ -87,7 +90,7 @@ QString DistanceMatrix::buildQjsonUrl(QList <SMarker*> markers, int origins_star
         //QString address_to_look_up = prepareForUrl((*it)->caption);
         QString address_to_look_up = QString("%1,%2").arg((*it)->north).arg((*it)->east);
 
-        qDebug() << "!! !!" << address_to_look_up << "!! !!";
+        vvimDebug() << "!! !!" << address_to_look_up << "!! !!";
 
         if( (i >= origins_start) && (i <= origins_end) )
             origins += address_to_look_up + "|";
@@ -106,12 +109,12 @@ QString DistanceMatrix::buildQjsonUrl(QList <SMarker*> markers, int origins_star
         destinations.chop(1);
 
     // <vvim> TODO: if QString.length() > 2000 => gebruik coordinaten ipv adres!
-    qDebug() << "<vvim> TODO: if QString.length() > 2000 => gebruik coordinaten ipv adres!";
+    vvimDebug() << "<vvim> TODO: if QString.length() > 2000 => gebruik coordinaten ipv adres!";
 
     QString QjsonUrl = QString("https://maps.googleapis.com/maps/api/distancematrix/json?origins=%1&destinations=%2&key=%3&oe=utf8&sensor=false").arg(origins).arg(destinations).arg(settings.value("apiKey").toString());
-    qDebug() << "<vvim> QjsonUrl:" << QjsonUrl;
+    vvimDebug() << "<vvim> QjsonUrl:" << QjsonUrl;
     if(QjsonUrl.length() > MAX_URL_LENGTH)
-        qDebug() << "url is too long:" << QjsonUrl.length() << "exceeds the maximum of" << MAX_URL_LENGTH;
+        vvimDebug() << "url is too long:" << QjsonUrl.length() << "exceeds the maximum of" << MAX_URL_LENGTH;
     return QjsonUrl;
 
     return origins;
@@ -141,12 +144,12 @@ QString DistanceMatrix::buildQjsonUrl(QList <SMarker*> markers)
     QString destinations = origins;
 
     // <vvim> TODO: if QString.length() > 2000 => gebruik coordinaten ipv adres!
-    qDebug() << "<vvim> TODO: if QString.length() > 2000 => gebruik coordinaten ipv adres!";
+    vvimDebug() << "<vvim> TODO: if QString.length() > 2000 => gebruik coordinaten ipv adres!";
 
     QString QjsonUrl = QString("https://maps.googleapis.com/maps/api/distancematrix/json?origins=%1&destinations=%2&key=%3&oe=utf8&sensor=false").arg(origins).arg(destinations).arg(settings.value("apiKey").toString());
-    qDebug() << "<vvim> QjsonUrl:" << QjsonUrl;
+    vvimDebug() << "<vvim> QjsonUrl:" << QjsonUrl;
     if(QjsonUrl.length() > MAX_URL_LENGTH)
-        qDebug() << "url is too long:" << QjsonUrl.length() << "exceeds the maximum of" << MAX_URL_LENGTH;
+        vvimDebug() << "url is too long:" << QjsonUrl.length() << "exceeds the maximum of" << MAX_URL_LENGTH;
     return QjsonUrl;
 }
 
@@ -155,35 +158,35 @@ void DistanceMatrix::getDistances(QList <SMarker*> markers)
     if(m_markers.length() > 0)
     {
 
-        qDebug() << "DistanceMatrix has been called before, so we must delete the matrices!";
+        vvimDebug() << "DistanceMatrix has been called before, so we must delete the matrices!";
         deleteTheMatrices();
 
     }
 
     m_markers = markers;
 
-    qDebug() << "<vvim> TODO: mag dit, of moeten we een nieuwe m_markers creëren en deze laten invullen met 'markers'???";
+    vvimDebug() << "<vvim> TODO: mag dit, of moeten we een nieuwe m_markers creëren en deze laten invullen met 'markers'???";
 
     // <vvim> TODO: maak dat de eerste SMarker altijd Vlaspit is!!!! En voeg deze automatisch toe bij het opstarten
-    qDebug() << "<vvim> TODO: maak dat de eerste SMarker altijd Vlaspit is!!!! En voeg deze automatisch toe bij het opstarten aub";
+    vvimDebug() << "<vvim> TODO: maak dat de eerste SMarker altijd Vlaspit is!!!! En voeg deze automatisch toe bij het opstarten aub";
 
     // HIER ENKEL DE EERSTE (10) PAKKEN  ( -->  MAX_NR_OF_CITIES)
-    qDebug() << "<vvim> TODO: check whether markers.length()" << markers.length() << " > " << MAX_NR_OF_CITIES << (markers.length() > MAX_NR_OF_CITIES);
-    qDebug() << "<vvim> TODO:  + check whether m_markers.length()" << m_markers.length() << " > " << MAX_NR_OF_CITIES << (m_markers.length() > MAX_NR_OF_CITIES);
-    qDebug() << "<vvim> TODO: check whether markers.size()" << markers.size() << " > " << MAX_NR_OF_CITIES << (markers.size() > MAX_NR_OF_CITIES);
-    qDebug() << "<vvim> TODO:  + check whether m_markers.size()" << m_markers.size() << " > " << MAX_NR_OF_CITIES << (m_markers.size() > MAX_NR_OF_CITIES);
+    vvimDebug() << "<vvim> TODO: check whether markers.length()" << markers.length() << " > " << MAX_NR_OF_CITIES << (markers.length() > MAX_NR_OF_CITIES);
+    vvimDebug() << "<vvim> TODO:  + check whether m_markers.length()" << m_markers.length() << " > " << MAX_NR_OF_CITIES << (m_markers.length() > MAX_NR_OF_CITIES);
+    vvimDebug() << "<vvim> TODO: check whether markers.size()" << markers.size() << " > " << MAX_NR_OF_CITIES << (markers.size() > MAX_NR_OF_CITIES);
+    vvimDebug() << "<vvim> TODO:  + check whether m_markers.size()" << m_markers.size() << " > " << MAX_NR_OF_CITIES << (m_markers.size() > MAX_NR_OF_CITIES);
 
     if(m_markers.length() > (2*MAX_NR_OF_CITIES))
     {
         // can't handle this with AA + B + CC +D
-        qDebug() << "<vvim> ERROR: aantal steden:"<< m_markers.length() <<" > 2x maximum dat Google toelaat om op te zoeken, nl" << MAX_NR_OF_CITIES << ". We kunnen dit niet oplossen. Google Maps API For Business aanschaffen?";
+        vvimDebug() << "<vvim> ERROR: aantal steden:"<< m_markers.length() <<" > 2x maximum dat Google toelaat om op te zoeken, nl" << MAX_NR_OF_CITIES << ". We kunnen dit niet oplossen. Google Maps API For Business aanschaffen?";
         emit errorOccured(QString("You exceeded the maximum number of places (%1 > %2) that we can calculate the distances from. Check the Google API Distance Matrix Limits.").arg(m_markers.length()).arg(2*MAX_NR_OF_CITIES));
         return;
     }
     else if(m_markers.length() > MAX_NR_OF_CITIES)
     {
         // telkens ook 1 seconde wachten aub
-        qDebug() << "<vvim> SPECIAL SAUCE";
+        vvimDebug() << "<vvim> SPECIAL SAUCE";
         distance_matrix_ready_to_process = DISTANCE_MATRIX_PART_AA; // origins = [0, MAX[, destinations = [0, MAX[
         QString url = buildQjsonUrl(m_markers,0,MAX_NR_OF_CITIES,0,MAX_NR_OF_CITIES);
         m_pNetworkAccessManager->get(QNetworkRequest(QUrl(url))); // staat er een delay op het antwoord? Of moeten we continu testen: "distance_matrix_ready_to_process == DISTANCE_MATRIX_PART_B;" ???
@@ -211,15 +214,15 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
     if(distance_matrix_ready_to_process == DISTANCE_MATRIX_PART_AA)
     {
 // TODO: <vvim> this should be one level up, because all the same for AA, B, CC, D & MATRIX_READY
-        qDebug() << "DISTANCE_MATRIX_PART_AA: preparing the distancematrix";
+        vvimDebug() << "DISTANCE_MATRIX_PART_AA: preparing the distancematrix";
         // veel zaken een niveau hoger zetten,
         // veel variabele: classe-variabele maken
 
         citynames->clear(); // <vvim> dit is nodig, zie probleempje-20140423-citiesnames
 
         QString json = reply->readAll();
-        //qDebug() << "AA Reply = " << json;
-        //qDebug() << "URL = " << reply->url();
+        //vvimDebug() << "AA Reply = " << json;
+        //vvimDebug() << "URL = " << reply->url();
         QString strUrl = reply->url().toString();
 
         QJson::Parser parser;
@@ -233,14 +236,14 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
 
         // JSON: "{}" is een map, "[]" is een list
         QVariantList rowsList = result["rows"].toList(); // bevat de distance matrix in een list
-        //qDebug() << "aantal rijen == aantal oorsprongsadressen" << rowsList.length() << result["origin_addresses"].toList().length(); // lengte van de rows is afhankelijk van het aantal "origin_addresses"
-        //qDebug() << "aantal elementen eerste rij == aantal destinaties"  << rowsList.first().toMap()["elements"].toList().length() << result["destination_addresses"].toList().length(); // aantal "destination_addresses" bepaalt het aantal elementen per row -> [ { 'elements' [
+        //vvimDebug() << "aantal rijen == aantal oorsprongsadressen" << rowsList.length() << result["origin_addresses"].toList().length(); // lengte van de rows is afhankelijk van het aantal "origin_addresses"
+        //vvimDebug() << "aantal elementen eerste rij == aantal destinaties"  << rowsList.first().toMap()["elements"].toList().length() << result["destination_addresses"].toList().length(); // aantal "destination_addresses" bepaalt het aantal elementen per row -> [ { 'elements' [
 
         int row = 0;
 
         // aantal steden:
-        qDebug() << "aantal steden: " << nr_of_cities;
-        qDebug() << "<vvim> TODO: we kunnen hier testen of listOfElementsFromThisRow.length() == SMarkers.length() . if so => ok";
+        vvimDebug() << "aantal steden: " << nr_of_cities;
+        vvimDebug() << "<vvim> TODO: we kunnen hier testen of listOfElementsFromThisRow.length() == SMarkers.length() . if so => ok";
         // <vvim> TODO: we kunnen hier testen of listOfElementsFromThisRow.length() == SMarkers.length() . if so => ok
 
         if(rowsList.length() < 1)
@@ -250,7 +253,7 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
             return;
         }
 
-        qDebug() << "DISTANCE_MATRIX_PART_AA: eerste deel van distance_matrix invullen met de AA-resultaten";
+        vvimDebug() << "DISTANCE_MATRIX_PART_AA: eerste deel van distance_matrix invullen met de AA-resultaten";
         // TSP 1. initieer de matrix afstanden_matrix:
         distance_matrix_in_meters = new int*[nr_of_cities];
         distance_matrix_in_seconds = new int*[nr_of_cities];
@@ -293,15 +296,15 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
                     distance_matrix_in_seconds[row][element] = duration["value"].toInt();
                 }
                 else
-                    qDebug() << "status:" << status;
+                    vvimDebug() << "status:" << status;
                 ++jt;
                 ++element;
             }
     /*
             QVariantMap mapOfResults = (*it).toMap();
-            qDebug() << "formatted_address" << mapOfResults["formatted_address"].toString();
+            vvimDebug() << "formatted_address" << mapOfResults["formatted_address"].toString();
             QVariantMap locationOfResult = mapOfResults["geometry"].toMap()["location"].toMap();
-            qDebug() << "location" << locationOfResult["lng"].toDouble() << locationOfResult["lat"].toDouble();
+            vvimDebug() << "location" << locationOfResult["lng"].toDouble() << locationOfResult["lat"].toDouble();
             // --> "geometry" ( toMap() )
     */
             ++it;
@@ -324,11 +327,11 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
     }
     else if(distance_matrix_ready_to_process == DISTANCE_MATRIX_PART_B)
     {
-        qDebug() << "DISTANCE_MATRIX_PART_B: preparing the distancematrix";
+        vvimDebug() << "DISTANCE_MATRIX_PART_B: preparing the distancematrix";
 
         QString json = reply->readAll();
-        //qDebug() << "B Reply = " << json;
-        //qDebug() << "URL = " << reply->url();
+        //vvimDebug() << "B Reply = " << json;
+        //vvimDebug() << "URL = " << reply->url();
         QString strUrl = reply->url().toString();
 
         QJson::Parser parser;
@@ -342,8 +345,8 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
 
         // JSON: "{}" is een map, "[]" is een list
         QVariantList rowsList = result["rows"].toList(); // bevat de distance matrix in een list
-        //qDebug() << "aantal rijen == aantal oorsprongsadressen" << rowsList.length() << result["origin_addresses"].toList().length(); // lengte van de rows is afhankelijk van het aantal "origin_addresses"
-        //qDebug() << "aantal elementen eerste rij == aantal destinaties"  << rowsList.first().toMap()["elements"].toList().length() << result["destination_addresses"].toList().length(); // aantal "destination_addresses" bepaalt het aantal elementen per row -> [ { 'elements' [
+        //vvimDebug() << "aantal rijen == aantal oorsprongsadressen" << rowsList.length() << result["origin_addresses"].toList().length(); // lengte van de rows is afhankelijk van het aantal "origin_addresses"
+        //vvimDebug() << "aantal elementen eerste rij == aantal destinaties"  << rowsList.first().toMap()["elements"].toList().length() << result["destination_addresses"].toList().length(); // aantal "destination_addresses" bepaalt het aantal elementen per row -> [ { 'elements' [
 
         int row = 0;
 
@@ -354,7 +357,7 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
             return;
         }
 
-        qDebug() << "DISTANCE_MATRIX_PART_B: tweede deel van distance_matrix invullen met de B-resultaten";
+        vvimDebug() << "DISTANCE_MATRIX_PART_B: tweede deel van distance_matrix invullen met de B-resultaten";
 
         QVariantList::Iterator it = rowsList.begin();
         while(it != rowsList.end())
@@ -378,15 +381,15 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
                     distance_matrix_in_seconds[row][element] = duration["value"].toInt();
                 }
                 else
-                    qDebug() << "status:" << status;
+                    vvimDebug() << "status:" << status;
                 ++jt;
                 ++element;
             }
     /*
             QVariantMap mapOfResults = (*it).toMap();
-            qDebug() << "formatted_address" << mapOfResults["formatted_address"].toString();
+            vvimDebug() << "formatted_address" << mapOfResults["formatted_address"].toString();
             QVariantMap locationOfResult = mapOfResults["geometry"].toMap()["location"].toMap();
-            qDebug() << "location" << locationOfResult["lng"].toDouble() << locationOfResult["lat"].toDouble();
+            vvimDebug() << "location" << locationOfResult["lng"].toDouble() << locationOfResult["lat"].toDouble();
             // --> "geometry" ( toMap() )
     */
             ++it;
@@ -410,11 +413,11 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
     }
     else if(distance_matrix_ready_to_process == DISTANCE_MATRIX_PART_CC)
     {
-        qDebug() << "DISTANCE_MATRIX_PART_CC: preparing the distancematrix";
+        vvimDebug() << "DISTANCE_MATRIX_PART_CC: preparing the distancematrix";
 
         QString json = reply->readAll();
-        //qDebug() << "CC Reply = " << json;
-        //qDebug() << "URL = " << reply->url();
+        //vvimDebug() << "CC Reply = " << json;
+        //vvimDebug() << "URL = " << reply->url();
         QString strUrl = reply->url().toString();
 
         QJson::Parser parser;
@@ -428,8 +431,8 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
 
         // JSON: "{}" is een map, "[]" is een list
         QVariantList rowsList = result["rows"].toList(); // bevat de distance matrix in een list
-        //qDebug() << "aantal rijen == aantal oorsprongsadressen" << rowsList.length() << result["origin_addresses"].toList().length(); // lengte van de rows is afhankelijk van het aantal "origin_addresses"
-        //qDebug() << "aantal elementen eerste rij == aantal destinaties"  << rowsList.first().toMap()["elements"].toList().length() << result["destination_addresses"].toList().length(); // aantal "destination_addresses" bepaalt het aantal elementen per row -> [ { 'elements' [
+        //vvimDebug() << "aantal rijen == aantal oorsprongsadressen" << rowsList.length() << result["origin_addresses"].toList().length(); // lengte van de rows is afhankelijk van het aantal "origin_addresses"
+        //vvimDebug() << "aantal elementen eerste rij == aantal destinaties"  << rowsList.first().toMap()["elements"].toList().length() << result["destination_addresses"].toList().length(); // aantal "destination_addresses" bepaalt het aantal elementen per row -> [ { 'elements' [
 
         int row = MAX_NR_OF_CITIES;
 
@@ -440,7 +443,7 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
             return;
         }
 
-        qDebug() << "DISTANCE_MATRIX_PART_CC: derde deel van distance_matrix invullen met de CC-resultaten";
+        vvimDebug() << "DISTANCE_MATRIX_PART_CC: derde deel van distance_matrix invullen met de CC-resultaten";
         QVariantList::Iterator it = rowsList.begin();
         while(it != rowsList.end())
         {
@@ -463,15 +466,15 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
                     distance_matrix_in_seconds[row][element] = duration["value"].toInt();
                 }
                 else
-                    qDebug() << "status:" << status;
+                    vvimDebug() << "status:" << status;
                 ++jt;
                 ++element;
             }
     /*
             QVariantMap mapOfResults = (*it).toMap();
-            qDebug() << "formatted_address" << mapOfResults["formatted_address"].toString();
+            vvimDebug() << "formatted_address" << mapOfResults["formatted_address"].toString();
             QVariantMap locationOfResult = mapOfResults["geometry"].toMap()["location"].toMap();
-            qDebug() << "location" << locationOfResult["lng"].toDouble() << locationOfResult["lat"].toDouble();
+            vvimDebug() << "location" << locationOfResult["lng"].toDouble() << locationOfResult["lat"].toDouble();
             // --> "geometry" ( toMap() )
     */
             ++it;
@@ -491,11 +494,11 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
     }
     else if(distance_matrix_ready_to_process == DISTANCE_MATRIX_PART_D)
     {
-        qDebug() << "DISTANCE_MATRIX_PART_D: preparing the distancematrix";
+        vvimDebug() << "DISTANCE_MATRIX_PART_D: preparing the distancematrix";
 
         QString json = reply->readAll();
-        //qDebug() << "D Reply = " << json;
-        //qDebug() << "URL = " << reply->url();
+        //vvimDebug() << "D Reply = " << json;
+        //vvimDebug() << "URL = " << reply->url();
         QString strUrl = reply->url().toString();
 
         QJson::Parser parser;
@@ -509,8 +512,8 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
 
         // JSON: "{}" is een map, "[]" is een list
         QVariantList rowsList = result["rows"].toList(); // bevat de distance matrix in een list
-        //qDebug() << "aantal rijen == aantal oorsprongsadressen" << rowsList.length() << result["origin_addresses"].toList().length(); // lengte van de rows is afhankelijk van het aantal "origin_addresses"
-        //qDebug() << "aantal elementen eerste rij == aantal destinaties"  << rowsList.first().toMap()["elements"].toList().length() << result["destination_addresses"].toList().length(); // aantal "destination_addresses" bepaalt het aantal elementen per row -> [ { 'elements' [
+        //vvimDebug() << "aantal rijen == aantal oorsprongsadressen" << rowsList.length() << result["origin_addresses"].toList().length(); // lengte van de rows is afhankelijk van het aantal "origin_addresses"
+        //vvimDebug() << "aantal elementen eerste rij == aantal destinaties"  << rowsList.first().toMap()["elements"].toList().length() << result["destination_addresses"].toList().length(); // aantal "destination_addresses" bepaalt het aantal elementen per row -> [ { 'elements' [
 
         int row = MAX_NR_OF_CITIES;
         int row_city_names = 0;
@@ -522,7 +525,7 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
             return;
         }
 
-        qDebug() << "DISTANCE_MATRIX_PART_D: laatste deel van distance_matrix invullen met de D-resultaten";
+        vvimDebug() << "DISTANCE_MATRIX_PART_D: laatste deel van distance_matrix invullen met de D-resultaten";
         QVariantList::Iterator it = rowsList.begin();
         while(it != rowsList.end())
         {
@@ -546,15 +549,15 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
                     distance_matrix_in_seconds[row][element] = duration["value"].toInt();
                 }
                 else
-                    qDebug() << "status:" << status;
+                    vvimDebug() << "status:" << status;
                 ++jt;
                 ++element;
             }
     /*
             QVariantMap mapOfResults = (*it).toMap();
-            qDebug() << "formatted_address" << mapOfResults["formatted_address"].toString();
+            vvimDebug() << "formatted_address" << mapOfResults["formatted_address"].toString();
             QVariantMap locationOfResult = mapOfResults["geometry"].toMap()["location"].toMap();
-            qDebug() << "location" << locationOfResult["lng"].toDouble() << locationOfResult["lat"].toDouble();
+            vvimDebug() << "location" << locationOfResult["lng"].toDouble() << locationOfResult["lat"].toDouble();
             // --> "geometry" ( toMap() )
     */
             ++it;
@@ -562,7 +565,7 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
             ++row_city_names;
         }
 
-        qDebug() << " *** TODO *** MATRIX VERWERKEN ZOALS bij DISTANCE_MATRIX_READY!";
+        vvimDebug() << " *** TODO *** MATRIX VERWERKEN ZOALS bij DISTANCE_MATRIX_READY!";
 
         //return; // ?
     }
@@ -575,8 +578,8 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
         citynames->clear(); // <vvim> dit is nodig, zie probleempje-20140423-citiesnames
 
         QString json = reply->readAll();
-        //qDebug() << "Ready Reply = " << json;
-        //qDebug() << "URL = " << reply->url();
+        //vvimDebug() << "Ready Reply = " << json;
+        //vvimDebug() << "URL = " << reply->url();
         QString strUrl = reply->url().toString();
 
         QJson::Parser parser;
@@ -590,16 +593,16 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
 
         // JSON: "{}" is een map, "[]" is een list
         QVariantList rowsList = result["rows"].toList(); // bevat de distance matrix in een list
-        //qDebug() << "aantal rijen == aantal oorsprongsadressen" << rowsList.length() << result["origin_addresses"].toList().length(); // lengte van de rows is afhankelijk van het aantal "origin_addresses"
-        //qDebug() << "aantal elementen eerste rij == aantal destinaties"  << rowsList.first().toMap()["elements"].toList().length() << result["destination_addresses"].toList().length(); // aantal "destination_addresses" bepaalt het aantal elementen per row -> [ { 'elements' [
+        //vvimDebug() << "aantal rijen == aantal oorsprongsadressen" << rowsList.length() << result["origin_addresses"].toList().length(); // lengte van de rows is afhankelijk van het aantal "origin_addresses"
+        //vvimDebug() << "aantal elementen eerste rij == aantal destinaties"  << rowsList.first().toMap()["elements"].toList().length() << result["destination_addresses"].toList().length(); // aantal "destination_addresses" bepaalt het aantal elementen per row -> [ { 'elements' [
 
         int row = 0;
 
         if(nr_of_cities != rowsList.length())
-            qDebug() << "WARNING: replyFinished() DistanceMatrixReady: nr_of_cities != rowsList.length() : " << nr_of_cities << rowsList.length();
+            vvimDebug() << "WARNING: replyFinished() DistanceMatrixReady: nr_of_cities != rowsList.length() : " << nr_of_cities << rowsList.length();
 
-        qDebug() << "aantal steden: " << nr_of_cities << "ofte" << rowsList.length();
-        qDebug() << "<vvim> TODO: we kunnen hier testen of listOfElementsFromThisRow.length() == SMarkers.length() . if so => ok";
+        vvimDebug() << "aantal steden: " << nr_of_cities << "ofte" << rowsList.length();
+        vvimDebug() << "<vvim> TODO: we kunnen hier testen of listOfElementsFromThisRow.length() == SMarkers.length() . if so => ok";
         // <vvim> TODO: we kunnen hier testen of listOfElementsFromThisRow.length() == SMarkers.length() . if so => ok
 
         if(rowsList.length() < 1)
@@ -650,15 +653,15 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
                     distance_matrix_in_seconds[row][element] = duration["value"].toInt();
                 }
                 else
-                    qDebug() << "status:" << status;
+                    vvimDebug() << "status:" << status;
                 ++jt;
                 ++element;
             }
     /*
             QVariantMap mapOfResults = (*it).toMap();
-            qDebug() << "formatted_address" << mapOfResults["formatted_address"].toString();
+            vvimDebug() << "formatted_address" << mapOfResults["formatted_address"].toString();
             QVariantMap locationOfResult = mapOfResults["geometry"].toMap()["location"].toMap();
-            qDebug() << "location" << locationOfResult["lng"].toDouble() << locationOfResult["lat"].toDouble();
+            vvimDebug() << "location" << locationOfResult["lng"].toDouble() << locationOfResult["lat"].toDouble();
             // --> "geometry" ( toMap() )
     */
             ++it;
@@ -671,14 +674,14 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
 
 void DistanceMatrix::calculateOptimalRoute()
 {
-    qDebug() << "you should only call this function when the distance matrices have been filled in correctly";
-    qDebug() << "that is why Form has the boolean `matrices_up_to_date` ";
+    vvimDebug() << "you should only call this function when the distance matrices have been filled in correctly";
+    vvimDebug() << "that is why Form has the boolean `matrices_up_to_date` ";
 
 //logOutputCitynamesDistanceMatrices(); //for debugging only:
     int nr_of_cities = m_markers.length();
 
     QString startTimeString = QDateTime::currentDateTime().toString();
-    qDebug() << "Start:" << startTimeString;
+    vvimDebug() << "Start:" << startTimeString;
     // TSP 2. al de rest resetten:
     reset_all_tsp(nr_of_cities);
 
@@ -696,19 +699,19 @@ void DistanceMatrix::calculateOptimalRoute()
     tsp(path,0,all_cities_marked);
 
 
-    qDebug() << "--- start:" << startTimeString;
-    qDebug() << "--- done:" << QDateTime::currentDateTime().toString();
+    vvimDebug() << "--- start:" << startTimeString;
+    vvimDebug() << "--- done:" << QDateTime::currentDateTime().toString();
 
     // TSP 6. tsp_solution uitschrijven:
     // <vvim> TODO: wat als er geen tsp_solution is gevonden?
-    qDebug() << "<vvim> TODO: wat als er geen tsp_solution is gevonden?";
+    vvimDebug() << "<vvim> TODO: wat als er geen tsp_solution is gevonden?";
 
     QApplication::restoreOverrideCursor(); // set cursor back to "Arrow cursor"
 
     //emit new_order_smarkers(tsp_solution, distance_matrix_in_meters, distance_matrix_in_seconds); // geef de voorgestelde route door aan de class Form zodat die ook in de GUI kan worden aangepast
     emit new_order_smarkers(tsp_solution); // geef de voorgestelde route door aan de class Form zodat die ook in de GUI kan worden aangepast
 
-    qDebug() << "[DistanceMatrix::calculateOptimalRoute()]" << "destroy path!";
+    vvimDebug() << "[DistanceMatrix::calculateOptimalRoute()]" << "destroy path!";
     delete path;
 
 }
@@ -717,7 +720,7 @@ int DistanceMatrix::initialize_current_minimum_cost(int size)
 {
     // we initialize the current_minimum_cost to be the "maximum" possible,namely adding all values from the distance_matrix together. Should do the trick.
     // Or we could take "MAX_INT", maybe that one is faster??
-    qDebug() << "<vvim> TODO: to initialize the current_minimum_cost, maybe we should take MAX_INT instead? Faster no doubt.";
+    vvimDebug() << "<vvim> TODO: to initialize the current_minimum_cost, maybe we should take MAX_INT instead? Faster no doubt.";
     int a = 0;
     for(int i=0; i < size; i++)
      {
@@ -744,31 +747,31 @@ void DistanceMatrix::fill_all_cities(int size)
 
 void DistanceMatrix::reset_all_tsp(int nr_of_cities)
 {
-    qDebug() << " + tsp_solution NUlL?" << (tsp_solution == NULL);
-    qDebug() << "<vvim> TODO: tsp_solution op NULL zetten,  + tsp_solution NUlL?" << (tsp_solution == NULL);
+    vvimDebug() << " + tsp_solution NUlL?" << (tsp_solution == NULL);
+    vvimDebug() << "<vvim> TODO: tsp_solution op NULL zetten,  + tsp_solution NUlL?" << (tsp_solution == NULL);
     /*
     if(tsp_solution == NULL)
         tsp_solution = new QList<int>();
     */
     delete tsp_solution;              // } <vvim> TODO: is dit wel nodig?
     tsp_solution = new QList<int>();  // }
-    qDebug() << " + tsp_solution clear";
+    vvimDebug() << " + tsp_solution clear";
     tsp_solution->clear();
 
-    qDebug() << " + all_cities_marked NUlL?" << (all_cities_marked == NULL);
+    vvimDebug() << " + all_cities_marked NUlL?" << (all_cities_marked == NULL);
     /*
     if(all_cities_marked == NULL)
         all_cities_marked = new QList<int>();
     */
     delete all_cities_marked;
     all_cities_marked = new QList<int>();
-    qDebug() << " + all_cities_marked clear";
+    vvimDebug() << " + all_cities_marked clear";
     all_cities_marked->clear();
 
-    qDebug() << " + fill all cities";
+    vvimDebug() << " + fill all cities";
     fill_all_cities(nr_of_cities);
 
-    qDebug() << " + current_minimum_cost";
+    vvimDebug() << " + current_minimum_cost";
     current_minimum_cost = initialize_current_minimum_cost(nr_of_cities);
 }
 
@@ -788,25 +791,25 @@ void DistanceMatrix::tsp(QList<int>* path, int totale_kost, QList<int>* remainin
         QString path_string = "";
         foreach(int i, *path)
             path_string += QString::number(i) + " -> ";
-        qDebug() << "onderzoeken van" << path_string << "kost" << totale_kost << "( huidig minimum: " << current_minimum_cost << ")"; // procedure SALESMAN(C, N, R, l_path)
+        vvimDebug() << "onderzoeken van" << path_string << "kost" << totale_kost << "( huidig minimum: " << current_minimum_cost << ")"; // procedure SALESMAN(C, N, R, l_path)
         QString REMAININGCITIES_string = "";
         foreach(int i, *remaining_cities)
             REMAININGCITIES_string += QString::number(i) + ",";
-        qDebug() << "ik kom van stad" << last_visited_city << "overschietende steden:" << REMAININGCITIES_string;
+        vvimDebug() << "ik kom van stad" << last_visited_city << "overschietende steden:" << REMAININGCITIES_string;
     // </Debugging>
 */
 
     if(totale_kost > current_minimum_cost)
     {
-        //qDebug() << "kost hoger dan HUIDIG_MINIMUM" << totale_kost << ">" << current_minimum_cost << ":" << path_string << "=> ABORT\n\n";
+        //vvimDebug() << "kost hoger dan HUIDIG_MINIMUM" << totale_kost << ">" << current_minimum_cost << ":" << path_string << "=> ABORT\n\n";
         return;
     }
 
     if(remaining_cities->empty())
     {
-       //qDebug() << "toerken gedaan: " << path_string;
+       //vvimDebug() << "toerken gedaan: " << path_string;
 
-       //qDebug() << "VLASPIT TOEVOEGEN:   path += VLASPIT en totale_kost += terug naar VLASPIT";
+       //vvimDebug() << "VLASPIT TOEVOEGEN:   path += VLASPIT en totale_kost += terug naar VLASPIT";
        path->push_back(Vlaspit);
        if(distance_calc == DISTANCE_IN_METERS)
           totale_kost += distance_matrix_in_meters[last_visited_city][Vlaspit];
@@ -815,7 +818,7 @@ void DistanceMatrix::tsp(QList<int>* path, int totale_kost, QList<int>* remainin
 
        if (totale_kost <= current_minimum_cost)
        {
-           //qDebug() << "kost" << totale_kost << "<= dan HUIDIG_MINIMUM" << current_minimum_cost << "dus potentiële opl" << path_string << "->"<<Vlaspit;
+           //vvimDebug() << "kost" << totale_kost << "<= dan HUIDIG_MINIMUM" << current_minimum_cost << "dus potentiële opl" << path_string << "->"<<Vlaspit;
            current_minimum_cost = totale_kost;
            // path opslaan in een algemene variabele?? tsp_solution ??? of als RETURN value???
            tsp_solution->clear();
@@ -826,10 +829,10 @@ void DistanceMatrix::tsp(QList<int>* path, int totale_kost, QList<int>* remainin
        /*
        else
        {
-           qDebug() << "kost" << totale_kost << "> dan HUIDIG_MINIMUM" << current_minimum_cost << "dus GEEN opl" << path_string;
-           qDebug() << "dit komt voor omdat we totale_kost verhogen met de reis terug naar de Vlaspit";
+           vvimDebug() << "kost" << totale_kost << "> dan HUIDIG_MINIMUM" << current_minimum_cost << "dus GEEN opl" << path_string;
+           vvimDebug() << "dit komt voor omdat we totale_kost verhogen met de reis terug naar de Vlaspit";
        }
-       qDebug() << "THE END\n\n";
+       vvimDebug() << "THE END\n\n";
        */
        return;
     }
@@ -856,7 +859,7 @@ void DistanceMatrix::tsp(QList<int>* path, int totale_kost, QList<int>* remainin
       delete newREMAINING_CITIES;
     }
 
-    //qDebug() << "\n";
+    //vvimDebug() << "\n";
 }
 
 QString DistanceMatrix::seconds_human_readable(int totalseconds)
@@ -869,9 +872,9 @@ QString DistanceMatrix::seconds_human_readable(int totalseconds)
     /* // check for calculation error:
     int secondscheck = (((((0*24)+hours)*60) + minutes)*60) + seconds;
     if (secondscheck == totalseconds)
-        qDebug() << "OK";
+        vvimDebug() << "OK";
     else
-        qDebug() << "[error]";
+        vvimDebug() << "[error]";
     */
 
     human_readable.sprintf("%01du %02dm %02ds", hours, minutes, seconds);
@@ -902,7 +905,7 @@ void DistanceMatrix::logOutputCitynamesDistanceMatrices()
           allcities.append(QString("%1 ;").arg(citynames->at(i)));
       }
 
-      qDebug() << "Distance Matrix in meters:\n" << allcities;
+      vvimDebug() << "Distance Matrix in meters:\n" << allcities;
       fprintf(matrixlogfile, "Distance Matrix in meters:\n%s", allcities.toStdString().c_str());
 
       for(int i = 0; i < nr_of_cities; i++)
@@ -912,12 +915,12 @@ void DistanceMatrix::logOutputCitynamesDistanceMatrices()
           {
               glob.append(QString("%1 ;").arg(distance_matrix_in_meters[i][j]));
           }
-          qDebug() << glob;
+          vvimDebug() << glob;
           fprintf(matrixlogfile, "\n%s", glob.toStdString().c_str());
       }
 
 
-      qDebug() << "\nDistance Matrix in seconds:\n" << allcities;
+      vvimDebug() << "\nDistance Matrix in seconds:\n" << allcities;
       fprintf(matrixlogfile, "\n\nDistance Matrix in seconds:\n%s", allcities.toStdString().c_str());
 
 
@@ -928,7 +931,7 @@ void DistanceMatrix::logOutputCitynamesDistanceMatrices()
           {
               glob.append(QString("%1 ;").arg(distance_matrix_in_seconds[i][j]));
           }
-          qDebug() << glob;
+          vvimDebug() << glob;
           fprintf(matrixlogfile, "\n%s", glob.toStdString().c_str());
       }
       fclose(matrixlogfile);
@@ -951,13 +954,13 @@ void DistanceMatrix::deleteTheMatrices()
 
 DistanceMatrix::~DistanceMatrix()
 {
-    qDebug() << "start to deconstruct DistanceMatrix()";
+    vvimDebug() << "start to deconstruct DistanceMatrix()";
     deleteTheMatrices();
     delete m_pNetworkAccessManager;
     delete tsp_solution;
     delete all_cities_marked;
     delete citynames;
-    qDebug() << "DistanceMatrix() deconstructed";
+    vvimDebug() << "DistanceMatrix() deconstructed";
 }
 
 QString DistanceMatrix::prepareForUrl(QString string)

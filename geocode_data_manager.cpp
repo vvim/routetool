@@ -4,6 +4,8 @@
 #include <QMessageBox>
 #include <QDebug>
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
 
 GeocodeDataManager::GeocodeDataManager(QObject *parent) :
     QObject(parent)
@@ -26,7 +28,7 @@ void GeocodeDataManager::getCoordinates(const QString& address)
     address_encoded.replace(" ","+");
     QString url = QString("https://maps.googleapis.com/maps/api/geocode/json?address=%1&key=%2&oe=utf8&sensor=false").arg(address_encoded).arg(settings.value("apiKey").toString());
 
-qDebug() << "<vvim>" << "would the distance matrix work if we would only put the NAME of the ophaalpunt here, and NOT the address? based on the coordinates???";
+vvimDebug() << "<vvim>" << "would the distance matrix work if we would only put the NAME of the ophaalpunt here, and NOT the address? based on the coordinates???";
     m_pNetworkAccessManager->get(QNetworkRequest(QUrl(url)));
 }
 
@@ -34,8 +36,8 @@ qDebug() << "<vvim>" << "would the distance matrix work if we would only put the
 void GeocodeDataManager::replyFinished(QNetworkReply* reply)
 {
     QString json = reply->readAll();
-    //qDebug() << "Reply = " << json;
-    qDebug() << "URL = " << reply->url();
+    //vvimDebug() << "Reply = " << json;
+    vvimDebug() << "URL = " << reply->url();
     QString strUrl = reply->url().toString();
 
     QJson::Parser parser;
@@ -64,7 +66,7 @@ void GeocodeDataManager::replyFinished(QNetworkReply* reply)
         return;
     }
     QVariantMap locationOfResult = (*it).toMap()["geometry"].toMap()["location"].toMap();
-    qDebug() << "location" << locationOfResult["lng"].toDouble() << locationOfResult["lat"].toDouble();
+    vvimDebug() << "location" << locationOfResult["lng"].toDouble() << locationOfResult["lat"].toDouble();
 
     if(marker_type == Adres)
         emit coordinatesReady(locationOfResult["lng"].toDouble(), locationOfResult["lat"].toDouble(),name_of_marker);
@@ -99,14 +101,14 @@ void GeocodeDataManager::giveNextMarker()
 {
     if(!markersToBeDone->empty()) // markersToBeDone: not declared yet???
     {
-        qDebug() << "markers to be done:" << markersToBeDone->size();
+        vvimDebug() << "markers to be done:" << markersToBeDone->size();
         foreach(SOphaalpunt marker, *markersToBeDone)
         {
-            qDebug() << marker.naam;
+            vvimDebug() << marker.naam;
         }
 
         marker_type = Ophaalpunt;
-        qDebug() << "<vvim>: hier een korte pauze inlassen zodat de naam van de marker correct blijft?";
+        vvimDebug() << "<vvim>: hier een korte pauze inlassen zodat de naam van de marker correct blijft?";
         ophaalpunt_to_mark = markersToBeDone->takeFirst(); // Removes the first item in the list and returns it.
         getCoordinates(ophaalpunt_to_mark.getNameAndAddress());
     }
@@ -114,8 +116,8 @@ void GeocodeDataManager::giveNextMarker()
 
 GeocodeDataManager::~GeocodeDataManager()
 {
-    qDebug() << "start to deconstruct GeocodeDataManager()";
+    vvimDebug() << "start to deconstruct GeocodeDataManager()";
     delete markersToBeDone;
     delete m_pNetworkAccessManager;
-    qDebug() << "GeocodeDataManager() deconstructed";
+    vvimDebug() << "GeocodeDataManager() deconstructed";
 }

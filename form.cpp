@@ -10,6 +10,9 @@
 #include <QVariant>
 #include <QSqlQuery>
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
 #ifdef Q_OS_WIN
     #include <windows.h> // for Sleep
 #endif
@@ -86,7 +89,7 @@ Form::Form(QWidget *parent) :
     QStringList words; // "don't come easy, to me, la la la laaa la la"
 
     if (!file.open(QFile::ReadOnly))
-        qDebug() << "<vvim> TODO: kan plaatsnamen niet vinden, iets doen? Nope, gewoon geen completer, toch?";
+        vvimDebug() << "<vvim> TODO: kan plaatsnamen niet vinden, iets doen? Nope, gewoon geen completer, toch?";
     else
     {
 
@@ -146,25 +149,25 @@ Form::Form(QWidget *parent) :
 
 Form::~Form()
 {
-    qDebug() << "start to deconstruct Form()";
+    vvimDebug() << "start to deconstruct Form()";
     delete ui;
     if(completer)
         delete completer;
-    qDebug() << "<vvim> ~Form() deconstructor: no need to delete distance_matrix_in_meters and distance_matrix_in_seconds, this has been done by the class DistanceMatrix";
-    qDebug() << "<vvim> ~Form() deconstructor: must we also delete all contents of QList <SMarker*> m_markers ?";
-    qDebug() << "Form() deconstructed";
+    vvimDebug() << "<vvim> ~Form() deconstructor: no need to delete distance_matrix_in_meters and distance_matrix_in_seconds, this has been done by the class DistanceMatrix";
+    vvimDebug() << "<vvim> ~Form() deconstructor: must we also delete all contents of QList <SMarker*> m_markers ?";
+    vvimDebug() << "Form() deconstructed";
 }
 
 void Form::showLevering(double east, double north, SLevering levering, bool saveMarker)
 {
-    qDebug() << "Form, showLevering" << east << north;
+    vvimDebug() << "Form, showLevering" << east << north;
 
     QString str =
             QString("var newLoc = new google.maps.LatLng(%1, %2); ").arg(north).arg(east) +
             QString("map.setCenter(newLoc);") +
             QString("map.setZoom(%1);").arg(ui->zoomSpinBox->value());
 
-     qDebug() << str;
+     vvimDebug() << str;
 
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 
@@ -174,14 +177,14 @@ void Form::showLevering(double east, double north, SLevering levering, bool save
 
 void Form::showOphaalpunt(double east, double north, SOphaalpunt ophaalpunt, bool saveMarker)
 {
-    qDebug() << "Form, showOphaalpunt" << east << north;
+    vvimDebug() << "Form, showOphaalpunt" << east << north;
 
     QString str =
             QString("var newLoc = new google.maps.LatLng(%1, %2); ").arg(north).arg(east) +
             QString("map.setCenter(newLoc);") +
             QString("map.setZoom(%1);").arg(ui->zoomSpinBox->value());
 
-     qDebug() << str;
+     vvimDebug() << str;
 
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 
@@ -192,14 +195,14 @@ void Form::showOphaalpunt(double east, double north, SOphaalpunt ophaalpunt, boo
 
 void Form::showCoordinates(double east, double north, QString markername, bool saveMarker)
 {
-    qDebug() << "Form, showCoordinates" << east << north;
+    vvimDebug() << "Form, showCoordinates" << east << north;
 
     QString str =
             QString("var newLoc = new google.maps.LatLng(%1, %2); ").arg(north).arg(east) +
             QString("map.setCenter(newLoc);") +
             QString("map.setZoom(%1);").arg(ui->zoomSpinBox->value());
 
-     qDebug() << str;
+     vvimDebug() << str;
 
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 
@@ -222,7 +225,7 @@ void Form::setMarker(double east, double north, QString caption)
             QString("title: %1").arg("\""+caption+"\"") +
             QString("});") +
             QString("markers.push(marker);");
-    qDebug() << str;
+    vvimDebug() << str;
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 
 
@@ -243,8 +246,8 @@ void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
         if (m_markers[i]->caption == caption)
         {
             // overschrijven met info ophaalpunt???
-            qDebug() << "<vvim> TODO: wat als OPHAALPUNT & LEVERING ?";
-            qDebug() << "found marker with the same caption" << caption << "ophaling" << m_markers[i]->ophaling << ", levering" << m_markers[i]->levering << ". Overwriting with SOphaalpunt data.";
+            vvimDebug() << "<vvim> TODO: wat als OPHAALPUNT & LEVERING ?";
+            vvimDebug() << "found marker with the same caption" << caption << "ophaling" << m_markers[i]->ophaling << ", levering" << m_markers[i]->levering << ". Overwriting with SOphaalpunt data.";
             m_markers[i]->ophaling = true;
             m_markers[i]->ophaalpunt = ophaalpunt;
             setTotalWeightTotalVolume();
@@ -259,7 +262,7 @@ void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
             QString("title: %1").arg("\"Ophaalpunt: "+ophaalpunt.naam+"\"") +
             QString("});") +
             QString("markers.push(marker);");
-    qDebug() << str;
+    vvimDebug() << str;
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 
 
@@ -282,7 +285,7 @@ void Form::setMarker(double east, double north, SLevering levering)
         if (m_markers[i]->caption == caption)
         {
             // overschrijven met info levering???
-            qDebug() << "found marker with the same caption" << caption << "ophaling" << m_markers[i]->ophaling << ", levering" << m_markers[i]->levering << ". Overwriting with SLevering data.";
+            vvimDebug() << "found marker with the same caption" << caption << "ophaling" << m_markers[i]->ophaling << ", levering" << m_markers[i]->levering << ". Overwriting with SLevering data.";
             m_markers[i]->levering = true;
             m_markers[i]->leveringspunt = levering;
             setTotalWeightTotalVolume();
@@ -298,7 +301,7 @@ void Form::setMarker(double east, double north, SLevering levering)
             QString("title: %1").arg("\"Levering: "+levering.name+"\"") +
             QString("});") +
             QString("markers.push(marker);");
-    qDebug() << str;
+    vvimDebug() << str;
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 
 
@@ -337,7 +340,7 @@ void Form::on_lwMarkers_currentRowChanged(int currentRow)
             QString("var newLoc = new google.maps.LatLng(%1, %2); ").arg(m_markers[currentRow]->north).arg(m_markers[currentRow]->east) +
             QString("map.setCenter(newLoc);");
 
-    qDebug() << str;
+    vvimDebug() << str;
 
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 }
@@ -348,7 +351,7 @@ void Form::on_pbRemoveMarker_clicked()
 
     if((ui->lwMarkers->currentRow()+2) == ui->lwMarkers->count())
     {
-        qDebug() << "Dangerous business";
+        vvimDebug() << "Dangerous business";
         QMessageBox::critical(this, tr("WAARSCHUWING"), tr("Het wissen van de 'voorlaatste' marker in de lijst resulteert in een fout die ik nog niet heb kunnen opsporen.\n\nAls je deze marker echt wilt wissen, versleep hem dan eerst tot onderaan de lijst, en verwijder hem dan."));
         return;
     }
@@ -365,7 +368,7 @@ void Form::on_pbRemoveMarker_clicked()
 
     QString str =
             QString("markers[%1].setMap(null); markers.splice(%1, 1);").arg(ui->lwMarkers->currentRow());
-    qDebug() << str;
+    vvimDebug() << str;
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 
     */
@@ -385,7 +388,7 @@ void Form::on_zoomSpinBox_valueChanged(int arg1)
 {
     QString str =
             QString("map.setZoom(%1);").arg(arg1);
-    qDebug() << str;
+    vvimDebug() << str;
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 }
 
@@ -486,10 +489,10 @@ void Form::process_result_distancematrix(QList<int> *tsp_order_smarkers)
         {
             SMarker * _marker = m_markers.at(tsp_order_smarkers->at(i));
             _marker->distancematrixindex = tsp_order_smarkers->at(i);
-            qDebug() << _marker->caption << _marker->distancematrixindex;
+            vvimDebug() << _marker->caption << _marker->distancematrixindex;
             temp.push_back(_marker);
             ui->lwMarkers->addItem(m_markers.at(tsp_order_smarkers->at(i))->caption);
-            //qDebug()<< m_markers.at(tsp_order_smarkers->at(i))->caption;
+            //vvimDebug() << m_markers.at(tsp_order_smarkers->at(i))->caption;
         }
 
         m_markers = temp; // does this leave garbage in memory? should I delete something??
@@ -568,7 +571,7 @@ void Form::drawRoute()
         QString str = QString("{\"Geometry\":{\"Latitude\": %1 ,\"Longitude\": %2 }}\n").arg(m_markers[0]->north).arg(m_markers[0]->east);
         html_top += str;
 
-        qDebug() << "complete HTML:" << html_top+html_bottom;
+        vvimDebug() << "complete HTML:" << html_top+html_bottom;
         ui->webView->setHtml(html_top+html_bottom);
     }
 }
@@ -594,7 +597,7 @@ void Form::on_pbRouteOmdraaien_clicked()
         {
             temp.push_back(m_markers.at(i));
             ui->lwMarkers->addItem(m_markers.at(i)->caption);
-            qDebug()<< m_markers.at(i)->caption;
+            vvimDebug() << m_markers.at(i)->caption;
         }
 
 
@@ -610,7 +613,7 @@ void Form::on_pbRouteOmdraaien_clicked()
 void Form::reorderMarkers()
 {
     QList<SMarker*> temp;
-    /**/qDebug() << "write out of m_markers BEFORE the reordering";
+    /**/vvimDebug() << "write out of m_markers BEFORE the reordering";
     /**/logOutputMarkers();
 
     for(int i = 0; i < ui->lwMarkers->count(); i++)
@@ -621,18 +624,18 @@ void Form::reorderMarkers()
     m_markers = temp; // does this leave garbage in memory? should I delete something??
                       // TODO <vvim> ask StackOverflow
 
-    /**/qDebug() << "write out of m_markers AFTER the reordering";
+    /**/vvimDebug() << "write out of m_markers AFTER the reordering";
     /**/logOutputMarkers();
 }
 
 void Form::logOutputMarkers()
 {
     // function used for debugging
-    qDebug() << "Debug information: output markers. Length: " << m_markers.length();
-    qDebug() << "Are the distance matrices up to date?" << matrices_up_to_date;
+    vvimDebug() << "Debug information: output markers. Length: " << m_markers.length();
+    vvimDebug() << "Are the distance matrices up to date?" << matrices_up_to_date;
     for(int i = 0; i < m_markers.length(); i++)
     {
-        qDebug() << "Marker" << i << ":";
+        vvimDebug() << "Marker" << i << ":";
         m_markers[i]->PrintInformation();
     }
 }
@@ -658,8 +661,8 @@ void Form::setTotalWeightTotalVolume()
         }
         if(m_markers[i]->levering)
         {
-            qDebug() << ". type: Levering";
-            qDebug() << "... anders bij levering dan bij ophaling, neen??? Levering wordt eerst gedaan, daarna is de camion leeg, dan de ophaling";
+            vvimDebug() << ". type: Levering";
+            vvimDebug() << "... anders bij levering dan bij ophaling, neen??? Levering wordt eerst gedaan, daarna is de camion leeg, dan de ophaling";
         }
     }
 
@@ -683,8 +686,8 @@ void Form::setTotalWeightTotalVolume()
 
 void Form::on_pbTransportationList_clicked()
 {
-    qDebug() << "Form::on_pbTransportationList_clicked()";
-    qDebug() << "This is where we should work on making the Transportation List (using distance matrices and Document Writer)";
+    vvimDebug() << "Form::on_pbTransportationList_clicked()";
+    vvimDebug() << "This is where we should work on making the Transportation List (using distance matrices and Document Writer)";
     // for the map: see http://qt-project.org/doc/qt-4.8/desktop-screenshot.html
     //              see http://stackoverflow.com/questions/681148/how-to-print-a-qt-dialog-or-window
 
@@ -717,13 +720,13 @@ void Form::buildTransportationList()
 
 void Form::logOutputLwMarkers()
 {
-    qDebug() << "\n\nSTART lwMarkers";
+    vvimDebug() << "\n\nSTART lwMarkers";
     // function used for debugging
-    qDebug() << "Debug information: output lwmarkers. Count: " << ui->lwMarkers->count();
-    qDebug() << "Current row:" << ui->lwMarkers->currentRow();
+    vvimDebug() << "Debug information: output lwmarkers. Count: " << ui->lwMarkers->count();
+    vvimDebug() << "Current row:" << ui->lwMarkers->currentRow();
     for(int i = 0; i < ui->lwMarkers->count(); i++)
     {
-        qDebug() << "Row" << i << ":" << ui->lwMarkers->item(i)->text();
+        vvimDebug() << "Row" << i << ":" << ui->lwMarkers->item(i)->text();
     }
-    qDebug() << "STOP\n\n";
+    vvimDebug() << "STOP\n\n";
 }

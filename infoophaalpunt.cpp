@@ -8,6 +8,9 @@
 #include <QMessageBox>
 #include "nieuweaanmelding.h"
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
 #define CODE_INTERCOMMUNALE 1
 
 InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
@@ -44,7 +47,7 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
 
     query.prepare("SELECT * FROM intercommunales ORDER by id");
     if(!query.exec())
-        qDebug() << "SELECT for intercommunales FAILED!" << query.lastError();
+        vvimDebug() << "SELECT for intercommunales FAILED!" << query.lastError();
 
     while(query.next())
     {
@@ -263,7 +266,7 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
 
 InfoOphaalpunt::~InfoOphaalpunt()
 {
-    qDebug() << "start to deconstruct InfoOphaalpunt()";
+    vvimDebug() << "start to deconstruct InfoOphaalpunt()";
     delete  resetButton;
     delete  aanmeldingButton;
     delete  showHistoriekButton;
@@ -316,7 +319,7 @@ InfoOphaalpunt::~InfoOphaalpunt()
     delete  forecastNewOphalingEdit;
     if(ophaalHistoriekDialog)
         delete ophaalHistoriekDialog;
-    qDebug() << "InfoOphaalpunt() deconstructed";
+    vvimDebug() << "InfoOphaalpunt() deconstructed";
 }
 
 void InfoOphaalpunt::accept()
@@ -360,7 +363,7 @@ void InfoOphaalpunt::accept()
         else
         {
             // results in "0000-00-00" instead of a real NULL. What can I do?
-            qDebug() << "[InfoOphaalpunt::accept()]" << "results in '0000-00-00'' instead of a real NULL. What can I do?";
+            vvimDebug() << "[InfoOphaalpunt::accept()]" << "results in '0000-00-00'' instead of a real NULL. What can I do?";
             query.bindValue(":last_contact_date","NULL");
         }
 
@@ -446,7 +449,7 @@ void InfoOphaalpunt::reject()
 
 void InfoOphaalpunt::showAanmeldingAndHistoriekButton(bool show_button)
 {
-    qDebug() << "[InfoOphaalpunt::showAanmeldingButton(bool show_button)]" << "show_button" << show_button << "id" << id;
+    vvimDebug() << "[InfoOphaalpunt::showAanmeldingButton(bool show_button)]" << "show_button" << show_button << "id" << id;
     aanmeldingButton->setVisible(show_button);
     showHistoriekButton->setVisible(show_button);
 }
@@ -469,13 +472,13 @@ void InfoOphaalpunt::reset()
     if (id > 0)
     {
         // widget shows EXISTING ophaalpunt, reset info to information found in DB
-        qDebug() << "haal uit databank informatie id" << id;
+        vvimDebug() << "haal uit databank informatie id" << id;
 
         QSqlQuery query;
         query.prepare("SELECT * FROM ophaalpunten WHERE id = :id");
         query.bindValue(":id", id);
         if(!query.exec())
-            qDebug() << "SELECT FAILED!" << query.lastError();
+            vvimDebug() << "SELECT FAILED!" << query.lastError();
 
         if (query.next())
         {
@@ -617,16 +620,16 @@ void InfoOphaalpunt::toggleFrequentie(int attest)
 
 void InfoOphaalpunt::nieuweAanmeldingButtonPressed()
 {
-    qDebug() << "[InfoOphaalpunt::nieuweAanmelding()]" << "button 'Nieuwe Aanmelding' pressed";
-    qDebug() << "[InfoOphaalpunt::nieuweAanmelding()]" << "nieuwe aanmelding, ophaalpunt_id" << id;
+    vvimDebug() << "[InfoOphaalpunt::nieuweAanmelding()]" << "button 'Nieuwe Aanmelding' pressed";
+    vvimDebug() << "[InfoOphaalpunt::nieuweAanmelding()]" << "nieuwe aanmelding, ophaalpunt_id" << id;
     if(id > 0)
         emit nieuweAanmelding(id);
 }
 
 void InfoOphaalpunt::showHistoriekButtonPressed()
 {
-    qDebug() << "[InfoOphaalpunt::showHistoriek()]" << "button 'Show Historiek' pressed";
-    qDebug() << "[InfoOphaalpunt::showHistoriek()]" << "show historiek, ophaalpunt_id" << id;
+    vvimDebug() << "[InfoOphaalpunt::showHistoriek()]" << "button 'Show Historiek' pressed";
+    vvimDebug() << "[InfoOphaalpunt::showHistoriek()]" << "show historiek, ophaalpunt_id" << id;
 
     if(id > 0) // else it has no use of course :-)
     {

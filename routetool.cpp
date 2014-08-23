@@ -7,6 +7,9 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
 RouteTool::RouteTool(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::RouteTool)
@@ -34,10 +37,10 @@ RouteTool::RouteTool(QWidget *parent) :
 
 RouteTool::~RouteTool()
 {
-    qDebug() << "start to deconstruct RouteTool()";
+    vvimDebug() << "start to deconstruct RouteTool()";
     delete m_pForm;
     delete ui;
-    qDebug() << "RouteTool() deconstructed";
+    vvimDebug() << "RouteTool() deconstructed";
 }
 
 void RouteTool::showNieuweAanmelding()

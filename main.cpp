@@ -15,6 +15,10 @@
 #include <QSqlError>
 #include <QMessageBox>
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
+
 FILE *debuglogfile;
 
 QSettings settings("routetool.ini", QSettings::IniFormat);
@@ -35,14 +39,14 @@ void checkSettings()
 
     if(!all_keys_found)
     {
-        qDebug() << "show Dialog";
+        vvimDebug() << "show Dialog";
         Configuration *c = new Configuration();
         c->show();
 
         // how to correctly delete "c" after it is done?
     }
 
-    qDebug() << "Configuration checkSettings(): OK! All settings are filled in.";
+    vvimDebug() << "Configuration checkSettings(): OK! All settings are filled in.";
 }
 
 void myMessageOutput(QtMsgType type, const char *msg)
@@ -105,7 +109,7 @@ int main(int argc, char *argv[])
 {
     debuglogfile = NULL;
 
-    qDebug() << "<vvim> TODO: in databank table ophaalhistoriek kan Tourist Union het ophaalpuntid 0 hebben, terwijl in table ophaalpunten het id 131 heeft. Best ophaalhistoriek aanpassen!";
+    vvimDebug() << "<vvim> TODO: in databank table ophaalhistoriek kan Tourist Union het ophaalpuntid 0 hebben, terwijl in table ophaalpunten het id 131 heeft. Best ophaalhistoriek aanpassen!";
     QApplication a(argc, argv);
     QLocale curLocale(QLocale("nl_NL"));
     QLocale::setDefault(curLocale);
@@ -120,7 +124,7 @@ int main(int argc, char *argv[])
 
     a.exec();
 
-    qDebug() << "remove DB";
+    vvimDebug() << "remove DB";
     QSqlDatabase::removeDatabase(settings.value("db/databasename").toString());
 
 
@@ -133,9 +137,9 @@ int main(int argc, char *argv[])
 
 
     how to correctly close the logfile? This gives errors:
-    qDebug() << "close logfile";
+    vvimDebug() << "close logfile";
     fclose(debuglogfile);
-    qDebug() << "delete logfile";
+    vvimDebug() << "delete logfile";
     delete debuglogfile;
     */
 

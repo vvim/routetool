@@ -9,6 +9,10 @@
 #include <QDate>
 #include "kiesophaalpunten.h"
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
+
 /*
 #define AANMELDING_DATE 0
 #define OPHAALPUNT_NAAM 1
@@ -114,9 +118,9 @@ void KiesOphaalpunten::checkAll()
         item->setCheckState(Qt::Checked);
         total_weight += getWeightOfRow(i);
         total_volume += getVolumeOfRow(i);
-        qDebug() << "total weight:" << total_weight;
-        qDebug() << "total volume:" << total_volume;
-        qDebug() << "----";
+        vvimDebug() << "total weight:" << total_weight;
+        vvimDebug() << "total volume:" << total_volume;
+        vvimDebug() << "----";
     }
 
     setTotalWeightTotalVolume();
@@ -174,7 +178,7 @@ void KiesOphaalpunten::setTotalWeightTotalVolume()
 
 void KiesOphaalpunten::populateLegeAanmeldingen()
 {
-    qDebug() << "[KiesOphaalpunten::populateLegeAanmeldingen()]" << "ook datum van laatste contact en laatste ophaling toevoegen";
+    vvimDebug() << "ook datum van laatste contact en laatste ophaling toevoegen";
 
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -214,7 +218,7 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
     }
     else
     {
-        qDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id, ophaalpunten.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL; error:" << query.lastError();
+        vvimDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id, ophaalpunten.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL; error:" << query.lastError();
         qFatal(QString("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id, ophaalpunten.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL, error is: ").append(query.lastError().text()).toStdString().c_str());
     }
 
@@ -290,7 +294,7 @@ void KiesOphaalpunten::accept()
     }
     emit aanmelding_for_route(listOfAanmeldingen);
 
-    // qDebug() << "<vvim> TODO add data to the database so that we can reconstruct 'ophaalrondes'.";
+    // vvimDebug() << "<vvim> TODO add data to the database so that we can reconstruct 'ophaalrondes'.";
     // -> is done when the TransportationList is compiled! , see function TransportationListWriter::print()
     this->close();
 }
@@ -302,7 +306,7 @@ void KiesOphaalpunten::reject()
 
 KiesOphaalpunten::~KiesOphaalpunten()
 {
-    qDebug() << "start to deconstruct KiesOphaalpunten()";
+    vvimDebug() << "start to deconstruct KiesOphaalpunten()";
     delete warning;
     delete normal;
     delete legeAanmeldingenLabel;
@@ -316,7 +320,7 @@ KiesOphaalpunten::~KiesOphaalpunten()
     delete model;
     delete legeAanmeldingenModel;
     delete legeAanmeldingenTreeView;
-    qDebug() << "KiesOphaalpunten() deconstructed";
+    vvimDebug() << "KiesOphaalpunten() deconstructed";
 }
 
 void KiesOphaalpunten::initialise()
@@ -364,7 +368,7 @@ double KiesOphaalpunten::getWeightOfRow(const int row)
     double weight_kaars = model->itemFromIndex(model->index(row,WEIGHT_KAARS))->data(Qt::DisplayRole).toDouble();
     double weight_kurk = model->itemFromIndex(model->index(row,WEIGHT_KURK))->data(Qt::DisplayRole).toDouble();
 
-    qDebug() << "[KiesOphaalpunten::getWeightOfItem]" << "kaars:" << weight_kaars  << "kurk:" << weight_kurk;
+    vvimDebug() << "[KiesOphaalpunten::getWeightOfItem]" << "kaars:" << weight_kaars  << "kurk:" << weight_kurk;
     return weight_kaars + weight_kurk;
 }
 
@@ -374,13 +378,13 @@ double KiesOphaalpunten::getVolumeOfRow(const int row)
     double volume_kaars = model->itemFromIndex(model->index(row,ZAK_KAARS))->data(Qt::DisplayRole).toDouble() * settings.value("zak_kaarsresten_volume").toDouble();
     double volume_kurk = model->itemFromIndex(model->index(row,ZAK_KURK))->data(Qt::DisplayRole).toDouble()* settings.value("zak_kurk_volume").toDouble();
 
-    qDebug() << "[KiesOphaalpunten::getVolumeOfItem]" << "kaars:" << volume_kaars  << "kurk:" << volume_kurk;
+    vvimDebug() << "[KiesOphaalpunten::getVolumeOfItem]" << "kaars:" << volume_kaars  << "kurk:" << volume_kurk;
     return volume_kaars + volume_kurk;
 }
 
 void KiesOphaalpunten::initModel()
 {
-    qDebug() << "[KiesOphaalpunten::initModel]" << "start";
+    vvimDebug() << "[KiesOphaalpunten::initModel]" << "start";
     if(model)
         delete model;
     if(legeAanmeldingenModel)

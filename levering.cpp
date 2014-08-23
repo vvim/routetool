@@ -7,6 +7,9 @@
 #include <QFormLayout>
 #include <QVBoxLayout>
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
 Levering::Levering(QWidget *parent) :
     QWidget(parent)
 {
@@ -106,7 +109,7 @@ void Levering::resetValues()
 
 Levering::~Levering()
 {
-    qDebug() << "start to deconstruct Levering()";
+    vvimDebug() << "start to deconstruct Levering()";
 
     delete info;
     delete locationLabel;
@@ -132,7 +135,7 @@ Levering::~Levering()
     // I guess QWidget takes care of this?
     delete this->layout();
 
-    qDebug() << "Levering() deconstructed";
+    vvimDebug() << "Levering() deconstructed";
 }
 
 void Levering::accept()
@@ -204,5 +207,5 @@ void Levering::toonOphaalpuntInformatie()
 
 void Levering::vulInformatieOphaalpuntIn()
 {
-    qDebug() << "gebruik SQL met id erin, id:" << ophaalpunten[locationEdit->text()];
+    vvimDebug() << "gebruik SQL met id erin, id:" << ophaalpunten[locationEdit->text()];
 }

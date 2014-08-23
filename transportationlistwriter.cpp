@@ -8,6 +8,9 @@
 #include <QUuid>
 #include "transportationlistwriter.h"
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
 // 30 minutes
 #define STANDAARD_OPHAALTIJD_IN_SECONDEN 1800
 
@@ -68,7 +71,7 @@ TransportationListWriter::TransportationListWriter(QWidget *parent) :
 
 TransportationListWriter::~TransportationListWriter()
 {
-    qDebug() << "start to deconstruct TransportationListWriter()";
+    vvimDebug() << "start to deconstruct TransportationListWriter()";
     deleteTheMatrices();
     delete nameTransportationListEdit;
     delete dateEdit;
@@ -79,7 +82,7 @@ TransportationListWriter::~TransportationListWriter()
     delete translist_doc;
  //   delete buttonBox; -> is this taken care of by ~QWidget?
  //   delete resetButton; -> is this taken care of by ~QWidget?
-    qDebug() << "TransportationListWriter() deconstructed";
+    vvimDebug() << "TransportationListWriter() deconstructed";
 }
 
 void TransportationListWriter::prepare(QList<SMarker *> _m_markers, int **_distance_matrix_in_meters, int **_distance_matrix_in_seconds, QWidget *_mapwidget)
@@ -88,7 +91,7 @@ void TransportationListWriter::prepare(QList<SMarker *> _m_markers, int **_dista
     if(m_markers.length() > 0)
     {
 
-        qDebug() << "TransportationListWriter has been called before, so we must delete the matrices!";
+        vvimDebug() << "TransportationListWriter has been called before, so we must delete the matrices!";
         deleteTheMatrices();
 
     }
@@ -128,7 +131,7 @@ void TransportationListWriter::prepare(QList<SMarker *> _m_markers, int **_dista
     // read each SMarker, in order shown, and add its information to the Transportation List
     for(int i = 0; i < m_markers.length(); i++)
     {
-        qDebug() << "[TransportationListWriter::prepare()]" << "reading marker" << i << "of" << m_markers.length();
+        vvimDebug() << "[TransportationListWriter::prepare()]" << "reading marker" << i << "of" << m_markers.length();
         int current_distance_matrix_i = m_markers[i]->distancematrixindex;
         if(previous_distance_matrix_i > -1)
         {
@@ -140,9 +143,9 @@ void TransportationListWriter::prepare(QList<SMarker *> _m_markers, int **_dista
 
     if(m_markers.length() > 1)
     {
-        qDebug() << "[TransportationListWriter::prepare()]" << "adding startpoint to end at" << previous_distance_matrix_i << 0;
+        vvimDebug() << "[TransportationListWriter::prepare()]" << "adding startpoint to end at" << previous_distance_matrix_i << 0;
         populateWithSmarker(m_markers[0],previous_distance_matrix_i, 0);
-        qDebug() << "[TransportationListWriter::prepare()]" << "adding startpoint is done";
+        vvimDebug() << "[TransportationListWriter::prepare()]" << "adding startpoint is done";
 
     }
 
@@ -154,20 +157,20 @@ void TransportationListWriter::prepare(QList<SMarker *> _m_markers, int **_dista
     mapwidget = _mapwidget;
     ready = true;
 
-    qDebug() << "[TransportationListWriter::prepare()]" << "Done";
+    vvimDebug() << "[TransportationListWriter::prepare()]" << "Done";
 
 }
 
 void TransportationListWriter::print()
 {
-    qDebug() << "vergeet niet ophaling ook op te slaan in DB!";
+    vvimDebug() << "vergeet niet ophaling ook op te slaan in DB!";
     if(!ready)
     {
-        qDebug() << "[Vervoerslijst]" << "Not yet ready to print, you should prepare first!";
+        vvimDebug() << "[Vervoerslijst]" << "Not yet ready to print, you should prepare first!";
         return;
     }
 
-    qDebug() << "vergeet niet ophaling ook op te slaan in DB!" << "als volgt: aanmeldingen.volgnr + aanmeldingen.datumophaling";
+    vvimDebug() << "vergeet niet ophaling ook op te slaan in DB!" << "als volgt: aanmeldingen.volgnr + aanmeldingen.datumophaling";
     // want maar één ophaling per dag max?
 
     ready = false;
@@ -176,23 +179,23 @@ void TransportationListWriter::print()
     total_distance_in_meters = 0;
     total_time_on_the_road_in_seconds = 0;
 
-    qDebug() << "\n\n\n";
-    qDebug() << "<vvim> debuginfo, m_markers.length() = " << m_markers.length();
-    qDebug() << "\n\n\n";
+    vvimDebug() << "\n\n\n";
+    vvimDebug() << "<vvim> debuginfo, m_markers.length() = " << m_markers.length();
+    vvimDebug() << "\n\n\n";
 
-    qDebug() << "+--------------------+";
-    qDebug() << "|   VERVOERSLIJST    |";
-    qDebug() << "+--------------------+";
-    qDebug() << "";
-    qDebug() << "De Vlaspit vzw";
-    qDebug() << "Basilieklaan 53, Scherpenheuvel";
-    qDebug() << "BTW .....";
-    qDebug() << "";
-    qDebug() << "\t\tOpgenomen in het register voor erkende ............";
-    qDebug() << "";
-    qDebug() << "VERVOERSLIJST\t\tDatum:   " << QLocale().toString(dateEdit->date());
+    vvimDebug() << "+--------------------+";
+    vvimDebug() << "|   VERVOERSLIJST    |";
+    vvimDebug() << "+--------------------+";
+    vvimDebug() << "";
+    vvimDebug() << "De Vlaspit vzw";
+    vvimDebug() << "Basilieklaan 53, Scherpenheuvel";
+    vvimDebug() << "BTW .....";
+    vvimDebug() << "";
+    vvimDebug() << "\t\tOpgenomen in het register voor erkende ............";
+    vvimDebug() << "";
+    vvimDebug() << "VERVOERSLIJST\t\tDatum:   " << QLocale().toString(dateEdit->date());
 
-    qDebug() << "Meenemen:" << empty_bags_of_kurk_neededEdit->value() << "lege zakken kurk en" << empty_bags_of_kaarsresten_neededEdit->value() << "lege zakken kaarsresten";
+    vvimDebug() << "Meenemen:" << empty_bags_of_kurk_neededEdit->value() << "lege zakken kurk en" << empty_bags_of_kaarsresten_neededEdit->value() << "lege zakken kaarsresten";
 
     delete translist_doc;
     translist_doc = new TransportationListDocumentWriter(dateEdit->date(),empty_bags_of_kurk_neededEdit->value(),empty_bags_of_kaarsresten_neededEdit->value());
@@ -202,13 +205,13 @@ void TransportationListWriter::print()
 
     for(int i = 0; i < m_markers.length(); i++)
     {
-        qDebug() << "[TransportationListWriter::print()]" << "write information of marker nr" << i << "of in total" << m_markers.length();
+        vvimDebug() << "[TransportationListWriter::print()]" << "write information of marker nr" << i << "of in total" << m_markers.length();
         int current_distance_matrix_i = m_markers[i]->distancematrixindex;
         if(previous_distance_matrix_i > -1)
         {
-            qDebug() << "Locatie #" << counter;
+            vvimDebug() << "Locatie #" << counter;
             char kaart_nr = 'A' + counter;
-            qDebug() << "Kaartnr" << QChar(kaart_nr);
+            vvimDebug() << "Kaartnr" << QChar(kaart_nr);
             writeInformation(m_markers[i], previous_distance_matrix_i, current_distance_matrix_i, counter, kaart_nr);
             if(m_markers[i]->ophaling)
             {
@@ -223,10 +226,10 @@ void TransportationListWriter::print()
                 if(!query.exec())
                 {
                     qCritical(QString(tr("UPDATE aanmelding SET ophaalronde_datum = %1 , volgorde = %2 WHERE id = %3").arg(dateEdit->date().toString()).arg(counter).arg(m_markers[i]->ophaalpunt.aanmelding_id).append(query.lastError().text())).toStdString().c_str());
-                    qDebug() << " !!! fout in wegschrijven aanmelding: " << QString(tr("UPDATE aanmelding SET ophaalronde_datum = %1 , volgorde = %2 WHERE id = %3").arg(dateEdit->date().toString()).arg(counter).arg(m_markers[i]->ophaalpunt.aanmelding_id).append(query.lastError().text()));
+                    vvimDebug() << " !!! fout in wegschrijven aanmelding: " << QString(tr("UPDATE aanmelding SET ophaalronde_datum = %1 , volgorde = %2 WHERE id = %3").arg(dateEdit->date().toString()).arg(counter).arg(m_markers[i]->ophaalpunt.aanmelding_id).append(query.lastError().text()));
                 }
                 else
-                    qDebug() << " <<< aanmelding is nu officieel in ophaalronde opgenomen :-) >>>";
+                    vvimDebug() << " <<< aanmelding is nu officieel in ophaalronde opgenomen :-) >>>";
             }
         }
         previous_distance_matrix_i = current_distance_matrix_i;
@@ -236,9 +239,9 @@ void TransportationListWriter::print()
     if(m_markers.length() > 1)
     {
         char kaart_nr = 'A' + counter;
-        qDebug() << "[TransportationListWriter::print()]" << "adding startpoint to end at" << previous_distance_matrix_i << 0 << counter;
+        vvimDebug() << "[TransportationListWriter::print()]" << "adding startpoint to end at" << previous_distance_matrix_i << 0 << counter;
         writeInformation(m_markers[0],previous_distance_matrix_i, 0, counter, kaart_nr);
-        qDebug() << "[TransportationListWriter::print()]" << "adding startpoint is done";
+        vvimDebug() << "[TransportationListWriter::print()]" << "adding startpoint is done";
 
     }
 
@@ -250,10 +253,10 @@ void TransportationListWriter::print()
 
     //vervoersLijst.write(QString("vervoerslijst-(%1).odt").arg(name_vervoerslijst));
 
-    qDebug() << "[Vervoerslijst]" << "Lege zakken voor kurk:" << empty_bags_of_kurk_needed << ", lege zakken voor kaarsresten:" << empty_bags_of_kaarsresten_needed;
+    vvimDebug() << "[Vervoerslijst]" << "Lege zakken voor kurk:" << empty_bags_of_kurk_needed << ", lege zakken voor kaarsresten:" << empty_bags_of_kaarsresten_needed;
 
     //setTotalWeightTotalVolume();
-    //qDebug() << "[Vervoerslijst]" << "Totaal lading:" << ui->totalWeightEdit->text() << "kg and " << ui->totalVolumeEdit->text() << "liter";
+    //vvimDebug() << "[Vervoerslijst]" << "Totaal lading:" << ui->totalWeightEdit->text() << "kg and " << ui->totalVolumeEdit->text() << "liter";
 
 
     //make screenshot of the QWidget "mapwidget" so that we have a screenshot of the route (built by Google Maps)
@@ -278,12 +281,12 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
     total_time_on_the_road_in_seconds += distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
     seconds_needed_to_complete_transport += distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
 
-    qDebug() << "Verwachtte aankomsttijd:" << QLocale().toString(startTimeEdit->time().addSecs(seconds_needed_to_complete_transport));
+    vvimDebug() << "Verwachtte aankomsttijd:" << QLocale().toString(startTimeEdit->time().addSecs(seconds_needed_to_complete_transport));
     // .trim(4) ?   // .truncate(4) ?
 
     if(marker->ophaling)
     {
-        qDebug() << "Deze locatie is een" << "OPHALING" << counter << kaart_nr;
+        vvimDebug() << "Deze locatie is een" << "OPHALING" << counter << kaart_nr;
         QSqlQuery query;
         query.prepare("SELECT naam, straat, nr, bus, postcode, plaats, land, openingsuren, contactpersoon, telefoonnummer1, extra_informatie"
                        " FROM   ophaalpunten WHERE id = :id ");
@@ -326,30 +329,30 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
             QString telefoonnummer = query.value(9).toString();
             QString opmerkingen = marker->ophaalpunt.opmerkingen;
 
-            qDebug() << "..Naam:" << naam;
-            qDebug() << "..Adres:" << straat << nr << bus;
-            qDebug() << "..Postcode:" << postcode;
+            vvimDebug() << "..Naam:" << naam;
+            vvimDebug() << "..Adres:" << straat << nr << bus;
+            vvimDebug() << "..Postcode:" << postcode;
             if(land.left(4).toLower() != "belg")
             {
-                qDebug() << "..Gemeente:" << gemeente << "("<<land<<")";
+                vvimDebug() << "..Gemeente:" << gemeente << "("<<land<<")";
             }
             else
-                qDebug() << "..Gemeente:" << gemeente;
-            qDebug() << "..Telefoon:" << telefoonnummer;
-            qDebug() << "..Contactpersoon:" << contactpersoon;
-            qDebug() << "..Openingsuren:" << openingsuren;
-            qDebug() << "..Speciale opmerkingen:" << opmerkingen;
-            qDebug() << "....................................";
-            qDebug() << "..op te halen kurk:" << marker->ophaalpunt.kg_kurk << "kg" << marker->ophaalpunt.zakken_kurk << "zakken";
-            qDebug() << "....werkelijk opgehaald: ___ kg , ___ zakken";
-            qDebug() << "..op te halen kaars:" << marker->ophaalpunt.kg_kaarsresten << "kg" << marker->ophaalpunt.zakken_kaarsresten << "zakken";
-            qDebug() << "....werkelijk opgehaald: ___ kg , ___ zakken";
-            qDebug() << "..lege zakken afgegeven: ____";
+                vvimDebug() << "..Gemeente:" << gemeente;
+            vvimDebug() << "..Telefoon:" << telefoonnummer;
+            vvimDebug() << "..Contactpersoon:" << contactpersoon;
+            vvimDebug() << "..Openingsuren:" << openingsuren;
+            vvimDebug() << "..Speciale opmerkingen:" << opmerkingen;
+            vvimDebug() << "....................................";
+            vvimDebug() << "..op te halen kurk:" << marker->ophaalpunt.kg_kurk << "kg" << marker->ophaalpunt.zakken_kurk << "zakken";
+            vvimDebug() << "....werkelijk opgehaald: ___ kg , ___ zakken";
+            vvimDebug() << "..op te halen kaars:" << marker->ophaalpunt.kg_kaarsresten << "kg" << marker->ophaalpunt.zakken_kaarsresten << "zakken";
+            vvimDebug() << "....werkelijk opgehaald: ___ kg , ___ zakken";
+            vvimDebug() << "..lege zakken afgegeven: ____";
             // </cut-here>
         }
         else
         {
-            qDebug() << "er ging iets mis met de databank bij het opzoeken van ophaalpunt" << marker->ophaalpunt.ophaalpunt_id << ":" << query.lastError();
+            vvimDebug() << "er ging iets mis met de databank bij het opzoeken van ophaalpunt" << marker->ophaalpunt.ophaalpunt_id << ":" << query.lastError();
             // opnemen in vervoerslijst als reden waarom info niet is ingevuld?
         }
 
@@ -359,7 +362,7 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
     }
     if(marker->levering)
     {
-        qDebug() << "Deze locatie is een" << "LEVERING" << counter << kaart_nr;
+        vvimDebug() << "Deze locatie is een" << "LEVERING" << counter << kaart_nr;
         seconds_needed_to_complete_transport += marker->leveringspunt.minutes_needed;
 
         TransportationListDocumentWriter::Levering doc_levering;
@@ -392,22 +395,22 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
         double weight = marker->leveringspunt.weight;
         double volume = marker->leveringspunt.volume;
 
-        qDebug() << "..Naam:" << naam;
-        qDebug() << "..Adres:" << straat << nr << bus;
-        qDebug() << "..Postcode:" << postcode;
+        vvimDebug() << "..Naam:" << naam;
+        vvimDebug() << "..Adres:" << straat << nr << bus;
+        vvimDebug() << "..Postcode:" << postcode;
 
         if(land.left(4).toLower() != "belg")
         {
-            qDebug() << "..Gemeente:" << gemeente << "("<<land<<")";
+            vvimDebug() << "..Gemeente:" << gemeente << "("<<land<<")";
         }
         else
-            qDebug() << "..Gemeente:" << gemeente;
+            vvimDebug() << "..Gemeente:" << gemeente;
 
-        qDebug() << "..Telefoon:" << telefoonnummer;
-        qDebug() << "..Contactpersoon:" << contactpersoon;
-        qDebug() << "....................................";
-        qDebug() << "..af te leveren:" << weight << "kg" << volume << "liter";
-        qDebug() << "....werkelijk afgeleverd: ___ kg , ___  liter";
+        vvimDebug() << "..Telefoon:" << telefoonnummer;
+        vvimDebug() << "..Contactpersoon:" << contactpersoon;
+        vvimDebug() << "....................................";
+        vvimDebug() << "..af te leveren:" << weight << "kg" << volume << "liter";
+        vvimDebug() << "....werkelijk afgeleverd: ___ kg , ___  liter";
 
         // ergens in databank opnemen? Aparte table voor LEVERINGEN ???
         seconds_needed_to_complete_transport += marker->leveringspunt.minutes_needed * 60;
@@ -422,8 +425,8 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
 
         translist_doc->addAdres(doc_adres);
 
-        qDebug() << "Deze locatie is een" << "gewoon ADRES" << counter << kaart_nr;
-        qDebug() << "..Adres:" << marker->caption;
+        vvimDebug() << "Deze locatie is een" << "gewoon ADRES" << counter << kaart_nr;
+        vvimDebug() << "..Adres:" << marker->caption;
     }
 }
 
@@ -435,7 +438,7 @@ void TransportationListWriter::editExpectedArrivalTime(QTime arrival)
 
 void TransportationListWriter::populateWithSmarker(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i)
 {
-    qDebug() << "[TransportationListWriter::populateWithSmarker()]" << previous_distance_matrix_i << current_distance_matrix_i;
+    vvimDebug() << "[TransportationListWriter::populateWithSmarker()]" << previous_distance_matrix_i << current_distance_matrix_i;
 
     total_distance_in_meters += distance_matrix_in_meters[previous_distance_matrix_i][current_distance_matrix_i];
     total_time_on_the_road_in_seconds += distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
@@ -443,7 +446,7 @@ void TransportationListWriter::populateWithSmarker(SMarker* marker, int previous
 
     if(marker->ophaling)
     {
-        qDebug() << "[TransportationListWriter::populateWithSmarker()]" << "marker is een ophaling, ophaalpunt" << marker->ophaalpunt.ophaalpunt_id;
+        vvimDebug() << "[TransportationListWriter::populateWithSmarker()]" << "marker is een ophaling, ophaalpunt" << marker->ophaalpunt.ophaalpunt_id;
         // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SOphaalpunt) => marker->ophaalpunt
         seconds_needed_to_complete_transport += STANDAARD_OPHAALTIJD_IN_SECONDEN;
         empty_bags_of_kurk_needed += marker->ophaalpunt.zakken_kurk;
@@ -451,17 +454,17 @@ void TransportationListWriter::populateWithSmarker(SMarker* marker, int previous
     }
     if(marker->levering)
     {
-        qDebug() << "[TransportationListWriter::populateWithSmarker()]" << "marker is een levering";
+        vvimDebug() << "[TransportationListWriter::populateWithSmarker()]" << "marker is een levering";
         // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SLevering) => marker->levering
         seconds_needed_to_complete_transport += marker->leveringspunt.minutes_needed * 60;
     }
     if((!marker->ophaling)&&(!marker->levering))
     {
-        qDebug() << "[TransportationListWriter::populateWithSmarker()]" << "marker is een adres";
+        vvimDebug() << "[TransportationListWriter::populateWithSmarker()]" << "marker is een adres";
         // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SMarker) => marker
         ;
     }
-//            qDebug() << "[Vervoerslijst]" << "departure time:" << seconds_needed_to_complete_transport; // make human readable
+//            vvimDebug() << "[Vervoerslijst]" << "departure time:" << seconds_needed_to_complete_transport; // make human readable
 
 }
 
@@ -475,7 +478,7 @@ void TransportationListWriter::reject()
 void TransportationListWriter::accept()
 {
     close();
-    qDebug() << "printing time!";
+    vvimDebug() << "printing time!";
     print();
 }
 
@@ -491,22 +494,22 @@ void TransportationListWriter::setOriginalValues()
 
 void TransportationListWriter::deleteTheMatrices()
 {
-    qDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "start";
+    vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "start";
     int nr_of_cities = m_markers.length();
-    qDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "markers length" << nr_of_cities;
+    vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "markers length" << nr_of_cities;
 
     if(nr_of_cities > 0)
     {
-        qDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "..starting for loop";
+        vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "..starting for loop";
         for(int i = 0; i < nr_of_cities; i++) {
             delete [] distance_matrix_in_meters[i];
-            qDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "....loop-a";
+            vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "....loop-a";
             delete [] distance_matrix_in_seconds[i];
-            qDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "....loop-b";
+            vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "....loop-b";
         }
-        qDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "..ending for loop";
+        vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "..ending for loop";
         delete [] distance_matrix_in_meters;
         delete [] distance_matrix_in_seconds;
     }
-    qDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "done";
+    vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "done";
 }
