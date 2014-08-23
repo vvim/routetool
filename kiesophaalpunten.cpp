@@ -41,7 +41,7 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
 
     sortingascending = true;
 
-    legeAanmeldingenLabel = new QLabel(tr("Aanmeldingen - dubbelklik op een kolom om te sorteren:"));
+    legeAanmeldingenLabel = new QLabel(tr("Aanmeldingen - klik op een kolom om te sorteren:"));
 
     legeAanmeldingenTreeView = new QTreeView();
 

@@ -229,7 +229,8 @@ void ListOfOphaalpuntenToContact::initialise()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
     label->setText(tr("Hieronder de lijst met ophaalpunten die al een historiek hebben en gecontacteerd dienen te worden.\n"
-                      "Dubbelklik op een ophaalpunt om de informatie te zien."));
+                      "Dubbelklik op een ophaalpunt om de informatie te zien.\n"
+                      "Dubbleklik op een kolom om te sorteren."));
 
     contactTree->clear();
 
@@ -355,7 +356,7 @@ void ListOfOphaalpuntenToContact::show_never_contacted_ophaalpunten()
     query.prepare("SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode , ophaalpunten.last_contact_date, ophaalpunten.contact_again_on, ophaalpunten.last_ophaling_date, ophaalpunten.forecast_new_ophaling_date "
                   "FROM ophaalpunten WHERE not exists "
                       "(select null from ophalinghistoriek "
-                       "where ophalinghistoriek.ophaalpunt = ophaalpunten.id);");
+                       "where ophalinghistoriek.ophaalpunt = ophaalpunten.id)");
 
     if(query.exec())
     {
