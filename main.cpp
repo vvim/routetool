@@ -50,16 +50,16 @@ void myMessageOutput(QtMsgType type, const char *msg)
     //in this function, you can write the message to any stream!
     switch (type) {
     case QtDebugMsg:
-        fprintf(debuglogfile, "Debug: %s\n", msg);
+        fprintf(debuglogfile, "%s %s Debug: %s\n", QDateTime::currentDateTime().toString("[dd/MM/yy hh:mm:ss:zzz]").toStdString().c_str(), msg);
         break;
     case QtWarningMsg:
-        fprintf(debuglogfile, "Warning: %s\n", msg);
+        fprintf(debuglogfile, "%s Warning: %s\n", QDateTime::currentDateTime().toString("[dd/MM/yy hh:mm:ss:zzz]").toStdString().c_str(), msg);
         break;
     case QtCriticalMsg:
-        fprintf(debuglogfile, "Critical: %s\n", msg);
+        fprintf(debuglogfile, "%s Critical: %s\n", QDateTime::currentDateTime().toString("[dd/MM/yy hh:mm:ss:zzz]").toStdString().c_str(), msg);
         break;
     case QtFatalMsg:
-        fprintf(debuglogfile, "Fatal: %s\n", msg);
+        fprintf(debuglogfile, "%s Fatal: %s\n", QDateTime::currentDateTime().toString("[dd/MM/yy hh:mm:ss:zzz]").toStdString().c_str(), msg);
         abort();
     }
 }
