@@ -413,4 +413,6 @@ void KiesOphaalpunten::initModel()
     legeAanmeldingenTreeView->hideColumn(STRAAT);
     legeAanmeldingenTreeView->hideColumn(HUISNR);
     legeAanmeldingenTreeView->hideColumn(BUSNR);
+    legeAanmeldingenTreeView->setEditTriggers(QAbstractItemView::NoEditTriggers); // thanks to http://www.qtcentre.org/threads/22511-QTreeWidget-read-only
+
 }

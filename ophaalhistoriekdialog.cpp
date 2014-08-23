@@ -41,7 +41,7 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
     while(query.next())
     {
         int historiek_id = query.value(0).toInt();
-        QDate ophalingsdatum= query.value(2).toDate();
+        QDate ophalingsdatum = query.value(2).toDate();
         QString chauffeur = query.value(3).toString();
         int ophaalpunt_id = query.value(4).toInt();
         double zakken_kurk = query.value(5).toDouble();
@@ -74,6 +74,8 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
     ui->historiekTreeView->resizeColumnToContents(HIST_WEIGHT_KAARS);
     ui->historiekTreeView->resizeColumnToContents(HIST_WEIGHT_KURK);
     ui->historiekTreeView->resizeColumnToContents(HIST_OPMERKINGEN);
+
+    ui->historiekTreeView->setEditTriggers(QAbstractItemView::NoEditTriggers); // thanks to http://www.qtcentre.org/threads/22511-QTreeWidget-read-only
 }
 
 OphaalHistoriekDialog::~OphaalHistoriekDialog()
