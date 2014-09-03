@@ -94,6 +94,7 @@ private:
     QCheckBox *everContactedBeforeCheckBox;
 
     OphaalHistoriekDialog *ophaalHistoriekDialog;
+
 private slots:
     void accept();
     void reject();
