@@ -33,6 +33,20 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(&kiesOphaalpuntenWidget, SIGNAL(aanmelding_for_route(QList<SOphaalpunt> *)), m_pForm, SLOT(add_aanmeldingen(QList<SOphaalpunt>*)));
     connect(&leveringWidget, SIGNAL(levering_for_route(SLevering)), m_pForm, SLOT(add_levering(SLevering)));
     connect(&configurationWidget, SIGNAL(configurationChanged()), m_pForm, SLOT(setTotalWeightTotalVolume()));
+
+    // when table OPHAALPUNTEN is changed, we should reload all the completers. Yes, _all_ of them...
+    /// 1] for the mainform
+    connect(&ophaalpuntenWidget, SIGNAL(contentsOfDatabaseChanged()), m_pForm, SLOT(reloadCompleter()));
+    connect(&nieuwOphaalpuntWidget, SIGNAL(infoChanged()), m_pForm, SLOT(reloadCompleter()));
+    /// 2] for the nieuweAanmeldingWidget
+    connect(&ophaalpuntenWidget, SIGNAL(contentsOfDatabaseChanged()), &nieuweAanmeldingWidget, SLOT(loadOphaalpunten()));
+    connect(&nieuwOphaalpuntWidget, SIGNAL(infoChanged()), &nieuweAanmeldingWidget, SLOT(loadOphaalpunten()));
+    /// 3] for the ophaalpuntenWidget
+    connect(&ophaalpuntenWidget, SIGNAL(contentsOfDatabaseChanged()), &ophaalpuntenWidget, SLOT(loadOphaalpunten()));
+    connect(&nieuwOphaalpuntWidget, SIGNAL(infoChanged()), &ophaalpuntenWidget, SLOT(loadOphaalpunten()));
+    /// 3] for the leveringWidget
+    connect(&ophaalpuntenWidget, SIGNAL(contentsOfDatabaseChanged()), &leveringWidget, SLOT(loadOphaalpunten()));
+    connect(&nieuwOphaalpuntWidget, SIGNAL(infoChanged()), &leveringWidget, SLOT(loadOphaalpunten()));
 }
 
 RouteTool::~RouteTool()
