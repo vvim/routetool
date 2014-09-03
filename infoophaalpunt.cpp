@@ -363,8 +363,9 @@ void InfoOphaalpunt::accept()
         else
         {
             // results in "0000-00-00" instead of a real NULL. What can I do?
-            vvimDebug() << "[InfoOphaalpunt::accept()]" << "results in '0000-00-00'' instead of a real NULL. What can I do?";
-            query.bindValue(":last_contact_date","NULL");
+            //query.bindValue(":last_contact_date","NULL");
+            // -> solved thanks to http://stackoverflow.com/questions/338809/how-to-insert-a-null-value-with-qt
+            query.bindValue(":last_contact_date",QVariant(QVariant::Date));
         }
 
         /*  // update  "contact_again_on", "lastOphalingEdit", "forecastNewOphalingEdit" ?
