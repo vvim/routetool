@@ -19,10 +19,14 @@ public:
     void show_never_contacted_ophaalpunten();
     void show_one_year_ophaalpunten();
 
+signals:
+    void contentsOfDatabaseChanged();
+
 private slots:
     void showOphaalpunt(QTreeWidgetItem*);
     void ok_button_pushed();
     void sortTreeWidget(int column);
+    void databaseBeenUpdated();
 
 private:
     InfoOphaalpunt *info;

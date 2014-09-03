@@ -53,6 +53,8 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
 
     vvimDebug() << "<vvim> TODO: should we call UptodateAllOphaalpunten() everytime we initialise the contactTree?";
     UpdateAllOphaalpunten();
+
+    connect(info, SIGNAL(infoChanged()), this, SLOT(databaseBeenUpdated()));
 }
 
 ListOfOphaalpuntenToContact::~ListOfOphaalpuntenToContact()
@@ -440,4 +442,10 @@ void ListOfOphaalpuntenToContact::addToTreeWidget(QString NaamOphaalpunt, int Op
         for (int i = 0 ; i < contactTree->columnCount(); i++)
         item->setForeground(i,Qt::blue);
     }
+}
+
+
+void ListOfOphaalpuntenToContact::databaseBeenUpdated()
+{
+    emit contentsOfDatabaseChanged();
 }
