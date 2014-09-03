@@ -69,7 +69,7 @@ private:
 private slots:
     void accept();
     void reject();
-    void ophaalpuntChanged();
+    void ophaalpuntTextChanged();
     void toonOphaalpuntInformatie();
     void loadOphaalpunten();
     void createNewOphaalpunt();

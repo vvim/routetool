@@ -17,14 +17,15 @@ public:
     void initialise();
     
 signals:
+    void contentsOfDatabaseChanged();
     
 private slots:
-    void ophaalpuntChanged();
+    void ophaalpuntTextChanged();
     void toonOphaalpuntInformatie();
-
-private:
+    void databaseBeenUpdated();
     void loadOphaalpunten();
 
+private:
     QLabel *ophaalpuntLabel;
     MyLineEdit *ophaalpuntEdit;
     InfoOphaalpunt *info;

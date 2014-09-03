@@ -167,6 +167,7 @@ void Levering::ophaalpuntChanged()
 
 void Levering::loadOphaalpunten()
 {
+    vvimDebug() << "database has been changed, so we should reload the Completer";
     // autocompletion for locationEdit:
     // telkens aanroepen na aanmaken / wijzigen van een ophaalpunt?
     QStringList words; // "don't come easy, to me, la la la laaa la la"
@@ -197,6 +198,7 @@ void Levering::loadOphaalpunten()
     completer->setCaseSensitivity(Qt::CaseInsensitive);
 
     locationEdit->setCompleter(completer);
+    vvimDebug() << "done, completer (re)loaded.";
 }
 
 void Levering::toonOphaalpuntInformatie()

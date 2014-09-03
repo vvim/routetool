@@ -64,7 +64,7 @@ NieuweAanmelding::NieuweAanmelding(QWidget *parent) :
     // zie mapper zoals custom widget mapper om ID te linken ??
     connect(toonOphaalpunt, SIGNAL(clicked()), this, SLOT(toonOphaalpuntInformatie()));
     connect(nieuwOphaalpunt, SIGNAL(clicked()), this, SLOT(createNewOphaalpunt()));
-    connect(locationEdit, SIGNAL(textChanged(QString)), this, SLOT(ophaalpuntChanged()));
+    connect(locationEdit, SIGNAL(textChanged(QString)), this, SLOT(ophaalpuntTextChanged()));
 
     connect(info, SIGNAL(infoChanged()), this, SLOT(loadOphaalpunten()));
 
@@ -256,7 +256,7 @@ void NieuweAanmelding::reject()
     this->close();
 }
 
-void NieuweAanmelding::ophaalpuntChanged()
+void NieuweAanmelding::ophaalpuntTextChanged()
 {
     if (ophaalpunten[locationEdit->text()] > 0)
     {
@@ -274,6 +274,7 @@ void NieuweAanmelding::toonOphaalpuntInformatie()
 
 void NieuweAanmelding::loadOphaalpunten()
 {
+    vvimDebug() << "database has been changed, so we should reload the Completer";
     // autocompletion for locationEdit:
     // telkens aanroepen na aanmaken / wijzigen van een ophaalpunt?
     QStringList words; // "don't come easy, to me, la la la laaa la la"
@@ -304,6 +305,7 @@ void NieuweAanmelding::loadOphaalpunten()
     completer->setCaseSensitivity(Qt::CaseInsensitive);
 
     locationEdit->setCompleter(completer);
+    vvimDebug() << "done, completer (re)loaded.";
 }
 
 void NieuweAanmelding::createNewOphaalpunt()

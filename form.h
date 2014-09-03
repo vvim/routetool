@@ -52,6 +52,7 @@ private slots:
     void on_pbRouteOmdraaien_clicked();
     void reorderMarkers();
     void setTotalWeightTotalVolume();
+    void reloadCompleter();
 
 private:
     /**    I believe this member is a copy/paste accident, must try out.

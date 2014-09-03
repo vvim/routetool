@@ -23,8 +23,9 @@ OphaalpuntenWidget::OphaalpuntenWidget(QWidget *parent) :
     toonOphaalpunt->setEnabled(false);
 
     connect(toonOphaalpunt, SIGNAL(clicked()), this, SLOT(toonOphaalpuntInformatie()));
-    connect(ophaalpuntEdit, SIGNAL(textChanged(QString)), this, SLOT(ophaalpuntChanged()));
+    connect(ophaalpuntEdit, SIGNAL(textChanged(QString)), this, SLOT(ophaalpuntTextChanged()));
     connect(info,SIGNAL(nieuweAanmelding(int)),nieuweaanmeldingWidget,SLOT(aanmeldingVoorOphaalpunt(int)));
+    connect(info, SIGNAL(infoChanged()), this, SLOT(databaseBeenUpdated()));
 
     QHBoxLayout *layout = new QHBoxLayout();
     layout->addWidget(ophaalpuntLabel);
@@ -64,6 +65,7 @@ OphaalpuntenWidget::~OphaalpuntenWidget()
 
 void OphaalpuntenWidget::loadOphaalpunten()
 {
+    vvimDebug() << "database has been changed, so we should reload the Completer";
     // autocompletion for locationEdit:
     // telkens aanroepen na aanmaken / wijzigen van een ophaalpunt?
     QStringList words; // "don't come easy, to me, la la la laaa la la"
@@ -103,6 +105,7 @@ void OphaalpuntenWidget::loadOphaalpunten()
     completer->setCaseSensitivity(Qt::CaseInsensitive);
 
     ophaalpuntEdit->setCompleter(completer);
+    vvimDebug() << "done, completer (re)loaded.";
 }
 
 void OphaalpuntenWidget::toonOphaalpuntInformatie()
@@ -111,7 +114,7 @@ void OphaalpuntenWidget::toonOphaalpuntInformatie()
     info->showOphaalpunt(ophaalpunten[ophaalpuntEdit->text()]);
 }
 
-void OphaalpuntenWidget::ophaalpuntChanged()
+void OphaalpuntenWidget::ophaalpuntTextChanged()
 {
     if (ophaalpunten[ophaalpuntEdit->text()] > 0)
     {
@@ -126,4 +129,9 @@ void OphaalpuntenWidget::initialise()
 {
     loadOphaalpunten();
     ophaalpuntEdit->setText("");
+}
+
+void OphaalpuntenWidget::databaseBeenUpdated()
+{
+    emit contentsOfDatabaseChanged();
 }

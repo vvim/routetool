@@ -67,79 +67,7 @@ Form::Form(QWidget *parent) :
     ui->webView->setHtml("<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"initial-scale=1.0, user-scalable=no\" /><style type=\"text/css\">html { height: 100% } body { height: 100%; margin: 0; padding: 0 } #map_canvas { height: 100% } </style> <script type=\"text/javascript\" src=\"http://maps.googleapis.com/maps/api/js?key="+settings.value("apiKey").toString()+"&sensor=false\"> </script> <script type=\"text/javascript\"> var map; var markers = []; function initialize() { var myOptions = { center: new google.maps.LatLng(50.9801, 4.97517), zoom: 15, mapTypeId: google.maps.MapTypeId.ROADMAP, panControl: true }; map = new google.maps.Map(document.getElementById(\"map_canvas\"), myOptions); } </script> </head> <body onload=\"initialize()\"> <div id=\"map_canvas\" style=\"width:100%; height:100%\"></div> </body></html>");
     ui->lwMarkers->setMaximumWidth(180);
 
-    /* version from file: can't get it to work properly
-        <ugly>
-
-      TODO vvim: make MyCompleter read from File and make modelFromFile
-        unfortunately: I cannot get it to work (maybe problem in constructor? maybe in MyCompleter::update() ??)
-        therefore I now convert the file to a QStringList, ugghh...
-
-
-    completer = new MyCompleter(this);
-    completer->setModel(modelFromFile(":/files/plaatsen.txt"));
-    completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
-    completer->setCaseSensitivity(Qt::CaseInsensitive);
-    completer->setWrapAround(false);
-       </ugly>
-
-    */
-
-    /** version from file: this one works
-    QFile file(":/files/plaatsen.txt");
-    QStringList words; // "don't come easy, to me, la la la laaa la la"
-
-    if (!file.open(QFile::ReadOnly))
-        vvimDebug() << "<vvim> TODO: kan plaatsnamen niet vinden, iets doen? Nope, gewoon geen completer, toch?";
-    else
-    {
-
-        #ifndef QT_NO_CURSOR
-            QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-        #endif
-
-            while (!file.atEnd()) {
-                QByteArray line = file.readLine();
-                if (!line.isEmpty())
-                    words << line.trimmed();
-            }
-
-        #ifndef QT_NO_CURSOR
-            QApplication::restoreOverrideCursor();
-        #endif
-    }
-    **/
-
-    /** version from database **/
-    QStringList words; // "don't come easy, to me, la la la laaa la la"
-
-#ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-#endif
-
-    QSqlQuery query("SELECT naam, straat, nr, bus, postcode, plaats, land FROM ophaalpunten");
-        while (query.next()) {
-            QString naam	= query.value(0).toString();
-            QString straat	= query.value(1).toString();
-            QString nr	    = query.value(2).toString();
-            QString bus	    = query.value(3).toString();
-            QString postcode	= query.value(4).toString();
-            QString plaats	= query.value(5).toString();
-            QString land	= query.value(6).toString();
-            words << naam.append(", %1 %2, %3 %4, %5").arg(straat).arg(nr).arg(postcode).arg(plaats).arg(land);
-        }
-
-#ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
-#endif
-
-
-    if(completer)
-        delete completer;
-
-    completer = new MyCompleter(words, this);
-    completer->setCaseSensitivity(Qt::CaseInsensitive);
-
-    ui->lePostalAddress->setCompleter(completer);
+    reloadCompleter();
 
     ui->lePostalAddress->setText(settings.value("startpunt").toString());
     goClicked();
@@ -729,4 +657,43 @@ void Form::logOutputLwMarkers()
         vvimDebug() << "Row" << i << ":" << ui->lwMarkers->item(i)->text();
     }
     vvimDebug() << "STOP\n\n";
+}
+
+void Form::reloadCompleter()
+{
+    vvimDebug() << "database has been changed, so we should reload the Completer";
+
+    /** version from database **/
+    QStringList words; // "don't come easy, to me, la la la laaa la la"
+
+#ifndef QT_NO_CURSOR
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+
+    QSqlQuery query("SELECT naam, straat, nr, bus, postcode, plaats, land FROM ophaalpunten");
+        while (query.next()) {
+            QString naam	= query.value(0).toString();
+            QString straat	= query.value(1).toString();
+            QString nr	    = query.value(2).toString();
+            QString bus	    = query.value(3).toString();
+            QString postcode	= query.value(4).toString();
+            QString plaats	= query.value(5).toString();
+            QString land	= query.value(6).toString();
+            words << naam.append(", %1 %2, %3 %4, %5").arg(straat).arg(nr).arg(postcode).arg(plaats).arg(land);
+        }
+
+#ifndef QT_NO_CURSOR
+    QApplication::restoreOverrideCursor();
+#endif
+
+
+    if(completer)
+        delete completer;
+
+    completer = new MyCompleter(words, this);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+
+    ui->lePostalAddress->setCompleter(completer);
+
+    vvimDebug() << "done, completer (re)loaded.";
 }
