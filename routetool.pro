@@ -59,7 +59,6 @@ SOURCES += main.cpp\
     configuration.cpp \
     nieuweaanmelding.cpp \
     infoophaalpunt.cpp \
-    mainwindow.cpp \
     kiesophaalpunten.cpp \
     levering.cpp \
     listofophaalpuntentocontact.cpp \
@@ -78,7 +77,6 @@ HEADERS  += routetool.h \
     configuration.h \
     nieuweaanmelding.h \
     infoophaalpunt.h \
-    mainwindow.h \
     kiesophaalpunten.h \
     sophaalpunt.h \
     levering.h \
@@ -93,9 +91,4 @@ HEADERS  += routetool.h \
 FORMS    += routetool.ui \
     form.ui \
     ophaalhistoriekdialog.ui
-
-
-
-RESOURCES += \
-    resource.qrc
 

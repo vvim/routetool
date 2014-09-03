@@ -2,7 +2,6 @@
 #include <QSqlDatabase>
 #include "routetool.h"
 #include "configuration.h"
-#include "mainwindow.h"
 
 #include <QDebug>
 #include <QJson/Parser>
