@@ -13,6 +13,7 @@
 #include <QSettings>
 #include <QSqlError>
 #include <QMessageBox>
+#include <QTextCodec>
 
 #define vvimDebug()\
     qDebug() << "[" << Q_FUNC_INFO << "]"
@@ -106,6 +107,10 @@ bool connectToDatabase()
 
 int main(int argc, char *argv[])
 {
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+
     debuglogfile = NULL;
 
     vvimDebug() << "<vvim> TODO: in databank table ophaalhistoriek kan Tourist Union het ophaalpuntid 0 hebben, terwijl in table ophaalpunten het id 131 heeft. Best ophaalhistoriek aanpassen!";
