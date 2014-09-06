@@ -9,6 +9,7 @@
 #include <QKeyEvent>
 #include <QVariant>
 #include <QSqlQuery>
+#include <QSqlError>
 
 #define vvimDebug()\
     qDebug() << "[" << Q_FUNC_INFO << "]"
@@ -666,11 +667,19 @@ void Form::reloadCompleter()
     /** version from database **/
     QStringList words; // "don't come easy, to me, la la la laaa la la"
 
+    vvimDebug() << "1. made QStringList words";
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
+    vvimDebug() << "2. setOverrideCursor";
 
     QSqlQuery query("SELECT naam, straat, nr, bus, postcode, plaats, land FROM ophaalpunten");
+    vvimDebug() << "3. SELECT query ready";
+    if(!query.exec())
+        vvimDebug() << "Something went wrong with querying information on the ophaalpunten" << query.lastError();
+    else
+    {
+        vvimDebug() << "4. no SQL query";
         while (query.next()) {
             QString naam	= query.value(0).toString();
             QString straat	= query.value(1).toString();
@@ -680,20 +689,35 @@ void Form::reloadCompleter()
             QString plaats	= query.value(5).toString();
             QString land	= query.value(6).toString();
             words << naam.append(", %1 %2, %3 %4, %5").arg(straat).arg(nr).arg(postcode).arg(plaats).arg(land);
+            vvimDebug() << "5." << words.length();
         }
+
+
+        vvimDebug() << "6. IF completer -> delete it, thank you" << completer;
+        vvimDebug() << "6. IF completer -> delete it, thank you - value:" << completer;
+        vvimDebug() << "!!! check in all classes if completer is set to NULL in constructor, thank you";
+
+        if(completer)
+        {
+            vvimDebug() << "7. - completer TRUE => delete completer";
+            delete completer;
+        }
+        else
+            vvimDebug() << "7. - completer FALSE, no need to delete it";
+
+
+
+        completer = new MyCompleter(words, this);
+        vvimDebug() << "8. new completer 'words'";
+        completer->setCaseSensitivity(Qt::CaseInsensitive);
+        vvimDebug() << "9. Case insensitive";
+
+        ui->lePostalAddress->setCompleter(completer);
+        vvimDebug() << "10. lePostalAddress";
+    }
 
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
 #endif
-
-
-    if(completer)
-        delete completer;
-
-    completer = new MyCompleter(words, this);
-    completer->setCaseSensitivity(Qt::CaseInsensitive);
-
-    ui->lePostalAddress->setCompleter(completer);
-
     vvimDebug() << "done, completer (re)loaded.";
 }

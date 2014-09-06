@@ -1,4 +1,8 @@
 #include "mylineedit.h"
+#include <QDebug>
+
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
 
 MyLineEdit::MyLineEdit(QWidget *parent)
 : QLineEdit(parent), c(0)
@@ -11,16 +15,30 @@ MyLineEdit::~MyLineEdit()
 
 void MyLineEdit::setCompleter(MyCompleter *completer)
 {
+    vvimDebug() << "a) test for if(c)";
 if (c)
-QObject::disconnect(c, 0, this, 0);
+{
+    vvimDebug() << "b-1) yes, c is true";
+//QObject::disconnect(c, 0, this, 0); // seriously, is this useful?? It definitely is part of the crash issue 1 (see http://stackoverflow.com/questions/25698644/concerning-qlineedit-can-i-change-completers-at-runtime )
+    vvimDebug() << "b-2) c is now disconnected";
+    vvimDebug() << "b-3) the above statement is NOT true, we no longer disconnect c as this appears to sometimes create a bug that is difficult to reproduce";
+}
 
+vvimDebug() << "c) make c the completer";
 c = completer;
 
 if (!c)
-return;
+{
+    vvimDebug() << "d) c is FALSE, ABORT!";
+    return;
+}
 
+vvimDebug() << "d) c is not false, we don't need to abort";
 c->setWidget(this);
+vvimDebug() << "e) connect";
 connect(completer, SIGNAL(activated(const QString&)), this, SLOT(insertCompletion(const QString&)));
+vvimDebug() << "f) DONE";
+
 }
 
 MyCompleter *MyLineEdit::completer() const
