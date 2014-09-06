@@ -68,7 +68,14 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     plaatsLabel = new QLabel(tr("Plaats:"));
     plaatsEdit = new QLineEdit();
     landLabel = new QLabel(tr("Land:"));
-    landEdit = new QLineEdit();
+
+    landComboBox = new QComboBox();
+    landComboBox->insertItem(0,"");
+    // "if I put 'België' in the combobox, the on screen result will be BelgiÃ« . Why?"; -> http://stackoverflow.com/questions/15579336/qt-qstring-from-string-strange-letters
+    landComboBox->insertItem(1, tr("België"));
+    landComboBox->insertItem(2, tr("Frankrijk"));
+    landComboBox->insertItem(3, tr("Nederland"));
+
     openingsurenLabel = new QLabel(tr("Openingsuren:"));
     openingsurenEdit = new QTextEdit();
     contactpersoonLabel = new QLabel(tr("Contactpersoon:"));
@@ -225,7 +232,7 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     layout->addRow(tr("Postcode:"), postcodeEdit);
     layout->addRow(tr("Plaats:"), plaatsEdit);
 */
-    layout->addRow(tr("Land:"), landEdit);
+    layout->addRow(tr("Land:"), landComboBox);
     // horizontal line
     layout->addRow(tr("Materiaal:"), kurkCheckBox);
     layout->addRow(tr(""), parafineCheckBox);
@@ -290,7 +297,7 @@ InfoOphaalpunt::~InfoOphaalpunt()
     delete  plaatsLabel;
     delete  plaatsEdit;
     delete  landLabel;
-    delete  landEdit;
+    delete  landComboBox;
     delete  openingsurenLabel;
     delete  openingsurenEdit;
     delete  contactpersoonLabel;
@@ -324,6 +331,7 @@ InfoOphaalpunt::~InfoOphaalpunt()
 
 void InfoOphaalpunt::accept()
 {
+
     if(id > 0)
     {
         //changing existing ophaalpunt
@@ -342,7 +350,7 @@ void InfoOphaalpunt::accept()
         query.bindValue(":bus",busEdit->text());
         query.bindValue(":postcode",postcodeEdit->text());
         query.bindValue(":plaats",plaatsEdit->text());
-        query.bindValue(":land",landEdit->text());
+        query.bindValue(":land",landComboBox->currentText());
         query.bindValue(":openingsuren",openingsurenEdit->toPlainText());
         query.bindValue(":contactpersoon",contactpersoonEdit->text());
         query.bindValue(":telefoonnummer1",telefoonnummer1Edit->text());
@@ -408,7 +416,7 @@ void InfoOphaalpunt::accept()
         query.bindValue(":bus",busEdit->text());
         query.bindValue(":postcode",postcodeEdit->text());
         query.bindValue(":plaats",plaatsEdit->text());
-        query.bindValue(":land",landEdit->text());
+        query.bindValue(":land",landComboBox->currentText());
         query.bindValue(":openingsuren",openingsurenEdit->toPlainText());
         query.bindValue(":contactpersoon",contactpersoonEdit->text());
         query.bindValue(":telefoonnummer1",telefoonnummer1Edit->text());
@@ -495,7 +503,7 @@ void InfoOphaalpunt::reset()
             busEdit->setText(query.value(9).toString());
             postcodeEdit->setText(query.value(10).toString());
             plaatsEdit->setText(query.value(11).toString());
-            landEdit->setText(query.value(12).toString());
+            landComboBox->setCurrentIndex(getCountryIndexFromQuery(query.value(12).toString()));
             openingsurenEdit->setText(query.value(13).toString());
             contactpersoonEdit->setText(query.value(14).toString());
             telefoonnummer1Edit->setText(query.value(15).toString());
@@ -570,7 +578,7 @@ void InfoOphaalpunt::reset()
         busEdit->clear();
         postcodeEdit->clear();
         plaatsEdit->clear();
-        landEdit->clear();
+        landComboBox->setCurrentIndex(0);
         openingsurenEdit->clear();
         contactpersoonEdit->clear();
         telefoonnummer1Edit->clear();
@@ -644,4 +652,24 @@ void InfoOphaalpunt::showHistoriekButtonPressed()
 void InfoOphaalpunt::everContactedBeforeCheckBoxToggled(bool visible)
 {
     lastContactDateEdit->setVisible(visible);
+}
+
+int InfoOphaalpunt::getCountryIndexFromQuery(QString country)
+{
+    /*
+        landComboBox->insertItem(1, "België");
+        landComboBox->insertItem(2, "Frankrijk");
+        landComboBox->insertItem(3, "Nederland");
+    */
+    int BELGIUM = 1;
+    int FRANCE = 2;
+    int NETHERLANDS = 3;
+
+    if(country.startsWith("Belg",Qt::CaseInsensitive))
+        return BELGIUM;
+    if(country.startsWith("Fran",Qt::CaseInsensitive))
+        return FRANCE;
+    if(country.startsWith("Ned",Qt::CaseInsensitive))
+        return NETHERLANDS;
+    return 0;
 }

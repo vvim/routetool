@@ -55,7 +55,7 @@ private:
     QLabel *plaatsLabel;
     QLineEdit *plaatsEdit;
     QLabel *landLabel;
-    QLineEdit *landEdit;
+    QComboBox *landComboBox;
     QLabel *openingsurenLabel;
     QTextEdit *openingsurenEdit;
 
@@ -94,6 +94,8 @@ private:
     QCheckBox *everContactedBeforeCheckBox;
 
     OphaalHistoriekDialog *ophaalHistoriekDialog;
+
+    int getCountryIndexFromQuery(QString country);
 
 private slots:
     void accept();
