@@ -66,7 +66,8 @@ SOURCES += main.cpp\
     transportationlistdocumentwriter.cpp \
     ophaalpuntenwidget.cpp \
     mysortfilterproxymodel.cpp \
-    ophaalhistoriekdialog.cpp
+    ophaalhistoriekdialog.cpp \
+    kiesgedaneophaling.cpp
 
 HEADERS  += routetool.h \
     form.h \
@@ -86,7 +87,8 @@ HEADERS  += routetool.h \
     transportationlistdocumentwriter.h \
     ophaalpuntenwidget.h \
     mysortfilterproxymodel.h \
-    ophaalhistoriekdialog.h
+    ophaalhistoriekdialog.h \
+    kiesgedaneophaling.h
 
 FORMS    += routetool.ui \
     form.ui \

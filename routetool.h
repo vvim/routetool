@@ -49,6 +49,7 @@ private slots:
     void showBijWieNogNooitOpgehaald();
     void showVoorspelling();
     void showOphaalpuntenWidget();
+    void showEffectiefOpgehaaldeHoeveelheden();
 };
 
 #endif // ROUTETOOL_H

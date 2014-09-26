@@ -10,6 +10,14 @@
 #define vvimDebug()\
     qDebug() << "[" << Q_FUNC_INFO << "]"
 
+
+
+
+
+
+#include "kiesgedaneophaling.h"
+
+
 RouteTool::RouteTool(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::RouteTool)
@@ -26,6 +34,7 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(ui->ouderDanEenJaarMenuButton, SIGNAL(triggered()), this, SLOT(showBijWieOuderDanJaarWidget()));
     connect(ui->voorspellingMenuButton, SIGNAL(triggered()), this, SLOT(showVoorspelling()));
     connect(ui->toonOphaalpuntenMenuButton, SIGNAL(triggered()), this, SLOT(showOphaalpuntenWidget()));
+    connect(ui->effectiefOpgehaaldeHoeveelhedenMenuButton, SIGNAL(triggered()), this, SLOT(showEffectiefOpgehaaldeHoeveelheden()));
 
     m_pForm = new Form(this);
     setCentralWidget(m_pForm);
@@ -116,4 +125,41 @@ void RouteTool::showOphaalpuntenWidget()
 {
     ophaalpuntenWidget.initialise();
     ophaalpuntenWidget.show();
+}
+
+void RouteTool::showEffectiefOpgehaaldeHoeveelheden()
+{
+    qDebug() << "Here we go!";
+    KiesGedaneOphaling *kgo = new KiesGedaneOphaling();
+
+    /**
+      1. geef een QComboBox met de verschillende data waarvan een ophaling nog niet bevestigd is geweest
+                dit zijn aanmeldingspunten in de table AANMELDING die een ophaalronde_datum en een volgorde hebben gekregen
+                (zie code regel 219 in transportationlistwriter.cpp)
+
+                => select distinct ophaalronde_datum from aanmelding where volgorde is not null
+
+                ???=[3.]=> select distinct aanmelding.ophaalronde_datum from aanmelding where volgorde is not null
+                                            AND not exists
+                            (select null from ophalinghistoriek
+                             wehere ophalinghistoriek.ophaalpunt = aanmelding.ophaalpunt and ophalinghistoriek.datum = ophaalronde_datum)
+                    zie regel 361 van void ListOfOphaalpuntenToContact::show_never_contacted_ophaalpunten()
+
+
+
+      2. nieuw venster met daarin de QSqlWidgetMapper om elke locatie apart te bevestigen, in volgorde!
+
+                => select * from aanmelding where ophaalronde_datum = GEKOZEN_OPHAALRONDE_DATUM
+
+      3. dubbelen verwijderen? => zie select in 1.
+
+      ** insert into TABLE OPHAALHISTORIEK
+      ging dat ok? =>
+      ** delete from TABLE AANMELDING
+
+      ??? wat als we een bevestigde ophaling toch nog willen wijzigen ???
+
+      ??? wat als we een geplande ophaling willen annuleren ???
+        --> ophalings_datum en volgorde terug op NULL zetten
+    **/
 }

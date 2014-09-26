@@ -55,16 +55,9 @@
    <addaction name="menuMenuAanmeldingen"/>
    <addaction name="menuMenuLeveringen"/>
    <addaction name="menuMenuBellijst"/>
+   <addaction name="effectiefOpgehaaldeHoeveelhedenMenuButton"/>
    <addaction name="configurationMenuButton"/>
    <addaction name="actionQuit"/>
-  </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="nieuweAanmeldingMenuButton">
@@ -94,12 +87,17 @@
   </action>
   <action name="ouderDanEenJaarMenuButton">
    <property name="text">
-    <string>Ophaalpunten > 1 jaar</string>
+    <string>Ophaalpunten &gt; 1 jaar</string>
    </property>
   </action>
   <action name="wieNogNooitMenuButton">
    <property name="text">
     <string>Punten zonder ophaalhistoriek</string>
+   </property>
+  </action>
+  <action name="effectiefOpgehaaldeHoeveelhedenMenuButton">
+   <property name="text">
+    <string>EffectiefOpgehaaldeHoeveelheden</string>
    </property>
   </action>
   <action name="configurationMenuButton">
