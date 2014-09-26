@@ -175,7 +175,7 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
 
     forecastNewOphalingEdit->setEnabled(false);
 
-    buttonBox = new QDialogButtonBox;
+    buttonBox = new QDialogButtonBox();
     buttonBox->addButton(tr("Wijzigingen opslaan"),
                  QDialogButtonBox::AcceptRole);
     buttonBox->addButton(tr("Niet opslaan"),

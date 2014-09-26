@@ -70,7 +70,7 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     // setTotalWeightTotalVolume(); -> niet nodig, zit al in de "uncheckAll()" in "initialise()"
 
     // buttonroles: http://doc.qt.digia.com/qt-maemo/qdialogbuttonbox.html#ButtonRole-enum
-    buttonBox = new QDialogButtonBox;
+    buttonBox = new QDialogButtonBox();
     buttonBox->addButton(tr("Wijzigingen opslaan"),
                  QDialogButtonBox::AcceptRole);
     buttonBox->addButton(tr("Niet opslaan"),
