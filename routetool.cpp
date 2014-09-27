@@ -4,8 +4,8 @@
 #include <QApplication>
 #include "form.h"
 
-#include <QSqlQuery>
-#include <QSqlError>
+
+#include <QMessageBox>
 
 #define vvimDebug()\
     qDebug() << "[" << Q_FUNC_INFO << "]"
@@ -132,21 +132,20 @@ void RouteTool::showEffectiefOpgehaaldeHoeveelheden()
     qDebug() << "Here we go!";
     KiesGedaneOphaling *kgo = new KiesGedaneOphaling();
 
+    switch(kgo->initialise())
+    {
+        case -1 :
+            QMessageBox::critical(this, tr("Databank error"), tr("We konden de onbevestigde ophaalrondes niet opzoeken in de databank."));
+            return;
+            break;
+        case 0 :
+            QMessageBox::information(this, tr("Geen onbevestigde ophaalrondes gevonden"), tr("Er werden geen onbevestigde ophaalrondes gevonden."));
+            return;
+            break;
+    }
+    kgo->show();
+
     /**
-      1. geef een QComboBox met de verschillende data waarvan een ophaling nog niet bevestigd is geweest
-                dit zijn aanmeldingspunten in de table AANMELDING die een ophaalronde_datum en een volgorde hebben gekregen
-                (zie code regel 219 in transportationlistwriter.cpp)
-
-                => select distinct ophaalronde_datum from aanmelding where volgorde is not null
-
-                ???=[3.]=> select distinct aanmelding.ophaalronde_datum from aanmelding where volgorde is not null
-                                            AND not exists
-                            (select null from ophalinghistoriek
-                             wehere ophalinghistoriek.ophaalpunt = aanmelding.ophaalpunt and ophalinghistoriek.datum = ophaalronde_datum)
-                    zie regel 361 van void ListOfOphaalpuntenToContact::show_never_contacted_ophaalpunten()
-
-
-
       2. nieuw venster met daarin de QSqlWidgetMapper om elke locatie apart te bevestigen, in volgorde!
 
                 => select * from aanmelding where ophaalronde_datum = GEKOZEN_OPHAALRONDE_DATUM

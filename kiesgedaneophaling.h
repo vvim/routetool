@@ -13,7 +13,8 @@ class KiesGedaneOphaling : public QWidget
 public:
     explicit KiesGedaneOphaling(QWidget *parent = 0);
     ~KiesGedaneOphaling();
-    
+    int initialise(); // return: -1 is error, 0 is nothing found, +1 is all ok
+
 signals:
     
 public slots:
