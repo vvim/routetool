@@ -15,6 +15,7 @@
 KiesGedaneOphaling::KiesGedaneOphaling(QWidget *parent) :
     QWidget(parent)
 {
+    vvimDebug() << "<vvim> [TODO] if window KiesGedaneOphaling gets closed: NOTHING HAPPENS! how to delete from memory???";
     ophalingenLabel = new QLabel(tr("Voor welke ophaalronde wil je de hoeveelheden bevestigen?"));
     ophalingenComboBox = new QComboBox();
     buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
