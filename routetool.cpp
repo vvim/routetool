@@ -35,6 +35,7 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(ui->voorspellingMenuButton, SIGNAL(triggered()), this, SLOT(showVoorspelling()));
     connect(ui->toonOphaalpuntenMenuButton, SIGNAL(triggered()), this, SLOT(showOphaalpuntenWidget()));
     connect(ui->effectiefOpgehaaldeHoeveelhedenMenuButton, SIGNAL(triggered()), this, SLOT(showEffectiefOpgehaaldeHoeveelheden()));
+    connect(ui->actionAnnuleer_ingegeven_ophaalronde, SIGNAL(triggered()), this, SLOT(showAnnuleerIngegevenOphaalronde()));
 
     m_pForm = new Form(this);
     setCentralWidget(m_pForm);
@@ -159,6 +160,14 @@ void RouteTool::showEffectiefOpgehaaldeHoeveelheden()
       ??? wat als we een bevestigde ophaling toch nog willen wijzigen ???
 
       ??? wat als we een geplande ophaling willen annuleren ???
-        --> ophalings_datum en volgorde terug op NULL zetten
+        --> zie showAnnuleerIngegevenOphaalronde()
     **/
+}
+
+void RouteTool::showAnnuleerIngegevenOphaalronde()
+{
+            QMessageBox::information(this, tr("Annuleer ophaalronde"), tr("Geert, deze functionaliteit is nog niet geprogrammeerd. Komt eraan!"));
+
+            // inherit KiesGedaneOphaling , override "accept" met UPDATE aanmelding SET ophalings_datum = NULL, volgorde = NULL WHERE ophalings_datum = :ophalingsdatum;
+
 }

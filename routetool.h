@@ -50,6 +50,7 @@ private slots:
     void showVoorspelling();
     void showOphaalpuntenWidget();
     void showEffectiefOpgehaaldeHoeveelheden();
+    void showAnnuleerIngegevenOphaalronde();
 };
 
 #endif // ROUTETOOL_H
