@@ -5,6 +5,10 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
+
+#include "opgehaaldehoeveelheid.h"
+
+
 #define vvimDebug()\
     qDebug() << "[" << Q_FUNC_INFO << "]"
 
@@ -42,7 +46,9 @@ KiesGedaneOphaling::~KiesGedaneOphaling()
 void KiesGedaneOphaling::reject()
 {
     close();
-    delete this;
+    vvimDebug() << "before deleting self";
+/* <vvim> TODO: does this one result in a crash? */    delete this;
+    vvimDebug() << "after deleting self (shouldn't show though :-) )";
 }
 
 void KiesGedaneOphaling::accept()
@@ -71,6 +77,11 @@ void KiesGedaneOphaling::accept()
             vvimDebug() << query.value(10).toDate().toString() << "volgorde" << query.value(11).toInt();
         }
     }
+
+
+    /// test
+    OpgehaaldeHoeveelheid *kkkk = new OpgehaaldeHoeveelheid(ophaalronde_datum);
+    kkkk->show();
 
     reject();
 }
