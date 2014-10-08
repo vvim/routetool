@@ -79,11 +79,14 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     buttonBox->addButton(allButton,QDialogButtonBox::ActionRole);
     resetButton = new QPushButton(tr("Geen"));
     buttonBox->addButton(resetButton,QDialogButtonBox::ActionRole); // NoRole ???
+    deleteButton = new QPushButton(tr("Wis"));
+    buttonBox->addButton(deleteButton,QDialogButtonBox::DestructiveRole); // NoRole ???
 
     connect(buttonBox, SIGNAL(accepted()),this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()),this, SLOT(reject()));
     connect(resetButton, SIGNAL(pressed()), this, SLOT(uncheckAll()));
     connect(allButton, SIGNAL(pressed()), this, SLOT(checkAll()));
+    connect(deleteButton, SIGNAL(pressed()), this, SLOT(deleteSelected()));
 
     //why does this one not work???
     connect(legeAanmeldingenModel, SIGNAL(checkChanges()), this, SLOT(setTotalWeightTotalVolume()));
@@ -316,6 +319,7 @@ KiesOphaalpunten::~KiesOphaalpunten()
     delete totalVolumeEdit;
     delete resetButton;
     delete allButton;
+    delete deleteButton;
     delete buttonBox;
     delete model;
     delete legeAanmeldingenModel;
@@ -415,4 +419,10 @@ void KiesOphaalpunten::initModel()
     legeAanmeldingenTreeView->hideColumn(BUSNR);
     legeAanmeldingenTreeView->setEditTriggers(QAbstractItemView::NoEditTriggers); // thanks to http://www.qtcentre.org/threads/22511-QTreeWidget-read-only
 
+}
+
+
+void KiesOphaalpunten::deleteSelected()
+{
+    qDebug() << "Poofff...";
 }

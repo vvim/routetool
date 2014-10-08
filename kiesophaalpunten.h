@@ -35,7 +35,7 @@ private:
     QLabel *legeAanmeldingenLabel, *totalWeightLabel, *totalVolumeLabel;
     QLineEdit *totalWeightEdit, *totalVolumeEdit;
     QDialogButtonBox *buttonBox;
-    QPushButton *resetButton, *allButton;
+    QPushButton *resetButton, *allButton, *deleteButton;
     QPalette *warning, *normal;
     double total_weight, total_volume;
     double maximum_weight, maximum_volume;
@@ -51,6 +51,7 @@ private:
 private slots:
     void checkAll();
     void uncheckAll();
+    void deleteSelected();
     void accept();
     void reject();
     void setTotalWeightTotalVolume();
