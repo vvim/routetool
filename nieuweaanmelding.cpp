@@ -208,9 +208,14 @@ NieuweAanmelding::~NieuweAanmelding()
 
 void NieuweAanmelding::accept()
 {
+    if(ophaalpunten[locationEdit->text()] < 1)
+    {
+        vvimDebug() << "no valid ophaalpunt, just ignore";
+        return;
+    }
+
+
     /** calculate bags to kgs (if needed) **/
-
-
     if (zakkenkaarsenSpinBox->value() == 0)
         zakkenkaarsenSpinBox->setValue(ceil(   kgkaarsenSpinBox->value() / settings.value("zak_kaarsresten_naar_kg").toDouble()  ) );
     else if (kgkaarsenSpinBox->value() == 0)
@@ -248,7 +253,10 @@ void NieuweAanmelding::accept()
         qCritical(QString(tr("INSERT aanmelding voor ophaalpunt %1 FAALT!").arg(locationEdit->text()).append(query.lastError().text())).toStdString().c_str());
     }
     else
+    {
+        vvimDebug() << "successfully added ophaalpunt" << locationEdit->text() << "( id" << ophaalpunten[locationEdit->text()] << ") to table AANMELDING";
         this->close();
+    }
 }
 
 void NieuweAanmelding::reject()
