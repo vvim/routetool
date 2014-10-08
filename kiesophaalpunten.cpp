@@ -79,7 +79,7 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     buttonBox->addButton(allButton,QDialogButtonBox::ActionRole);
     resetButton = new QPushButton(tr("Geen"));
     buttonBox->addButton(resetButton,QDialogButtonBox::ActionRole); // NoRole ???
-    deleteButton = new QPushButton(tr("Wis"));
+    deleteButton = new QPushButton(tr("Verwijder"));
     buttonBox->addButton(deleteButton,QDialogButtonBox::DestructiveRole); // NoRole ???
 
     connect(buttonBox, SIGNAL(accepted()),this, SLOT(accept()));
@@ -424,5 +424,41 @@ void KiesOphaalpunten::initModel()
 
 void KiesOphaalpunten::deleteSelected()
 {
-    qDebug() << "Poofff...";
+    int nr_of_checked_items = 0;
+    QStringList checked_items_ids;
+    for(int i = 0; i < model->rowCount(); i++)
+    {
+        QStandardItem* item = model->itemFromIndex(model->index(i,OPHAALPUNT_NAAM));
+        if(item->checkState() == Qt::Checked)
+        {
+            nr_of_checked_items++;
+            checked_items_ids << model->itemFromIndex(model->index(i,AANMELDING_ID))->data(Qt::DisplayRole).toString();
+            qDebug() << "..." << checked_items_ids;
+
+        }
+    }
+
+    if(nr_of_checked_items < 1)
+    {
+        vvimDebug() << "No checked aanmeldingen to remove: nr_of_checked_items =" << nr_of_checked_items << ", checked_items_ids" << checked_items_ids;
+        return;
+    }
+
+    QString question = tr("Ben je zeker dat je deze aanmelding wilt verwijderen?");
+    if (nr_of_checked_items > 1)
+        question = QString(tr("Ben je zeker dat je deze %1 aanmeldingen wilt verwijderen?").arg(nr_of_checked_items));
+
+    vvimDebug() << "Asking permission before removing aanmeldingen:" << question;
+
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, tr("Verwijder geselecteerde aanmeldingen"),
+                  question, QMessageBox::Yes|QMessageBox::No);
+
+    if(reply == QMessageBox::No)
+    {
+        vvimDebug() << "user declined";
+        return;
+    }
+    else
+        vvimDebug() << "EXPLODE!";
 }
