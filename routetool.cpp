@@ -166,8 +166,20 @@ void RouteTool::showEffectiefOpgehaaldeHoeveelheden()
 
 void RouteTool::showAnnuleerIngegevenOphaalronde()
 {
-            QMessageBox::information(this, tr("Annuleer ophaalronde"), tr("Geert, deze functionaliteit is nog niet geprogrammeerd. Komt eraan!"));
+    // inherit KiesGedaneOphaling , override "accept" met UPDATE aanmelding SET ophalings_datum = NULL, volgorde = NULL WHERE ophalings_datum = :ophalingsdatum;
+    vvimDebug() << "user clicked on showAnnuleerIngegevenOphaalronde()";
+    KiesGedaneOphaling *kgo = new KiesGedaneOphaling(false);
 
-            // inherit KiesGedaneOphaling , override "accept" met UPDATE aanmelding SET ophalings_datum = NULL, volgorde = NULL WHERE ophalings_datum = :ophalingsdatum;
-
+    switch(kgo->initialise())
+    {
+        case -1 :
+            QMessageBox::critical(this, tr("Databank error"), tr("We konden de onbevestigde ophaalrondes niet opzoeken in de databank."));
+            return;
+            break;
+        case 0 :
+            QMessageBox::information(this, tr("Geen onbevestigde ophaalrondes gevonden"), tr("Er werden geen onbevestigde ophaalrondes gevonden."));
+            return;
+            break;
+    }
+    kgo->show();
 }

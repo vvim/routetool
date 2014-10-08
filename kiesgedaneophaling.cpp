@@ -12,11 +12,26 @@
 #define vvimDebug()\
     qDebug() << "[" << Q_FUNC_INFO << "]"
 
-KiesGedaneOphaling::KiesGedaneOphaling(QWidget *parent) :
+KiesGedaneOphaling::KiesGedaneOphaling(bool confirm, QWidget *parent) :
     QWidget(parent)
 {
     vvimDebug() << "<vvim> [TODO] if window KiesGedaneOphaling gets closed: NOTHING HAPPENS! how to delete from memory???";
-    ophalingenLabel = new QLabel(tr("Voor welke ophaalronde wil je de hoeveelheden bevestigen?"));
+
+    m_confirm_or_cancel = confirm;
+
+    if(m_confirm_or_cancel)
+    {
+        // select route to confirm it
+        ophalingenLabel = new QLabel(tr("Voor welke ophaalronde wil je de hoeveelheden bevestigen?"));
+        setWindowTitle(tr("Bevestigen opgehaalde hoeveelheden"));
+    }
+    else
+    {
+        // select route to cancel it
+        ophalingenLabel = new QLabel(tr("Welke ophaalronde wil je annuleren?"));
+        setWindowTitle(tr("Annuleer geplande ophaalronde"));
+    }
+
     ophalingenComboBox = new QComboBox();
     buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
@@ -32,7 +47,6 @@ KiesGedaneOphaling::KiesGedaneOphaling(QWidget *parent) :
     setLayout(layout);
     setMinimumWidth(500);
     setMinimumHeight(200);
-    setWindowTitle(tr("Bevestigen opgehaalde hoeveelheden"));
 }
 
 KiesGedaneOphaling::~KiesGedaneOphaling()
@@ -62,29 +76,16 @@ void KiesGedaneOphaling::accept()
     QDate ophaalronde_datum = ophalingenMap[ophalingenComboBox->currentIndex()];
     vvimDebug() << "choice has been made" << ophalingenComboBox->currentIndex() << ophalingenComboBox->itemText(ophalingenComboBox->currentIndex()) << ophalingenMap[ophalingenComboBox->currentIndex()].toString();
 
-
-    QSqlQuery query;
-    query.prepare("SELECT * FROM aanmelding WHERE ophaalronde_datum = :ophaalrondedatum ORDER BY volgorde");
-    query.bindValue(":ophaalrondedatum",ophaalronde_datum);
-    if(!query.exec())
+    if(m_confirm_or_cancel)
     {
-        qCritical(QString(tr("SELECT * FROM aanmelding WHERE ophaalronde_datum = %1 ORDER BY volgorde FAILED!").arg(ophaalronde_datum.toString()).append(query.lastError().text())).toStdString().c_str());
-        return; // errorboodschap tonen???
+        vvimDebug() << "moving on to confirming a finished route";
+        confirmRoute(ophaalronde_datum);
     }
     else
     {
-        while(query.next())
-        {
-            vvimDebug() << query.value(10).toDate().toString() << "volgorde" << query.value(11).toInt();
-        }
+        vvimDebug() << "moving on to CANCELING a finished route, first ask permission to cancel selected route";
+        cancelRoute(ophaalronde_datum);
     }
-
-
-    /// test
-    OpgehaaldeHoeveelheid *kkkk = new OpgehaaldeHoeveelheid(ophaalronde_datum);
-    kkkk->show();
-
-    reject();
 }
 
 int KiesGedaneOphaling::initialise()
@@ -132,4 +133,46 @@ int KiesGedaneOphaling::initialise()
     return 1;
     /// -> if i == 1 => geen ophaalrondes gevonden! => messagebox, no execute of this dialogbox!!
     /// => geef de functie initialise() een return waarde int: -1 is error, 0 is niets gevonden, +1 is alles ok
+}
+
+
+void KiesGedaneOphaling::confirmRoute(QDate ophaalronde_datum)
+{
+    //assuming m_confirm_or_cancel == TRUE -> tested by accept()
+    OpgehaaldeHoeveelheid *kkkk = new OpgehaaldeHoeveelheid(ophaalronde_datum);
+    kkkk->show();
+    reject();
+}
+
+void KiesGedaneOphaling::cancelRoute(QDate ophaalronde_datum)
+{
+    //assuming m_confirm_or_cancel == FALSE -> tested by accept()
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, tr("Annuleer geselecteerde ophaalronde"),
+                    tr("Ben je zeker dat je de geplande ophaalronde van %1 wilt annuleren?").arg(ophaalronde_datum.toString()), QMessageBox::Yes|QMessageBox::No);
+
+    if(reply == QMessageBox::No)
+    {
+        vvimDebug() << "user declined";
+        return;
+    }
+
+    vvimDebug() << "user agreed";
+    QSqlQuery query;
+    query.prepare("UPDATE aanmelding SET ophaalronde_datum=NULL, volgorde=NULL where ophaalronde_datum = :ophaalrondedatum");
+    query.bindValue(":ophaalrondedatum",ophaalronde_datum);
+
+    if(!query.exec())
+    {
+        QMessageBox::critical(this,tr("Verwijderen van ophaalronde niet gelukt"),
+                            query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
+        qCritical(QString(tr("Verwijderen van ophaalronde %1 is niet gelukt! UPDATE aanmelding SET ophaalronde_datum=NULL and volgorde=NULL where ophaalronde_datum = ... , error: ").arg(ophaalronde_datum.toString()).append(query.lastError().text())).toStdString().c_str());
+        return; // errorboodschap tonen???
+    }
+    else
+    {
+        vvimDebug() << "canceling route" << ophaalronde_datum.toString() << "DONE";
+    }
+
+    reject();
 }
