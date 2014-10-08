@@ -130,7 +130,7 @@ void RouteTool::showOphaalpuntenWidget()
 
 void RouteTool::showEffectiefOpgehaaldeHoeveelheden()
 {
-    qDebug() << "Here we go!";
+    vvimDebug() << "user clicked on showEffectiefOpgehaaldeHoeveelheden()";
     KiesGedaneOphaling *kgo = new KiesGedaneOphaling();
 
     switch(kgo->initialise())
