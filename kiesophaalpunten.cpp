@@ -459,6 +459,23 @@ void KiesOphaalpunten::deleteSelected()
         vvimDebug() << "user declined";
         return;
     }
-    else
-        vvimDebug() << "EXPLODE!";
+
+    QString prepare_query = QString("DELETE FROM aanmelding WHERE id = ").append(checked_items_ids[0]);
+
+    for(int i = 1; i < checked_items_ids.count(); i++)
+        prepare_query.append(QString(" OR id = %1").arg(checked_items_ids[i]));
+
+    QSqlQuery query(prepare_query);
+
+    if(!query.exec())
+    {
+        QMessageBox::critical(this,tr("Verwijderen van aanmeldingen niet gelukt"),
+                            query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
+        qFatal(QString("Something went wrong, could not execute %1, error is: %2").arg(prepare_query).arg(query.lastError().text()).toStdString().c_str());
+        return;
+    }
+
+    vvimDebug() << prepare_query << "DONE";
+
+    initialise();
 }
