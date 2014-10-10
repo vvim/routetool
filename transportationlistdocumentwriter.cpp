@@ -17,7 +17,7 @@ TransportationListDocumentWriter::TransportationListDocumentWriter(QDate date_of
     QString client = "<b>De Vlaspit vzw</b><br />"
             "Basilieklaan 53<br />"
             "B-3270 Scherpenheuvel<br />"
-            "BTW BE-0461 019 224";
+            "<small>BTW BE-0461 019 224</small>";
     QString legal = "Opgenomen in het register van erkende overbrengers en vervoerders van afvalstoffen onder het nummer 60337/E/11574<br />"
             "Enregistr&eacute;e en qualit&eacute; de collecteur et de transporteur de d&eacute;chets autres que dangereux sous le num&eacute;ro 2011-04-01-17";
 
