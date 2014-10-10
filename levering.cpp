@@ -99,7 +99,7 @@ void Levering::resetValues()
     busNrEdit->setText("");
     postalCodeEdit->setText("");
     plaatsEdit->setText("");
-    countryEdit->setText("");
+    countryEdit->setText("België");
     weightSpinBox->setValue(0);
     volumeSpinBox->setValue(0);
     timeNeededSpinBox->setValue(30); // by default 30 minutes for a delivery
