@@ -71,9 +71,9 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
 
     // buttonroles: http://doc.qt.digia.com/qt-maemo/qdialogbuttonbox.html#ButtonRole-enum
     buttonBox = new QDialogButtonBox();
-    buttonBox->addButton(tr("Wijzigingen opslaan"),
+    buttonBox->addButton(tr("Toevoegen aan ophaalronde"),
                  QDialogButtonBox::AcceptRole);
-    buttonBox->addButton(tr("Niet opslaan"),
+    buttonBox->addButton(tr("Venster sluiten"),
                          QDialogButtonBox::RejectRole);
     allButton = new QPushButton(tr("Allen"));
     buttonBox->addButton(allButton,QDialogButtonBox::ActionRole);
