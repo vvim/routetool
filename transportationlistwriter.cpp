@@ -39,8 +39,10 @@ TransportationListWriter::TransportationListWriter(QWidget *parent) :
     dateEdit->setCalendarPopup(true);  //zie http://stackoverflow.com/questions/7031962/qdateedit-calendar-popup
 
     empty_bags_of_kurk_neededEdit = new QSpinBox();
+    empty_bags_of_kurk_neededEdit->setMaximum(9999);
     empty_bags_of_kurk_neededEdit->setValue(empty_bags_of_kurk_needed);
     empty_bags_of_kaarsresten_neededEdit = new QSpinBox();
+    empty_bags_of_kaarsresten_neededEdit->setMaximum(9999);
     empty_bags_of_kaarsresten_neededEdit->setValue(empty_bags_of_kaarsresten_needed);
 
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
