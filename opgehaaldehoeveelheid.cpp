@@ -51,9 +51,11 @@ OpgehaaldeHoeveelheid::OpgehaaldeHoeveelheid(QDate ophaalronde_datum, QWidget *p
    kgKurkSpinBox = new QSpinBox();
    kgKurkSpinBox->setMaximum(9999);
    zakkenKurkSpinBox = new QSpinBox();
+   zakkenKurkSpinBox->setMaximum(9999);
    kgKaarsrestenSpinBox = new QSpinBox();
    kgKaarsrestenSpinBox->setMaximum(9999);
    zakkenKaarsrestenSpinBox = new QSpinBox();
+   zakkenKaarsrestenSpinBox->setMaximum(9999);
 
    nextButton = new QPushButton(tr("&Volgende"));
    previousButton = new QPushButton(tr("V&orige"));
