@@ -43,12 +43,14 @@ NieuweAanmelding::NieuweAanmelding(QWidget *parent) :
 
     zakkenkurkLabel = new QLabel(tr("Zakken kurk:"));
     zakkenkurkSpinBox = new QSpinBox();
+    zakkenkurkSpinBox->setMaximum(9999);
     kgkurkLabel = new QLabel(tr("Kg kurk:"));
     kgkurkSpinBox = new QSpinBox();
     kgkurkSpinBox->setMaximum(9999);
 
     zakkenkaarsenLabel = new QLabel(tr("Zakken kaarsen:"));
     zakkenkaarsenSpinBox = new QSpinBox();
+    zakkenkaarsenSpinBox->setMaximum(9999);
     kgkaarsenLabel = new QLabel(tr("Kg kaarsen:"));
     kgkaarsenSpinBox = new QSpinBox();
     kgkaarsenSpinBox->setMaximum(9999);
