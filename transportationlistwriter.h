@@ -31,7 +31,6 @@ private slots:
     void setOriginalValues();
 
 private:
-    QLineEdit* nameTransportationListEdit;
     QDateEdit* dateEdit;
     QTimeEdit* startTimeEdit;
     QTimeEdit* expectedArrivalTimeEdit;

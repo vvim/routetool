@@ -6,6 +6,7 @@
 #include <QSqlError>
 #include <QFile>
 #include <QUuid>
+#include <QMessageBox>
 #include "transportationlistwriter.h"
 
 #define vvimDebug()\
@@ -29,11 +30,13 @@ TransportationListWriter::TransportationListWriter(QWidget *parent) :
 
 
 
-    nameTransportationListEdit = new QLineEdit();
     startTimeEdit = new QTimeEdit();
     expectedArrivalTimeEdit = new QTimeEdit();
     expectedArrivalTimeEdit->setDisabled(true);
-    dateEdit = new QDateEdit( QDate::currentDate(), this ); // zie http://doc.qt.digia.com/3.3/qdateedit.html
+
+    // how to set QDateEdit to 'NULL', it cannot be done: http://www.qtcentre.org/threads/17295-How-to-put-empty-value-in-QDateEdit
+    // dateEdit = new QDateEdit( QDate::currentDate(), this ); // zie http://doc.qt.digia.com/3.3/qdateedit.html
+    dateEdit = new QDateEdit(QDate::currentDate().addDays(-1));
     dateEdit->setDisplayFormat("dd MMM yyyy");
     dateEdit->setLocale(QLocale::Dutch);
     dateEdit->setCalendarPopup(true);  //zie http://stackoverflow.com/questions/7031962/qdateedit-calendar-popup
@@ -55,7 +58,6 @@ TransportationListWriter::TransportationListWriter(QWidget *parent) :
     connect(resetButton, SIGNAL(pressed()), this, SLOT(setOriginalValues()));
 
     QFormLayout *formlayout = new QFormLayout();
-    formlayout->addRow(tr("Bestandsnaam:"),nameTransportationListEdit);
     formlayout->addRow(tr("Datum ophaling:"),dateEdit);
     formlayout->addRow(tr("Start om:"),startTimeEdit);
     formlayout->addRow(tr("Terug om:"),expectedArrivalTimeEdit);
@@ -69,13 +71,13 @@ TransportationListWriter::TransportationListWriter(QWidget *parent) :
 //    layout->addLayout(formlayout);
 
     setLayout(formlayout);
+    setWindowTitle("Aanmaken vervoerslijst");
 }
 
 TransportationListWriter::~TransportationListWriter()
 {
     vvimDebug() << "start to deconstruct TransportationListWriter()";
     deleteTheMatrices();
-    delete nameTransportationListEdit;
     delete dateEdit;
     delete startTimeEdit;
     delete expectedArrivalTimeEdit;
@@ -247,13 +249,8 @@ void TransportationListWriter::print()
 
     }
 
-    // TELKENS
-    QString name_vervoerslijst = nameTransportationListEdit->text();
-    name_vervoerslijst.replace( QRegExp("\\W"),QString("")); // escape for filenames, see http://comments.gmane.org/gmane.comp.lib.qt.general/20276
-    if(name_vervoerslijst.simplified().length() < 1)
-        name_vervoerslijst = QLocale().toString(QDate::currentDate()).replace(QRegExp("\\W"),QString(""));
-
-    //vervoersLijst.write(QString("vervoerslijst-(%1).odt").arg(name_vervoerslijst));
+    // escape for filenames, see http://comments.gmane.org/gmane.comp.lib.qt.general/20276 -> http://qt-project.org/doc/qt-5/qregexp.html#characters-and-abbreviations-for-sets-of-characters
+    QString uniqueFeatureForFilenames = QLocale().toString(dateEdit->date()).append("-").append(QUuid::createUuid ()).replace(QRegExp("\\W"),QString(""));
 
     vvimDebug() << "[Vervoerslijst]" << "Lege zakken voor kurk:" << empty_bags_of_kurk_needed << ", lege zakken voor kaarsresten:" << empty_bags_of_kaarsresten_needed;
 
@@ -267,13 +264,16 @@ void TransportationListWriter::print()
     //     and http://qt-project.org/doc/qt-5/quuid.html#createUuid
     QPixmap pixmap = QPixmap::grabWidget(mapwidget);
 
-    QString filename_map = name_vervoerslijst;
-    filename_map.append(QUuid::createUuid ()).append(".png");
+    QString filename_map = QString(tr("kaart")).append(uniqueFeatureForFilenames).append(".png");
     QFile file(filename_map);
     file.open(QIODevice::WriteOnly);
     pixmap.save(&file, "PNG");
 
+    QString name_vervoerslijst = QString(tr("vervoerslijst")).append(uniqueFeatureForFilenames);
     translist_doc->write(name_vervoerslijst, filename_map);
+
+    vvimDebug() << "Vervoerslijst is aangemaakt en heet" << name_vervoerslijst << ".doc, de kaart heet" << filename_map;
+    QMessageBox::information(this, tr("Vervoerslijst is aangemaakt"), tr("De vervoerslijst is aangemaakt, het bestand heet '%1.doc' en de kaart is opgeslagen in het bestand '%2'.").arg(name_vervoerslijst).arg(filename_map));
 }
 
 
@@ -479,6 +479,18 @@ void TransportationListWriter::reject()
 
 void TransportationListWriter::accept()
 {
+
+    if(dateEdit->date() < QDate::currentDate())
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, tr("Datum ligt in het verleden"),
+                      tr("De opgegeven datum voor de vervoerslijst ligt in het verleden.\n\nWeet u zeker dat u de vervoerlijst wilt opstellen voor %1?").arg(QLocale().toString(dateEdit->date())),
+                                QMessageBox::Yes|QMessageBox::No);
+
+        if(reply == QMessageBox::No)
+            return;
+    }
+
     close();
     vvimDebug() << "printing time!";
     print();
@@ -486,12 +498,12 @@ void TransportationListWriter::accept()
 
 void TransportationListWriter::setOriginalValues()
 {
-    dateEdit->setDate(QDate::currentDate());
+    // how to set QDateEdit to 'NULL', it cannot be done: http://www.qtcentre.org/threads/17295-How-to-put-empty-value-in-QDateEdit
+    dateEdit->setDate(QDate::currentDate().addDays(-1));
     empty_bags_of_kurk_neededEdit->setValue(empty_bags_of_kurk_needed);
     empty_bags_of_kaarsresten_neededEdit->setValue(empty_bags_of_kaarsresten_needed);
     startTimeEdit->setTime(QTime(8,0));
     editExpectedArrivalTime(startTimeEdit->time());
-    nameTransportationListEdit->clear();
 }
 
 void TransportationListWriter::deleteTheMatrices()
