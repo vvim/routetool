@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QDate>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 class QDataWidgetMapper;
@@ -17,6 +18,8 @@ class QDialogButtonBox;
 class QSpacerItem;
 QT_END_NAMESPACE
 
+extern QSettings settings;
+
 //! [OpgehaaldeHoeveelheid definition]
 class OpgehaaldeHoeveelheid : public QWidget
 {
@@ -30,6 +33,8 @@ private slots:
     void updateButtons(int row);
     void reject();
     void accept();
+    void zakkenKurkTest();
+    void zakkenKaarsrestenTest();
 
 private:
     void setupModel(QDate ophaalronde_datum);

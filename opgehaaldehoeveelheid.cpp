@@ -92,6 +92,8 @@ OpgehaaldeHoeveelheid::OpgehaaldeHoeveelheid(QDate ophaalronde_datum, QWidget *p
            mapper, SLOT(toNext()));
    connect(mapper, SIGNAL(currentIndexChanged(int)),
            this, SLOT(updateButtons(int)));
+   connect(zakkenKurkSpinBox, SIGNAL(editingFinished()), this, SLOT(zakkenKurkTest()));
+   connect(zakkenKaarsrestenSpinBox, SIGNAL(editingFinished()), this, SLOT(zakkenKaarsrestenTest()));
 //! [Set up the mapper]
 
 
@@ -361,4 +363,51 @@ void OpgehaaldeHoeveelheid::accept()
     }
 
     reject();
+}
+
+void OpgehaaldeHoeveelheid::zakkenKurkTest()
+{
+    int zakkenKurk = zakkenKurkSpinBox->value();
+    int kgKurk_input = kgKurkSpinBox->value();
+    int kgKurk_expected = zakkenKurk * settings.value("zak_kurk_naar_kg").toInt();
+
+    vvimDebug() << "zakken kurk:" << zakkenKurk << "ingegeven kg:" << kgKurk_input << "verwachtte kg:" << kgKurk_expected;
+
+    if(kgKurk_input != kgKurk_expected)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, tr("Gewicht aan kurk aanpassen?"),
+                                      tr("%1 zakken kurk wordt geschat op %2 kilogram. Wilt u dit geschat gewicht nemen in plaats van de ingegeven %3 kilogram?").arg(zakkenKurk).arg(kgKurk_expected).arg(kgKurk_input),
+                                      QMessageBox::Yes|QMessageBox::No);
+        if(reply == QMessageBox::Yes)
+        {
+            kgKurkSpinBox->setValue(kgKurk_expected);
+            kgKurkSpinBox->setFocus(); // else the model does not save the valuechange. Other way possible?
+            vvimDebug() << "kg kurk changed to:" << kgKurk_expected;
+        }
+    }
+}
+
+void OpgehaaldeHoeveelheid::zakkenKaarsrestenTest()
+{
+    int zakkenKaars = zakkenKaarsrestenSpinBox->value();
+    int kgKaars_input = kgKaarsrestenSpinBox->value();
+
+    int kgKaars_expected = zakkenKaars * settings.value("zak_kaarsresten_naar_kg").toInt();
+
+    vvimDebug() << "zakken kaars:" << zakkenKaars << "ingegeven kg:" << kgKaars_input << "verwachtte kg:" << kgKaars_expected;
+
+    if(kgKaars_input != kgKaars_expected)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, tr("Gewicht aan kaarsresten aanpassen?"),
+                                      tr("%1 zakken kaarsresten wordt geschat op %2 kilogram. Wilt u dit geschat gewicht nemen in plaats van de ingegeven %3 kilogram?").arg(zakkenKaars).arg(kgKaars_expected).arg(kgKaars_input),
+                                      QMessageBox::Yes|QMessageBox::No);
+        if(reply == QMessageBox::Yes)
+        {
+            kgKaarsrestenSpinBox->setValue(kgKaars_expected);
+            kgKaarsrestenSpinBox->setFocus(); // else the model does not save the valuechange. Other way possible?
+            vvimDebug() << "kg kurk changed to:" << kgKaars_expected;
+        }
+    }
 }
