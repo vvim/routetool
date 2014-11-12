@@ -34,9 +34,9 @@ Levering::Levering(QWidget *parent) :
     weightSpinBox = new QSpinBox();
     volumeSpinBox = new QSpinBox();
     timeNeededSpinBox = new QSpinBox();
-    weightSpinBox->setMaximum(9999);
-    volumeSpinBox->setMaximum(9999);
-    timeNeededSpinBox->setMaximum(9999);
+    weightSpinBox->setMaximum(99999);
+    volumeSpinBox->setMaximum(99999);
+    timeNeededSpinBox->setMaximum(99999);
 
     connect(toonOphaalpunt, SIGNAL(clicked()), this, SLOT(toonOphaalpuntInformatie()));
     connect(vulOphaalpuntIn, SIGNAL(clicked()), this, SLOT(vulInformatieOphaalpuntIn()));
