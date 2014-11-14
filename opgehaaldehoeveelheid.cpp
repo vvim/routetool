@@ -72,17 +72,17 @@ OpgehaaldeHoeveelheid::OpgehaaldeHoeveelheid(QDate ophaalronde_datum, QWidget *p
 //! [Set up the mapper]
    mapper = new QDataWidgetMapper(this);
    mapper->setModel(model);
-   vvimDebug() << "0";
+   vvimDebug() << "--ophaalpunt";
    mapper->addMapping(ophaalpuntEdit, 0);
-   vvimDebug() << "1";
+   vvimDebug() << "--opmerkingen";
    mapper->addMapping(opmerkingenEdit, 1);
-   vvimDebug() << "kurkkg";
+   vvimDebug() << "--kurkkg";
    mapper->addMapping(kgKurkSpinBox, 3);
-   vvimDebug() << "kurkzakk";
+   vvimDebug() << "--kurkzakk";
    mapper->addMapping(zakkenKurkSpinBox, 4);
-   vvimDebug() << "kaarskg";
+   vvimDebug() << "--kaarskg";
    mapper->addMapping(kgKaarsrestenSpinBox, 5);
-   vvimDebug() << "kaarszakk";
+   vvimDebug() << "--kaarszakk";
    mapper->addMapping(zakkenKaarsrestenSpinBox, 6);
 
 
