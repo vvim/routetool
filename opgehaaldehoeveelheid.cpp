@@ -164,7 +164,7 @@ void OpgehaaldeHoeveelheid::setupModel(QDate ophaalronde_datum)
     //query.prepare("SELECT * FROM aanmelding, ophaalpunten WHERE aanmelding.ophaalronde_datum = :ophaalrondedatum AND aanmelding.ophaalpunt = ophaalpunten.id ORDER BY aanmelding.volgorde");
 
     query.prepare("SELECT aanmelding.ophaalronde_datum, aanmelding.volgorde, ophaalpunten.naam, aanmelding.opmerkingen, "
-                         "ophaalpunten.id, aanmelding.kg_kurk, aanmelding.zakken_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kaarsresten "
+                         "ophaalpunten.id, aanmelding.kg_kurk, aanmelding.zakken_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kaarsresten, aanmelding.datum "
                   "FROM aanmelding, ophaalpunten "
                   "WHERE aanmelding.ophaalronde_datum = :ophaalrondedatum AND aanmelding.ophaalpunt = ophaalpunten.id "
                   "ORDER BY aanmelding.volgorde");
@@ -191,6 +191,7 @@ void OpgehaaldeHoeveelheid::setupModel(QDate ophaalronde_datum)
         QStringList zakken_kurk;
         QStringList kg_kaarsresten;
         QStringList zakken_kaarsresten;
+        QList<QDate> aanmeldingsdata;
 
         while(query.next())
         {
@@ -209,13 +210,21 @@ void OpgehaaldeHoeveelheid::setupModel(QDate ophaalronde_datum)
            kg_kaarsresten << query.value(7).toString();
            zakken_kaarsresten << query.value(8).toString();
 
+           vvimDebug() << "aanmeldingsdatum:" <<  query.value(9).toDate().toString();
+           aanmeldingsdata.append(query.value(9).toDate());
 
            query_results++;
 
         } // end of Query Results
 
+        vvimDebug() << "Debugging the way of putting aanmeldingsdatum in the model. Size of list is" << aanmeldingsdata.size() << ". Writing out all members:";
+        for (int i = 0; i < aanmeldingsdata.size(); ++i)
+        {
+            vvimDebug() << ".." << aanmeldingsdata.at(i).toString();
+        }
+
         vvimDebug() << "initializing the model";
-        model = new QStandardItemModel(query_results, 7, this);
+        model = new QStandardItemModel(query_results, 8, this);
         for (int row = 0; row < query_results; ++row) {
           QStandardItem *item = new QStandardItem(ophaalpunten_string[row]);
           model->setItem(row, 0, item);
@@ -232,6 +241,9 @@ void OpgehaaldeHoeveelheid::setupModel(QDate ophaalronde_datum)
           model->setItem(row, 5, item);
           item = new QStandardItem(zakken_kaarsresten[row]);
           model->setItem(row, 6, item);
+          item = new QStandardItem();
+          item->setData(aanmeldingsdata.at(row),Qt::UserRole);
+          model->setItem(row, 7, item);
         }
         vvimDebug() << "DONE";
 
@@ -313,10 +325,11 @@ void OpgehaaldeHoeveelheid::accept()
         int zakken_kurk = model->item(row,4)->text().toInt();
         int kg_kaarsresten = model->item(row,5)->text().toInt();
         int zakken_kaarsresten = model->item(row,6)->text().toInt();
+        QDate aanmeldingsdatum = model->item(row,7)->data(Qt::UserRole).toDate();
 
         QSqlQuery query;
-        query.prepare("INSERT ophalinghistoriek (id,   timestamp,         ophalingsdatum,    chauffeur, ophaalpunt, zakken_kurk, kg_kurk, zakken_kaarsresten, kg_kaarsresten, opmerkingen) "
-                      "                  VALUES (NULL, CURRENT_TIMESTAMP, :ophaalrondedatum, :chauffeur, :ophaalpunt, :zakkenkurk, :kgkurk, :zakkenkaarsresten, :kgkaarsresten, :opmerkingen)");
+        query.prepare("INSERT ophalinghistoriek (id,   timestamp,         ophalingsdatum,    chauffeur, ophaalpunt, zakken_kurk, kg_kurk, zakken_kaarsresten, kg_kaarsresten, opmerkingen, aanmeldingsdatum) "
+                      "                  VALUES (NULL, CURRENT_TIMESTAMP, :ophaalrondedatum, :chauffeur, :ophaalpunt, :zakkenkurk, :kgkurk, :zakkenkaarsresten, :kgkaarsresten, :opmerkingen, :aanmeldingsdatum)");
         query.bindValue(":ophaalrondedatum",ophaalrondedatum);
         query.bindValue(":chauffeur",chauffeur);
         query.bindValue(":ophaalpunt",ophaalpunt_id);
@@ -325,13 +338,14 @@ void OpgehaaldeHoeveelheid::accept()
         query.bindValue(":zakkenkaarsresten",zakken_kaarsresten);
         query.bindValue(":kgkaarsresten",kg_kaarsresten);
         query.bindValue(":opmerkingen",opmerkingen);
+        query.bindValue(":aanmeldingsdatum",aanmeldingsdatum);
 
         if(!query.exec())
         {
             qCritical(QString("FAIL: Couldn't put row #%1 of the model in the database, something went wrong with the INSERT-query: "
-                              "INSERT ophalinghistoriek (id,   timestamp,         ophalingsdatum,    chauffeur, ophaalpunt, zakken_kurk, kg_kurk, zakken_kaarsresten, kg_kaarsresten, opmerkingen) "
-                                                    "                  VALUES (NULL, CURRENT_TIMESTAMP, %2, %3, %4, ..., %5)"
-                              ).arg(row).arg(ophaalrondedatum.toString()).arg(chauffeur).arg(ophaalpunt_id).arg(opmerkingen).toStdString().c_str());
+                              "INSERT ophalinghistoriek (id,   timestamp,         ophalingsdatum,    chauffeur, ophaalpunt, zakken_kurk, kg_kurk, zakken_kaarsresten, kg_kaarsresten, opmerkingen, aanmeldingsdatum) "
+                                                    "                  VALUES (NULL, CURRENT_TIMESTAMP, %2, %3, %4, ..., %5, %6)"
+                              ).arg(row).arg(ophaalrondedatum.toString()).arg(chauffeur).arg(ophaalpunt_id).arg(opmerkingen).arg(aanmeldingsdatum.toString()).toStdString().c_str()   );
             all_queries_worked_fine = false;
             row = model->rowCount(); // how do I abort a for-loop -> 'break' ?
             break;
@@ -340,8 +354,8 @@ void OpgehaaldeHoeveelheid::accept()
         {
             vvimDebug() << QString("Row #%1 of the model has been put in the database: "
                               "INSERT ophalinghistoriek (id,   timestamp,         ophalingsdatum,    chauffeur, ophaalpunt, zakken_kurk, kg_kurk, zakken_kaarsresten, kg_kaarsresten, opmerkingen) "
-                                                    "                  VALUES (NULL, CURRENT_TIMESTAMP, %2, %3, %4, ..., %5)"
-                              ).arg(row).arg(ophaalrondedatum.toString()).arg(chauffeur).arg(ophaalpunt_id).arg(opmerkingen);
+                                                    "                  VALUES (NULL, CURRENT_TIMESTAMP, %2, %3, %4, ..., %5, %6)"
+                              ).arg(row).arg(ophaalrondedatum.toString()).arg(chauffeur).arg(ophaalpunt_id).arg(opmerkingen).arg(aanmeldingsdatum.toString());
         }
     }
 
