@@ -8,6 +8,7 @@
 QT_BEGIN_NAMESPACE
 class QDataWidgetMapper;
 class QLabel;
+class QCheckBox;
 class QLineEdit;
 class QPushButton;
 class QSpinBox;
@@ -35,6 +36,7 @@ private slots:
     void accept();
     void zakkenKurkTest();
     void zakkenKaarsrestenTest();
+    void checkBoxToggled(bool);
 
 private:
     void setupModel(QDate ophaalronde_datum);
@@ -57,6 +59,7 @@ private:
     QSpinBox *zakkenKaarsrestenSpinBox;
     QPushButton *nextButton;
     QPushButton *previousButton;
+    QCheckBox *locationShouldBeSkippedCheckBox;
 
     QDialogButtonBox *buttonBox;
     QSpacerItem *spaceritem;

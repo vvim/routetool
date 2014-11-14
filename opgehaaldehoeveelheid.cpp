@@ -57,6 +57,8 @@ OpgehaaldeHoeveelheid::OpgehaaldeHoeveelheid(QDate ophaalronde_datum, QWidget *p
    zakkenKaarsrestenSpinBox = new QSpinBox();
    zakkenKaarsrestenSpinBox->setMaximum(9999);
 
+   locationShouldBeSkippedCheckBox = new QCheckBox(tr("locatie is niet bezocht geweest"));
+
    nextButton = new QPushButton(tr("&Volgende"));
    previousButton = new QPushButton(tr("V&orige"));
 
@@ -84,6 +86,8 @@ OpgehaaldeHoeveelheid::OpgehaaldeHoeveelheid(QDate ophaalronde_datum, QWidget *p
    mapper->addMapping(kgKaarsrestenSpinBox, 5);
    vvimDebug() << "--kaarszakk";
    mapper->addMapping(zakkenKaarsrestenSpinBox, 6);
+   vvimDebug() << "--location-has-not-been-visited-Checkbox";
+   mapper->addMapping(locationShouldBeSkippedCheckBox, 8);
 
 
    connect(previousButton, SIGNAL(clicked()),
@@ -94,6 +98,9 @@ OpgehaaldeHoeveelheid::OpgehaaldeHoeveelheid(QDate ophaalronde_datum, QWidget *p
            this, SLOT(updateButtons(int)));
    connect(zakkenKurkSpinBox, SIGNAL(editingFinished()), this, SLOT(zakkenKurkTest()));
    connect(zakkenKaarsrestenSpinBox, SIGNAL(editingFinished()), this, SLOT(zakkenKaarsrestenTest()));
+
+   connect(locationShouldBeSkippedCheckBox, SIGNAL(toggled(bool)),this, SLOT(checkBoxToggled(bool)));
+
 //! [Set up the mapper]
 
 
@@ -115,7 +122,6 @@ OpgehaaldeHoeveelheid::OpgehaaldeHoeveelheid(QDate ophaalronde_datum, QWidget *p
    connect(buttonBox, SIGNAL(accepted()),this, SLOT(accept()));
    connect(buttonBox, SIGNAL(rejected()),this, SLOT(reject()));
 
-
    vvimDebug() << "set up QGridLayout";
 //! [Set up the layout]
    QGridLayout *layout = new QGridLayout();
@@ -126,7 +132,7 @@ OpgehaaldeHoeveelheid::OpgehaaldeHoeveelheid(QDate ophaalronde_datum, QWidget *p
    layout->addWidget(chauffeurEdit, 1, 1, 1, 3);
    layout->addWidget(nextButton, 1, 4, 1, 1);
 
-   int row_ui = 3;
+   int row_ui = 2;
    layout->addWidget(ophaalpuntLabel, row_ui, 0, 1, 1);
    layout->addWidget(ophaalpuntEdit, row_ui, 1, 1, 3);
    row_ui++;
@@ -144,6 +150,10 @@ OpgehaaldeHoeveelheid::OpgehaaldeHoeveelheid(QDate ophaalronde_datum, QWidget *p
    layout->addWidget(zakkenKaarsrestenSpinBox, row_ui, 3, 1, 1);
    row_ui++;
    spaceritem = new QSpacerItem(this->width(),40);
+   layout->addItem(spaceritem,row_ui,0,1,5);
+   row_ui++;
+   layout->addWidget(locationShouldBeSkippedCheckBox,row_ui,0,1,5);
+   row_ui++;
    layout->addItem(spaceritem,row_ui,0,1,5);
    row_ui++;
    layout->addWidget(buttonBox,row_ui,0,1,5);
@@ -224,7 +234,7 @@ void OpgehaaldeHoeveelheid::setupModel(QDate ophaalronde_datum)
         }
 
         vvimDebug() << "initializing the model";
-        model = new QStandardItemModel(query_results, 8, this);
+        model = new QStandardItemModel(query_results, 9, this);
         for (int row = 0; row < query_results; ++row) {
           QStandardItem *item = new QStandardItem(ophaalpunten_string[row]);
           model->setItem(row, 0, item);
@@ -244,6 +254,9 @@ void OpgehaaldeHoeveelheid::setupModel(QDate ophaalronde_datum)
           item = new QStandardItem();
           item->setData(aanmeldingsdata.at(row),Qt::UserRole);
           model->setItem(row, 7, item);
+          item = new QStandardItem();
+          item->setData(false,Qt::UserRole); // all checkboxes are set on 'false'
+          model->setItem(row, 8, item);
         }
         vvimDebug() << "DONE";
 
@@ -424,4 +437,15 @@ void OpgehaaldeHoeveelheid::zakkenKaarsrestenTest()
             vvimDebug() << "kg kurk changed to:" << kgKaars_expected;
         }
     }
+}
+
+void OpgehaaldeHoeveelheid::checkBoxToggled(bool checked)
+{
+    vvimDebug() << "CheckBox toggled: this location has (not) been visited => enable/disable all Edits";
+    ophaalpuntEdit->setDisabled(checked);
+    opmerkingenEdit->setDisabled(checked);
+    kgKurkSpinBox->setDisabled(checked);
+    zakkenKurkSpinBox->setDisabled(checked);
+    kgKaarsrestenSpinBox->setDisabled(checked);
+    zakkenKaarsrestenSpinBox->setDisabled(checked);
 }
