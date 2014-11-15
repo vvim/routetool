@@ -62,7 +62,8 @@ private:
     QCheckBox *locationShouldBeSkippedCheckBox;
 
     QDialogButtonBox *buttonBox;
-    QSpacerItem *spaceritem;
+    QSpacerItem *spaceritem_beforebuttonbox;
+    QSpacerItem *spaceritem_beforelocationshouldbeskipped;
 
     QStandardItemModel *model;
     QDataWidgetMapper *mapper;
