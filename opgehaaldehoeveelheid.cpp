@@ -175,7 +175,7 @@ void OpgehaaldeHoeveelheid::setupModel(QDate ophaalronde_datum)
     //query.prepare("SELECT * FROM aanmelding, ophaalpunten WHERE aanmelding.ophaalronde_datum = :ophaalrondedatum AND aanmelding.ophaalpunt = ophaalpunten.id ORDER BY aanmelding.volgorde");
 
     query.prepare("SELECT aanmelding.ophaalronde_datum, aanmelding.volgorde, ophaalpunten.naam, aanmelding.opmerkingen, "
-                         "ophaalpunten.id, aanmelding.kg_kurk, aanmelding.zakken_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kaarsresten, aanmelding.datum "
+                         "ophaalpunten.id, aanmelding.kg_kurk, aanmelding.zakken_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kaarsresten, aanmelding.datum, aanmelding.id "
                   "FROM aanmelding, ophaalpunten "
                   "WHERE aanmelding.ophaalronde_datum = :ophaalrondedatum AND aanmelding.ophaalpunt = ophaalpunten.id "
                   "ORDER BY aanmelding.volgorde");
@@ -203,6 +203,7 @@ void OpgehaaldeHoeveelheid::setupModel(QDate ophaalronde_datum)
         QStringList kg_kaarsresten;
         QStringList zakken_kaarsresten;
         QList<QDate> aanmeldingsdata;
+        QStringList aanmeldings_ids;
 
         while(query.next())
         {
@@ -224,14 +225,17 @@ void OpgehaaldeHoeveelheid::setupModel(QDate ophaalronde_datum)
            vvimDebug() << "aanmeldingsdatum:" <<  query.value(9).toDate().toString();
            aanmeldingsdata.append(query.value(9).toDate());
 
+           vvimDebug() << "aanmeldings_id:" <<  query.value(10).toString();
+           aanmeldings_ids << query.value(10).toString();
+
            query_results++;
 
         } // end of Query Results
 
-        vvimDebug() << "Debugging the way of putting aanmeldingsdatum in the model. Size of list is" << aanmeldingsdata.size() << ". Writing out all members:";
+        vvimDebug() << "Debugging the way of putting aanmeldingsdatum and _ids in the model. Size of list is" << aanmeldingsdata.size() << ". Writing out all members:";
         for (int i = 0; i < aanmeldingsdata.size(); ++i)
         {
-            vvimDebug() << ".." << aanmeldingsdata.at(i).toString();
+            vvimDebug() << ".." << aanmeldingsdata.at(i).toString() << "id:" << aanmeldings_ids.at(i);
         }
 
         vvimDebug() << "initializing the model";
@@ -257,6 +261,9 @@ void OpgehaaldeHoeveelheid::setupModel(QDate ophaalronde_datum)
           model->setItem(row, 7, item);
           item = new QStandardItem();
           item->setData(false,Qt::UserRole); // all checkboxes are set on 'false'
+          item->setData(aanmeldings_ids[row],Qt::UserRole+1); // set aanmelding_id together with the checkbox-value
+          item->setCheckable(true);
+          item->setCheckState(Qt::Unchecked);
           model->setItem(row, 8, item);
         }
         vvimDebug() << "DONE";
@@ -325,6 +332,24 @@ void OpgehaaldeHoeveelheid::reject()
 
 void OpgehaaldeHoeveelheid::accept()
 {
+    /**
+        Regarding [ locationShouldBeSkippedCheckBox ] :
+           It annoys me that I can't use ->checkState, but it works when I check the ->text() for the string "true"
+           (see below)
+
+           What is going wrong?
+
+           For now it works, but it would be cleaner if we can simply check the state of the locationShouldBeSkippedCheckBox ?
+
+           In initiating the mapper, maybe the following can be used:
+            mapper->addMapping(locationShouldBeSkippedCheckBox, 8, "checked");
+
+           Or is it because of Flag-settings? Look at [ listofophaalpuntentocontact.cpp ] or [ kiesophaalpunten.cpp ] ?
+            item->setFlags(item->flags|Qt::ItemIsUserCheckable);
+           and what is the difference with [ item->SetCheckable() ] ???
+    **/
+
+
     vvimDebug() << "CONFIRM collected quantities of route";
     bool all_queries_worked_fine = true;
     QDate ophaalrondedatum = ophalingDateEdit->date();
@@ -333,45 +358,82 @@ void OpgehaaldeHoeveelheid::accept()
     int row = 0;
     for( row; row < model->rowCount(); ++row )
     {
-        vvimDebug() << "row" << row << ":";
+        int aanmelding_id = model->item(row,8)->data(Qt::UserRole+1).toInt();
 
-        QString opmerkingen = model->item(row,1)->text();
-        int ophaalpunt_id = model->item(row,2)->text().toInt();
-        int kg_kurk = model->item(row,3)->text().toInt();
-        int zakken_kurk = model->item(row,4)->text().toInt();
-        int kg_kaarsresten = model->item(row,5)->text().toInt();
-        int zakken_kaarsresten = model->item(row,6)->text().toInt();
-        QDate aanmeldingsdatum = model->item(row,7)->data(Qt::UserRole).toDate();
+        /** extra debugging information
+        //bool checkbox_state = model->item(row,8)->data(Qt::UserRole).toBool();
+        vvimDebug() << " ... A: " << model->item(row,8)->data(Qt::UserRole).toBool();  /// FALSE
+        vvimDebug() << " ... B: " << model->item(row,8)->text();                       /// ""
+        vvimDebug() << " ... C: " << model->item(row,8)->checkState() << Qt::Checked << Qt::Unchecked; /// 0 => Qt::UnChecked
+        vvimDebug() << " ... D: " << model->item(row,8)->isCheckable();                /// FALSE
+        vvimDebug() << " ... E: " << model->item(row,8)->isEnabled();                   /// TRUE
+        vvimDebug() << " ... F: " << model->item(row,8)->flags();                      /// qbitearray?
+        vvimDebug() << " ... G: " << aanmelding_id;
+        **/
 
-        QSqlQuery query;
-        query.prepare("INSERT ophalinghistoriek (id,   timestamp,         ophalingsdatum,    chauffeur, ophaalpunt, zakken_kurk, kg_kurk, zakken_kaarsresten, kg_kaarsresten, opmerkingen, aanmeldingsdatum) "
-                      "                  VALUES (NULL, CURRENT_TIMESTAMP, :ophaalrondedatum, :chauffeur, :ophaalpunt, :zakkenkurk, :kgkurk, :zakkenkaarsresten, :kgkaarsresten, :opmerkingen, :aanmeldingsdatum)");
-        query.bindValue(":ophaalrondedatum",ophaalrondedatum);
-        query.bindValue(":chauffeur",chauffeur);
-        query.bindValue(":ophaalpunt",ophaalpunt_id);
-        query.bindValue(":zakkenkurk",zakken_kurk);
-        query.bindValue(":kgkurk",kg_kurk);
-        query.bindValue(":zakkenkaarsresten",zakken_kaarsresten);
-        query.bindValue(":kgkaarsresten",kg_kaarsresten);
-        query.bindValue(":opmerkingen",opmerkingen);
-        query.bindValue(":aanmeldingsdatum",aanmeldingsdatum);
-
-        if(!query.exec())
+        /** it annoys me that I can't use ->checkState, but it works when I check the ->text() for the string "true" **/
+        //if(model->item(row,8)->checkState() == Qt::Checked)
+        if(model->item(row,8)->text() == "true")
         {
-            qCritical(QString("FAIL: Couldn't put row #%1 of the model in the database, something went wrong with the INSERT-query: "
-                              "INSERT ophalinghistoriek (id,   timestamp,         ophalingsdatum,    chauffeur, ophaalpunt, zakken_kurk, kg_kurk, zakken_kaarsresten, kg_kaarsresten, opmerkingen, aanmeldingsdatum) "
-                                                    "                  VALUES (NULL, CURRENT_TIMESTAMP, %2, %3, %4, ..., %5, %6)"
-                              ).arg(row).arg(ophaalrondedatum.toString()).arg(chauffeur).arg(ophaalpunt_id).arg(opmerkingen).arg(aanmeldingsdatum.toString()).toStdString().c_str()   );
-            all_queries_worked_fine = false;
-            row = model->rowCount(); // how do I abort a for-loop -> 'break' ?
-            break;
+            vvimDebug() << "row" << row << ": to be IGNORED per request of user, aanmelding_id from t_aanmelding:" << aanmelding_id;
+            QSqlQuery query;
+            query.prepare("UPDATE aanmelding SET ophaalronde_datum = NULL, volgorde = NULL WHERE id = :id");
+            query.bindValue(":id",aanmelding_id);
+            if(!query.exec())
+            {
+                qCritical(QString("FAIL: Location was not visited and therefore supposed to be ignored. Couldn't return the location from route to 'aanmelding'. Row #%1 of the model, something went wrong with the UPDATE-query: "
+                                  "UPDATE aanmelding SET ophaalronde_datum = NULL, volgorde = NULL WHERE id = %2"
+                                  ).arg(row).arg(aanmelding_id).toStdString().c_str()   );
+                vvimDebug() << ".. FAIL: Location was not visited and therefore supposed to be ignored. Couldn't return the location from route to 'aanmelding'. Row #" << row << " of the model, something went wrong with the UPDATE-query: "
+                               "UPDATE aanmelding SET ophaalronde_datum = NULL, volgorde = NULL WHERE id = " << aanmelding_id;
+                vvimDebug() << ".. should I break the FOR-loop or continue? For now we choose to CONTINUE";
+            }
+            else
+                vvimDebug() << ".. succesfully returned row to t_aanmeldingen, erased the content of column 'ophaalronde_datum' and 'volgorde'.";
         }
         else
         {
-            vvimDebug() << QString("Row #%1 of the model has been put in the database: "
-                              "INSERT ophalinghistoriek (id,   timestamp,         ophalingsdatum,    chauffeur, ophaalpunt, zakken_kurk, kg_kurk, zakken_kaarsresten, kg_kaarsresten, opmerkingen) "
-                                                    "                  VALUES (NULL, CURRENT_TIMESTAMP, %2, %3, %4, ..., %5, %6)"
-                              ).arg(row).arg(ophaalrondedatum.toString()).arg(chauffeur).arg(ophaalpunt_id).arg(opmerkingen).arg(aanmeldingsdatum.toString());
+            /// --start----- adding [row] to ophalinghistoriek
+            vvimDebug() << "row" << row << ": to be added to t_ophalinghistoriek";
+            QString opmerkingen = model->item(row,1)->text();
+            int ophaalpunt_id = model->item(row,2)->text().toInt();
+            int kg_kurk = model->item(row,3)->text().toInt();
+            int zakken_kurk = model->item(row,4)->text().toInt();
+            int kg_kaarsresten = model->item(row,5)->text().toInt();
+            int zakken_kaarsresten = model->item(row,6)->text().toInt();
+            QDate aanmeldingsdatum = model->item(row,7)->data(Qt::UserRole).toDate();
+
+            QSqlQuery query;
+            query.prepare("INSERT ophalinghistoriek (id,   timestamp,         ophalingsdatum,    chauffeur, ophaalpunt, zakken_kurk, kg_kurk, zakken_kaarsresten, kg_kaarsresten, opmerkingen, aanmeldingsdatum) "
+                          "                  VALUES (NULL, CURRENT_TIMESTAMP, :ophaalrondedatum, :chauffeur, :ophaalpunt, :zakkenkurk, :kgkurk, :zakkenkaarsresten, :kgkaarsresten, :opmerkingen, :aanmeldingsdatum)");
+            query.bindValue(":ophaalrondedatum",ophaalrondedatum);
+            query.bindValue(":chauffeur",chauffeur);
+            query.bindValue(":ophaalpunt",ophaalpunt_id);
+            query.bindValue(":zakkenkurk",zakken_kurk);
+            query.bindValue(":kgkurk",kg_kurk);
+            query.bindValue(":zakkenkaarsresten",zakken_kaarsresten);
+            query.bindValue(":kgkaarsresten",kg_kaarsresten);
+            query.bindValue(":opmerkingen",opmerkingen);
+            query.bindValue(":aanmeldingsdatum",aanmeldingsdatum);
+
+            if(!query.exec())
+            {
+                qCritical(QString("FAIL: Couldn't put row #%1 of the model in the database, something went wrong with the INSERT-query: "
+                                  "INSERT ophalinghistoriek (id,   timestamp,         ophalingsdatum,    chauffeur, ophaalpunt, zakken_kurk, kg_kurk, zakken_kaarsresten, kg_kaarsresten, opmerkingen, aanmeldingsdatum) "
+                                                        "                  VALUES (NULL, CURRENT_TIMESTAMP, %2, %3, %4, ..., %5, %6)"
+                                  ).arg(row).arg(ophaalrondedatum.toString()).arg(chauffeur).arg(ophaalpunt_id).arg(opmerkingen).arg(aanmeldingsdatum.toString()).toStdString().c_str()   );
+                all_queries_worked_fine = false;
+                row = model->rowCount(); // how do I abort a for-loop -> 'break' ?
+                break;
+            }
+            else
+            {
+                vvimDebug() << QString("Row #%1 of the model has been put in the database: "
+                                  "INSERT ophalinghistoriek (id,   timestamp,         ophalingsdatum,    chauffeur, ophaalpunt, zakken_kurk, kg_kurk, zakken_kaarsresten, kg_kaarsresten, opmerkingen) "
+                                                        "                  VALUES (NULL, CURRENT_TIMESTAMP, %2, %3, %4, ..., %5, %6)"
+                                  ).arg(row).arg(ophaalrondedatum.toString()).arg(chauffeur).arg(ophaalpunt_id).arg(opmerkingen).arg(aanmeldingsdatum.toString());
+            }
+            /// --end----- adding [row] to ophalinghistoriek
         }
     }
 
