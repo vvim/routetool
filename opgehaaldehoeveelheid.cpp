@@ -57,7 +57,7 @@ OpgehaaldeHoeveelheid::OpgehaaldeHoeveelheid(QDate ophaalronde_datum, QWidget *p
    zakkenKaarsrestenSpinBox = new QSpinBox();
    zakkenKaarsrestenSpinBox->setMaximum(9999);
 
-   locationShouldBeSkippedCheckBox = new QCheckBox(tr("locatie is niet bezocht geweest"));
+   locationShouldBeSkippedCheckBox = new QCheckBox(tr("Dit ophaalpunt is tijdens de route niet bezocht."));
 
    nextButton = new QPushButton(tr("&Volgende"));
    previousButton = new QPushButton(tr("V&orige"));
@@ -149,12 +149,13 @@ OpgehaaldeHoeveelheid::OpgehaaldeHoeveelheid(QDate ophaalronde_datum, QWidget *p
    layout->addWidget(zakkenKaarsrestenLabel, row_ui, 2, 1, 1);
    layout->addWidget(zakkenKaarsrestenSpinBox, row_ui, 3, 1, 1);
    row_ui++;
-   spaceritem = new QSpacerItem(this->width(),40);
-   layout->addItem(spaceritem,row_ui,0,1,5);
+   spaceritem_beforelocationshouldbeskipped = new QSpacerItem(this->width(),10);
+   layout->addItem(spaceritem_beforelocationshouldbeskipped,row_ui,0,1,5);
    row_ui++;
    layout->addWidget(locationShouldBeSkippedCheckBox,row_ui,0,1,5);
    row_ui++;
-   layout->addItem(spaceritem,row_ui,0,1,5);
+   spaceritem_beforebuttonbox = new QSpacerItem(this->width(),40);
+   layout->addItem(spaceritem_beforebuttonbox,row_ui,0,1,5);
    row_ui++;
    layout->addWidget(buttonBox,row_ui,0,1,5);
 
@@ -298,10 +299,12 @@ OpgehaaldeHoeveelheid::~OpgehaaldeHoeveelheid()
     delete zakkenKaarsrestenSpinBox;
     delete nextButton;
     delete previousButton;
+    delete locationShouldBeSkippedCheckBox;
 
     vvimDebug() << "deleting buttonbox";
     delete buttonBox;
-    delete spaceritem;
+    delete spaceritem_beforebuttonbox;
+    delete spaceritem_beforelocationshouldbeskipped;
 
     vvimDebug() << "deleting model";
     delete model;
