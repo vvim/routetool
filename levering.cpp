@@ -172,6 +172,9 @@ void Levering::loadOphaalpunten()
     // telkens aanroepen na aanmaken / wijzigen van een ophaalpunt?
     QStringList words; // "don't come easy, to me, la la la laaa la la"
 
+    vvimDebug() << "empty QMap 'ophaalpunten'";
+    ophaalpunten.clear();
+
     #ifndef QT_NO_CURSOR
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     #endif
