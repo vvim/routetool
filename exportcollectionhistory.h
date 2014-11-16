@@ -6,9 +6,9 @@
 
 QT_BEGIN_NAMESPACE
 class QLabel;
-class QLineEdit;
 class QDateEdit;
 class QDialogButtonBox;
+class QSpacerItem;
 class QFileDialog;
 QT_END_NAMESPACE
 
@@ -29,9 +29,14 @@ private:
     MyCompleter *completer;
     QDialogButtonBox *buttonBox;
     QLabel *ophaalpuntLabel, *timeperiod_startLabel, *timeperiod_endLabel, *timeperiodLabel;
-    QLineEdit *ophaalpuntEdit;
+    MyLineEdit *ophaalpuntEdit;
     QDateEdit *timeperiod_startEdit, *timeperiod_endEdit;
+    QSpacerItem *spaceritem_beforeOphaalpunt, *spaceritem_beforeButtonBox;
     QFileDialog* exportToFile;
+
+    QMap<QString, int> ophaalpunten;
+
+    void loadOphaalpunten();
 };
 
 #endif // EXPORTCOLLECTIONHISTORY_H
