@@ -36,6 +36,7 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(ui->toonOphaalpuntenMenuButton, SIGNAL(triggered()), this, SLOT(showOphaalpuntenWidget()));
     connect(ui->effectiefOpgehaaldeHoeveelhedenMenuButton, SIGNAL(triggered()), this, SLOT(showEffectiefOpgehaaldeHoeveelheden()));
     connect(ui->actionAnnuleer_ingegeven_ophaalronde, SIGNAL(triggered()), this, SLOT(showAnnuleerIngegevenOphaalronde()));
+    connect(ui->actionExporteer_Historiek, SIGNAL(triggered()), this, SLOT(showExportCollectionHistory()));
 
     m_pForm = new Form(this);
     setCentralWidget(m_pForm);
@@ -182,4 +183,10 @@ void RouteTool::showAnnuleerIngegevenOphaalronde()
             break;
     }
     kgo->show();
+}
+
+void RouteTool::showExportCollectionHistory()
+{
+    ExportCollectionHistory *dialogboxToExportHistoryOfCollectedQuantities = new ExportCollectionHistory();
+    dialogboxToExportHistoryOfCollectedQuantities->show();
 }

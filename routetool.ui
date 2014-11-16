@@ -29,6 +29,7 @@
     </property>
     <addaction name="nieuwOphaalpuntMenuButton"/>
     <addaction name="toonOphaalpuntenMenuButton"/>
+    <addaction name="actionExporteer_Historiek"/>
    </widget>
    <widget class="QMenu" name="menuMenuAanmeldingen">
     <property name="title">
@@ -125,6 +126,11 @@
   <action name="actionAnnuleer_ingegeven_ophaalronde">
    <property name="text">
     <string>Annuleer ingegeven ophaalronde</string>
+   </property>
+  </action>
+  <action name="actionExporteer_Historiek">
+   <property name="text">
+    <string>Exporteer historiek</string>
    </property>
   </action>
  </widget>

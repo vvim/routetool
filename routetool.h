@@ -10,6 +10,7 @@
 #include "levering.h"
 #include "listofophaalpuntentocontact.h"
 #include "ophaalpuntenwidget.h"
+#include "exportcollectionhistory.h"
 
 extern QSettings settings;
 
@@ -51,6 +52,7 @@ private slots:
     void showOphaalpuntenWidget();
     void showEffectiefOpgehaaldeHoeveelheden();
     void showAnnuleerIngegevenOphaalronde();
+    void showExportCollectionHistory();
 };
 
 #endif // ROUTETOOL_H
