@@ -5,6 +5,8 @@
 #define vvimDebug()\
     qDebug() << "[" << Q_FUNC_INFO << "]"
 
+#define EndOfLine "\r\n"
+
 ExportCollectionHistory::ExportCollectionHistory(QWidget *parent) :
     QWidget(parent)
 {
@@ -30,10 +32,9 @@ ExportCollectionHistory::ExportCollectionHistory(QWidget *parent) :
 
     buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-    //QFileDialog* exportToFile = new QFileDialog()
-
     connect(buttonBox, SIGNAL(accepted()),this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()),this, SLOT(reject()));
+    vvimDebug() << "TODO <vvim>: when this window gets closed, there is no trigger to DELETE the content. How to?";
 
     QGridLayout *gridLayout = new QGridLayout();
     int row_ui = 0;
@@ -73,6 +74,7 @@ ExportCollectionHistory::~ExportCollectionHistory()
     delete timeperiod_endLabel;
     delete timeperiod_endEdit;
     delete buttonBox;
+
     if(completer)
     {
         vvimDebug() << "completer _not_ NULL, therefore it has been initialised and we must delete it";
@@ -81,7 +83,6 @@ ExportCollectionHistory::~ExportCollectionHistory()
     else
         vvimDebug() << "completer == NULL, therefore it has NOT been initialised and we should not delete it";
 
-    //delete exportToFile
     vvimDebug() << "ExportCollectionHistory() deconstructed";
 }
 
@@ -145,21 +146,19 @@ void ExportCollectionHistory::accept()
     vvimDebug() << "... location ID:" << ophaalpunt_id;
 
     vvimDebug() << "test if start >= end";
-    if(timeperiod_startEdit->date() <= timeperiod_endEdit->date())
-        vvimDebug() << "correct period, start is before ending";
-    else
-        vvimDebug() << "INVALID timeperiod, start is NOT before ending";
-
-    vvimDebug() << "export accepted";
-    if(ophaalpunt_id < 1)
+    if(timeperiod_startEdit->date() > timeperiod_endEdit->date())
     {
-        vvimDebug() << "Show history of ALL locations within timeperiod";
+        vvimDebug() << "INVALID timeperiod, " << timeperiod_startEdit->date().toString() << "is >" << timeperiod_endEdit->date().toString();
+        QMessageBox::information(this, tr("Startdatum valt na de einddatum"), tr("Exporteren onmogelijk, de startdatum valt na de einddatum. Gelieve dit aan te passen."));
+        return;
     }
-    else
-        vvimDebug() << "Show history of location" << ophaalpuntEdit->text();
 
-    vvimDebug() << "show QFileDialog";
-    // misschien moet dat helemaal geen pointer zijn??? testen?
+    if(!saveToCSV())
+        return; // empty string, so no filename was indicated to save it ; or could not open file ; or database error
+
+    vvimDebug() << "History exported, huray!";
+
+    // all done, let's go!
     reject();
 }
 
@@ -169,4 +168,123 @@ void ExportCollectionHistory::reject()
     close();
     vvimDebug() << "deleting";
     delete this;
+}
+
+bool ExportCollectionHistory::saveToCSV()
+{
+    /**
+      see http://stackoverflow.com/questions/12546031/qfiledialoggetsavefilename-and-default-selectedfilter
+      and http://stackoverflow.com/questions/1953631/qfiledialog-adding-extension-automatically-when-saving-file
+    **/
+
+    vvimDebug() << "export accepted";
+
+    vvimDebug() << "show QFileDialog";
+
+    QString filters("CSVbestanden (*.csv);;Tekstbestanden (*.txt);;Microsoft Excel (*.xls *.xlsx);;All files (*.*)");
+    QString defaultFilter("Microsoft Excel (*.xls *.xlsx)");
+    QString filename = QFileDialog::getSaveFileName(0, tr("Exporteer historiek naar..."), QDir::currentPath(), filters, &defaultFilter);
+
+    if(filename.count() < 1)
+    {
+        vvimDebug() << "no filename given, the user must have pressed 'cancel' or 'close' in the FileDialogBox. Let's return to the Export Collection History Dialog Box like nothing happened...";
+        // no need to show QMessageBox
+        return false;
+    }
+
+    // would be better with "QFileDialog.SetDefaultSuffix()", but I simply don't get it: http://stackoverflow.com/questions/1953631/qfiledialog-adding-extension-automatically-when-saving-file
+    // so, a little hack:
+    if((filename.right(4) == ".xls") || (filename.right(5) == ".xlsx") || (filename.right(4) == ".txt") || (filename.right(4) == ".csv") )
+        vvimDebug() << "file-extension is alright:" << filename.right(4);
+    else
+        filename.append(".csv");
+
+    vvimDebug() << "filename:" << filename;
+
+
+    /// 2. now that we finally have this filename-stuff settled, let's go down to business!
+
+    int ophaalpunt_id = ophaalpunten[ophaalpuntEdit->text()];
+    QString startdate = QLocale().toString(timeperiod_startEdit->date(),"dd MMM yyyy");
+    QString enddate = QLocale().toString(timeperiod_endEdit->date(),"dd MMM yyyy");
+
+    QFile f( filename );
+
+    if(!f.open(QFile::WriteOnly | QFile::Truncate)) // 'truncate' == overwrite
+    {
+        vvimDebug() << "FAILED: We could not opened file" << filename << "show messagebox to user and return to Export Collection History Dialog Box";
+        QMessageBox::information(this, tr("Kan bestand niet openen"), tr("Bestand %1 kan niet geopend worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder.").arg(filename));
+    }
+
+    QTextStream data( &f );
+
+    QSqlQuery query;
+
+    if(ophaalpunt_id < 1)
+    {
+        vvimDebug() << "Show history of ALL locations within timeperiod";
+        query.prepare("SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id ORDER BY ophalingsdatum");
+        data << tr("\"Export uit databank van de ophalinghistoriek voor alle ophaalpunten van %1 tot %2\"").arg(startdate).arg(enddate)+EndOfLine;
+    }
+    else
+    {
+        vvimDebug() << "Show history of location" << ophaalpuntEdit->text();
+        query.prepare("SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = :ophaalpuntid AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id ORDER BY ophalingsdatum");
+        query.bindValue(":ophaalpuntid", ophaalpunt_id);
+        data << tr("\"Export uit databank van de ophalinghistoriek voor ophaalpunt %3 van %1 tot %2\"").arg(startdate).arg(enddate).arg(ophaalpuntEdit->text())+EndOfLine;
+    }
+
+    query.bindValue(":startdate",timeperiod_startEdit->date());
+    query.bindValue(":enddate",timeperiod_endEdit->date());
+
+    if(!query.exec())
+    {
+        vvimDebug() << "FAILED: We could not execute the query SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = :ophaalpuntid AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id .";
+        vvimDebug() << "show messagebox to user and return to Export Collection History Dialog Box";
+        QMessageBox::information(this, tr("Fout bij verbinding met de databank"), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+    }
+
+    QStringList strList;
+
+    int records = 0;
+    int columns_in_queryresult = 11 + 1; // 11 for
+
+    strList << "\"ophalingsdatum\"";
+    strList << "\"chauffeur\"";
+    strList <<"\"ophaalpunt\"";
+    strList <<"\"zakken_kurk\"";
+    strList <<"\"kg_kurk\"";
+    strList <<"\"zakken_kaarsresten\"";
+    strList <<"\"kg_kaarsresten\"";
+    strList <<"\"opmerkingen\"";
+    strList <<"\"aanmeldingsdatum\"";
+    strList <<"\"ophaalpunt\"";
+    data << strList.join( ";" )+EndOfLine;
+
+    while (query.next())
+    {
+        strList.clear();
+        for( int c = 2; c < columns_in_queryresult; ++c ) // "ophalinghistoriek.id" and "ophalinghistoriek.timestamp" do not need to be exported
+        {
+            strList << "\""+query.value(c).toString()+"\"";
+        }
+        data << strList.join( ";" )+EndOfLine;
+
+        records++;
+    }
+
+    if(records < 1)
+    {
+        vvimDebug() << "no results from this query";
+        data << tr("Geen historiek gevonden voor deze periode.")+";\n";
+    }
+    else
+    {
+        vvimDebug() << records << "results found and recorded";
+    }
+    QMessageBox::information(this, tr("Historiek geëxporteerd"), tr("Er werden %1 records gevonden en geëxporteerd naar bestand %2.").arg(records).arg(filename));
+
+    f.close();
+
+    return true;
 }

@@ -32,11 +32,11 @@ private:
     MyLineEdit *ophaalpuntEdit;
     QDateEdit *timeperiod_startEdit, *timeperiod_endEdit;
     QSpacerItem *spaceritem_beforeOphaalpunt, *spaceritem_beforeButtonBox;
-    QFileDialog* exportToFile;
 
     QMap<QString, int> ophaalpunten;
 
     void loadOphaalpunten();
+    bool saveToCSV();
 };
 
 #endif // EXPORTCOLLECTIONHISTORY_H
