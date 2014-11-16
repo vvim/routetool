@@ -139,8 +139,8 @@ int KiesGedaneOphaling::initialise()
 void KiesGedaneOphaling::confirmRoute(QDate ophaalronde_datum)
 {
     //assuming m_confirm_or_cancel == TRUE -> tested by accept()
-    OpgehaaldeHoeveelheid *kkkk = new OpgehaaldeHoeveelheid(ophaalronde_datum);
-    kkkk->show();
+    OpgehaaldeHoeveelheid *dialogboxToConfirmCollectedQuantities = new OpgehaaldeHoeveelheid(ophaalronde_datum);
+    dialogboxToConfirmCollectedQuantities->show();
     reject();
 }
 
