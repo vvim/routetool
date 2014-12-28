@@ -268,7 +268,12 @@ bool ExportCollectionHistory::saveToCSV()
         {
             strList << "\""+query.value(c).toString()+"\"";
         }
-        data << strList.join( ";" )+EndOfLine;
+
+        /** MS Excel from Geert treats fields that contain a \n as a new row.
+            This can be very confusing, therefore we add the call to "replace()"
+            as to change every \n by a white space.
+        **/
+        data << strList.join( ";" ).replace("\n"," ")+EndOfLine;
 
         records++;
     }
