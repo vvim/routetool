@@ -241,7 +241,7 @@ void ListOfOphaalpuntenToContact::initialise()
 
     QSqlQuery query("SELECT id, naam, postcode, last_contact_date, contact_again_on, last_ophaling_date, forecast_new_ophaling_date "
                     "FROM ophaalpunten "
-                    "WHERE forecast_new_ophaling_date < date( CURDATE() + INTERVAL 1 DAY)"
+                    "WHERE forecast_new_ophaling_date < date( CURDATE() + INTERVAL 14 DAY)"
                     "ORDER BY postcode");
 
     if(query.exec())
