@@ -9,6 +9,7 @@
 #include "mylineedit.h" // not my personal code, where is it from? (forum on QCompleter)
 #include <QSettings>
 #include <QList>
+#include <QWebPage>
 #include "sophaalpunt.h"
 #include "transportationlistwriter.h"
 
@@ -18,6 +19,12 @@ namespace Ui {
     class Form;
 }
 
+class myWebPage : public QWebPage
+{
+    virtual QString userAgentForUrl(const QUrl& url) const {
+        return "Chrome/1.0";
+    }
+};
 
 
 class Form : public QWidget

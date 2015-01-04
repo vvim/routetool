@@ -35,6 +35,8 @@ Form::Form(QWidget *parent) :
 
 
     ui->setupUi(this);
+    ui->webView->setPage(new myWebPage());
+
     connect(ui->goButton, SIGNAL(clicked()), this, SLOT(goClicked()));
     connect(ui->lePostalAddress, SIGNAL(returnPressed()), this, SLOT(goClicked()));
 
