@@ -224,14 +224,56 @@ bool ExportCollectionHistory::saveToCSV()
     {
         vvimDebug() << "Show history of ALL locations within timeperiod";
         query.prepare("SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id ORDER BY ophalingsdatum");
-        data << tr("\"Export uit databank van de ophalinghistoriek voor alle ophaalpunten van %1 tot %2\"").arg(startdate).arg(enddate)+EndOfLine;
+        data << tr("\"Export van de ophalinghistoriek uit databank voor alle ophaalpunten van %1 tot %2\"").arg(startdate).arg(enddate)+EndOfLine;
+        data << EndOfLine;
     }
     else
     {
         vvimDebug() << "Show history of location" << ophaalpuntEdit->text();
         query.prepare("SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = :ophaalpuntid AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id ORDER BY ophalingsdatum");
         query.bindValue(":ophaalpuntid", ophaalpunt_id);
-        data << tr("\"Export uit databank van de ophalinghistoriek voor ophaalpunt %3 van %1 tot %2\"").arg(startdate).arg(enddate).arg(ophaalpuntEdit->text())+EndOfLine;
+        data << tr("\"Export van de ophalinghistoriek uit databank\"")+EndOfLine;
+        data << EndOfLine;
+        data << tr("\"Ophaalpunt\";\"Adres\";\"Postcode\";\"Plaats\";\"Soort ophaalpunt\";\"Export startdatum\";\"Export einddatum\"")+EndOfLine;
+
+        // informatie van ophaalpunt :ophaalpuntid uit DB halen
+        QSqlQuery ophaalpunt;
+        ophaalpunt.prepare("SELECT ophaalpunten.naam, ophaalpunten.straat, ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, soort_ophaalpunt.soort FROM ophaalpunten, soort_ophaalpunt WHERE ophaalpunten.id = :ophaalpuntid AND ophaalpunten.code = soort_ophaalpunt.code");
+        ophaalpunt.bindValue(":ophaalpuntid", ophaalpunt_id);
+
+        if(!ophaalpunt.exec())
+        {
+            data << tr("\"ERROR: kon geen verbinding maken met de databank voor informatie van ophaalpunt %1\"").arg(ophaalpunt_id);
+            data << ";\"\"";
+            data << ";\"\"";
+            data << ";\"\"";
+            data << ";\"\"";
+        }
+        else
+        {
+            if(ophaalpunt.next())
+            {
+                QString adres = ophaalpunt.value(1).toString() + " " + ophaalpunt.value(2).toString();
+                if(ophaalpunt.value(3).toString().length() > 0)
+                    adres += ", bus " + ophaalpunt.value(3).toString();
+
+                data << "\"" << ophaalpunt.value(0).toString() << "\"" << ";"; // naam ophaalpunt
+                data << "\"" << adres << "\"" << ";"; // straat ophaalpunt
+                data << "\"" << ophaalpunt.value(4).toString() << "\"" << ";"; // postcode ophaalpunt
+                data << "\"" << ophaalpunt.value(5).toString() << "\"" << ";"; // plaats ophaalpunt
+                data << "\"" << ophaalpunt.value(6).toString() << "\"" << ";"; // soort ophaalpunt
+            }
+            else
+            {
+                data << tr("\"ERROR: geen informatie gevonden in databank over ophaalpunt %1\"").arg(ophaalpunt_id);
+                data << ";\"\"";
+                data << ";\"\"";
+                data << ";\"\"";
+                data << ";\"\"";
+            }
+        }
+        data << tr("\"%1\";\"%2\"").arg(startdate).arg(enddate)+EndOfLine;
+        data << EndOfLine;
     }
 
     query.bindValue(":startdate",timeperiod_startEdit->date());
