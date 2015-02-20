@@ -289,7 +289,7 @@ bool ExportCollectionHistory::saveToCSV()
     QStringList strList;
 
     int records = 0;
-    int columns_in_queryresult = 11 + 1; // 11 for
+    int columns_in_queryresult = 11 + 1; // 12 columns in total, we will skip the first two of ophalinhistoriek (column 'ID' and column 'TIMESTAMP') and print out the rest. The 12th column is "ophaalpunten.naam" with the name of the collector's location
 
     strList << "\"ophalingsdatum\"";
     strList << "\"chauffeur\"";
