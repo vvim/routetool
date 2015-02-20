@@ -289,7 +289,10 @@ bool ExportCollectionHistory::saveToCSV()
     QStringList strList;
 
     int records = 0;
-    int columns_in_queryresult = 11 + 1; // 12 columns in total, we will skip the first two of ophalinhistoriek (column 'ID' and column 'TIMESTAMP') and print out the rest. The 12th column is "ophaalpunten.naam" with the name of the collector's location
+
+    // OPHAALPUNT SELECTED? => 11 columns in total, purely table "OPHALINGHISTORIEK"
+    // NO OPHAALPUNT SELECTED? => all locations => 14 columns in total, table "OPHALINGHISTORIEK" + information on the location (NAME, POSTAL CODE, TYPE)
+    int columns_in_queryresult = query.record().count();
 
     strList << "\"ophalingsdatum\"";
     strList << "\"chauffeur\"";
@@ -300,13 +303,21 @@ bool ExportCollectionHistory::saveToCSV()
     strList <<"\"kg_kaarsresten\"";
     strList <<"\"opmerkingen\"";
     strList <<"\"aanmeldingsdatum\"";
-    strList <<"\"ophaalpunt\"";
+    if(ophaalpunt_id < 1)
+    {
+        // when no location (ophaalpunt) has been pointed out, we export collections from ALL locations
+        // therefore, extra location information could be useful:
+        strList <<"\"ophaalpunt\"";
+        strList <<"\"postcode\"";
+        strList <<"\"soort ophaalpunt (code)\"";
+        strList <<"\"soort ophaalpunt\"";
+    }
     data << strList.join( ";" )+EndOfLine;
 
     while (query.next())
     {
         strList.clear();
-        for( int c = 2; c < columns_in_queryresult; ++c ) // "ophalinghistoriek.id" and "ophalinghistoriek.timestamp" do not need to be exported
+        for( int c = 2; c < columns_in_queryresult; ++c ) // first two columns, namely "ophalinghistoriek.id" and "ophalinghistoriek.timestamp", do not need to be exported
         {
             strList << "\""+query.value(c).toString()+"\"";
         }
