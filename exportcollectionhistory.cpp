@@ -298,23 +298,23 @@ bool ExportCollectionHistory::saveToCSV()
     // NO OPHAALPUNT SELECTED? => all locations => 14 columns in total, table "OPHALINGHISTORIEK" + information on the location (NAME, POSTAL CODE, TYPE)
     int columns_in_queryresult = query.record().count();
 
-    strList << "\"ophalingsdatum\"";
-    strList << "\"chauffeur\"";
-    strList <<"\"ophaalpunt\"";
-    strList <<"\"zakken_kurk\"";
-    strList <<"\"kg_kurk\"";
-    strList <<"\"zakken_kaarsresten\"";
-    strList <<"\"kg_kaarsresten\"";
-    strList <<"\"opmerkingen\"";
-    strList <<"\"aanmeldingsdatum\"";
+    strList << tr("\"ophalingsdatum\"");
+    strList << tr("\"chauffeur\"");
+    strList << tr("\"ophaalpunt\"");
+    strList << tr("\"zakken_kurk\"");
+    strList << tr("\"kg_kurk\"");
+    strList << tr("\"zakken_kaarsresten\"");
+    strList << tr("\"kg_kaarsresten\"");
+    strList << tr("\"opmerkingen\"");
+    strList << tr("\"aanmeldingsdatum\"");
     if(ophaalpunt_id < 1)
     {
         // when no location (ophaalpunt) has been pointed out, we export collections from ALL locations
         // therefore, extra location information could be useful:
-        strList <<"\"ophaalpunt\"";
-        strList <<"\"postcode\"";
-        strList <<"\"soort ophaalpunt (code)\"";
-        strList <<"\"soort ophaalpunt\"";
+        strList << tr("\"ophaalpunt\"");
+        strList << tr("\"postcode\"");
+        strList << tr("\"soort ophaalpunt (code)\"");
+        strList << tr("\"soort ophaalpunt\"");
     }
     data << strList.join( ";" )+EndOfLine;
 
@@ -323,7 +323,7 @@ bool ExportCollectionHistory::saveToCSV()
         strList.clear();
         for( int c = 2; c < columns_in_queryresult; ++c ) // first two columns, namely "ophalinghistoriek.id" and "ophalinghistoriek.timestamp", do not need to be exported
         {
-            strList << "\""+query.value(c).toString()+"\"";
+            strList << "\""+query.value(c).toString().toUtf8() +"\"";
         }
 
         /** MS Excel from Geert treats fields that contain a \n as a new row.
