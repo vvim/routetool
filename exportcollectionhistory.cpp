@@ -1,6 +1,7 @@
 #include "exportcollectionhistory.h"
 #include <QtGui>
 #include <QSqlQuery>
+#include <QSqlRecord>
 
 #define vvimDebug()\
     qDebug() << "[" << Q_FUNC_INFO << "]"
@@ -223,14 +224,17 @@ bool ExportCollectionHistory::saveToCSV()
     if(ophaalpunt_id < 1)
     {
         vvimDebug() << "Show history of ALL locations within timeperiod";
-        query.prepare("SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id ORDER BY ophalingsdatum");
+
+        // when no location (ophaalpunt) has been pointed out, we export collections from ALL locations
+        // therefore, extra location information could be useful
+        query.prepare("SELECT ophalinghistoriek.*, ophaalpunten.naam, ophaalpunten.postcode, ophaalpunten.code, soort_ophaalpunt.soort FROM ophalinghistoriek, ophaalpunten, soort_ophaalpunt WHERE ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id AND ophaalpunten.code = soort_ophaalpunt.code ORDER BY ophalingsdatum");
         data << tr("\"Export van de ophalinghistoriek uit databank voor alle ophaalpunten van %1 tot %2\"").arg(startdate).arg(enddate)+EndOfLine;
         data << EndOfLine;
     }
     else
     {
         vvimDebug() << "Show history of location" << ophaalpuntEdit->text();
-        query.prepare("SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = :ophaalpuntid AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id ORDER BY ophalingsdatum");
+        query.prepare("SELECT ophalinghistoriek.* FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = :ophaalpuntid AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id ORDER BY ophalingsdatum");
         query.bindValue(":ophaalpuntid", ophaalpunt_id);
         data << tr("\"Export van de ophalinghistoriek uit databank\"")+EndOfLine;
         data << EndOfLine;
