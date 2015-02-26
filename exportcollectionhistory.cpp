@@ -218,6 +218,9 @@ bool ExportCollectionHistory::saveToCSV()
     }
 
     QTextStream data( &f );
+    //data.setCodec("Latin-1");
+    data.setCodec("UTF-8");
+    data.setGenerateByteOrderMark(true);
 
     QSqlQuery query;
 
@@ -323,7 +326,9 @@ bool ExportCollectionHistory::saveToCSV()
         strList.clear();
         for( int c = 2; c < columns_in_queryresult; ++c ) // first two columns, namely "ophalinghistoriek.id" and "ophalinghistoriek.timestamp", do not need to be exported
         {
-            strList << "\""+query.value(c).toString().toUtf8() +"\"";
+            /*   // see http://stackoverflow.com/questions/4780507/create-utf-8-file-in-qt --> misschien is deze lijn zelfs niet nodig en is het opgelost via de SETCODEC bovenaan?
+            strList <<  QString::fromUtf8(QString("\""+query.value(c).toString() +"\"").toStdString().c_str());*/
+            strList <<  "\""+query.value(c).toString().toUtf8() +"\"";
         }
 
         /** MS Excel from Geert treats fields that contain a \n as a new row.
@@ -333,6 +338,7 @@ bool ExportCollectionHistory::saveToCSV()
         data << strList.join( ";" ).replace("\n"," ")+EndOfLine;
 
         records++;
+        data.flush();
     }
 
     if(records < 1)
