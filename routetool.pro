@@ -70,7 +70,8 @@ SOURCES += main.cpp\
     kiesgedaneophaling.cpp \
     opgehaaldehoeveelheid.cpp \
     exportcollectionhistory.cpp \
-    ophaalhistoriekdialogsortfilterproxymodel.cpp
+    ophaalhistoriekdialogsortfilterproxymodel.cpp \
+    listofophaalpuntentocontactsortfilterproxymodel.cpp
 
 HEADERS  += routetool.h \
     form.h \
@@ -94,7 +95,8 @@ HEADERS  += routetool.h \
     kiesgedaneophaling.h \
     opgehaaldehoeveelheid.h \
     exportcollectionhistory.h \
-    ophaalhistoriekdialogsortfilterproxymodel.h
+    ophaalhistoriekdialogsortfilterproxymodel.h \
+    listofophaalpuntentocontactsortfilterproxymodel.h
 
 FORMS    += routetool.ui \
     form.ui \
