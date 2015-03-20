@@ -75,6 +75,9 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
     ui->historiekTreeView->resizeColumnToContents(HIST_WEIGHT_KURK);
     ui->historiekTreeView->resizeColumnToContents(HIST_OPMERKINGEN);
 
+    ui->historiekTreeView->setSortingEnabled(true);
+    ui->historiekTreeView->sortByColumn(1, Qt::AscendingOrder);
+
     ui->historiekTreeView->setEditTriggers(QAbstractItemView::NoEditTriggers); // thanks to http://www.qtcentre.org/threads/22511-QTreeWidget-read-only
 }
 
