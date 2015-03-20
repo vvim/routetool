@@ -89,6 +89,7 @@ OphaalHistoriekDialog::~OphaalHistoriekDialog()
 {
     vvimDebug() << "start to deconstruct OphaalHistoriekDialog()";
     delete model;
+    delete ophalingHistoriekModel;
     delete ui;
     vvimDebug() << "OphaalHistoriekDialog() deconstructed";
 }
