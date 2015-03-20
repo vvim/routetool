@@ -3,7 +3,9 @@
 
 #include "infoophaalpunt.h"
 #include "nieuweaanmelding.h"
+#include "listofophaalpuntentocontactsortfilterproxymodel.h"
 #include <QTreeWidget>
+#include <QTreeView>
 
 extern QSettings settings;
 
@@ -32,6 +34,11 @@ private:
     QTreeWidget *contactTree;
     QDialogButtonBox *buttonBox;
     QLabel *label;
+
+    QStandardItemModel *model;
+    ListOfOphaalpuntenToContactSortFilterProxyModel *listToContactModel;
+    QTreeView *contactTreeView;
+
 
     bool sortingascending;
 

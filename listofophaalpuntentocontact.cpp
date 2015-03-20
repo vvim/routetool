@@ -9,13 +9,6 @@
 #define vvimDebug()\
     qDebug() << "[" << Q_FUNC_INFO << "]"
 
-#define LIST_OPHAALPUNT_NAAM 0
-#define LIST_OPHAALPUNT_ID 1
-#define LIST_POSTCODE 2
-#define LIST_LAST_CONTACT_DATE 3
-#define LIST_LAST_OPHALING_DATE 4
-#define LIST_FORECAST_NEW_OPHALING_DATE 5
-
 ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
     QWidget(parent)
 {
