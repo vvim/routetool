@@ -63,7 +63,11 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
         model->appendRow(item_model);
     }
 
-    ui->historiekTreeView->setModel(model);
+    ophalingHistoriekModel = new OphaalHistoriekDialogSortFilterProxyModel(this);
+    ophalingHistoriekModel->setDynamicSortFilter(true);
+    ophalingHistoriekModel->setSourceModel(model);
+
+    ui->historiekTreeView->setModel(ophalingHistoriekModel);
     ui->historiekTreeView->setRootIsDecorated(false);
     ui->historiekTreeView->setAlternatingRowColors(true);
     ui->historiekTreeView->setColumnHidden(HIST_HISTORIEK_ID,true);
