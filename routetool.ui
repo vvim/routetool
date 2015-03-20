@@ -44,14 +44,6 @@
     </property>
     <addaction name="nieuweLeveringMenuButton"/>
    </widget>
-   <widget class="QMenu" name="menuMenuBellijst">
-    <property name="title">
-     <string>Bellijst</string>
-    </property>
-    <addaction name="voorspellingMenuButton"/>
-    <addaction name="ouderDanEenJaarMenuButton"/>
-    <addaction name="wieNogNooitMenuButton"/>
-   </widget>
    <widget class="QMenu" name="menuIngegeven_ophaalrondes">
     <property name="title">
      <string>Ingegeven ophaalrondes</string>
@@ -62,7 +54,7 @@
    <addaction name="menuMenuOphaalpunten"/>
    <addaction name="menuMenuAanmeldingen"/>
    <addaction name="menuMenuLeveringen"/>
-   <addaction name="menuMenuBellijst"/>
+   <addaction name="bellijstMenuButton"/>
    <addaction name="menuIngegeven_ophaalrondes"/>
    <addaction name="configurationMenuButton"/>
    <addaction name="actionQuit"/>
@@ -88,19 +80,9 @@
     <string>Nieuw ophaalpunt</string>
    </property>
   </action>
-  <action name="voorspellingMenuButton">
+  <action name="bellijstMenuButton">
    <property name="text">
-    <string>Voorspelling</string>
-   </property>
-  </action>
-  <action name="ouderDanEenJaarMenuButton">
-   <property name="text">
-    <string>Ophaalpunten &gt; 1 jaar</string>
-   </property>
-  </action>
-  <action name="wieNogNooitMenuButton">
-   <property name="text">
-    <string>Punten zonder ophaalhistoriek</string>
+    <string>Bellijst</string>
    </property>
   </action>
   <action name="effectiefOpgehaaldeHoeveelhedenMenuButton">

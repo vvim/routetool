@@ -241,9 +241,7 @@ void ListOfOphaalpuntenToContact::initialise()
 
     QSqlQuery query("SELECT id, naam, postcode, last_contact_date, contact_again_on, last_ophaling_date, forecast_new_ophaling_date "
                     "FROM ophaalpunten "
-                    "WHERE forecast_new_ophaling_date < date( CURDATE() + INTERVAL 14 DAY)"
                     "ORDER BY postcode");
-
     if(query.exec())
     {
         while (query.next())
@@ -265,7 +263,6 @@ void ListOfOphaalpuntenToContact::initialise()
         vvimDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL";
         qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_nr is NULL");
     }
-
     //contactTree->setColumnWidth(LIST_OPHAALPUNT_NAAM,100);
 
 #ifndef QT_NO_CURSOR
@@ -285,130 +282,6 @@ void ListOfOphaalpuntenToContact::ok_button_pushed()
     this->close();
 }
 
-void ListOfOphaalpuntenToContact::show_one_year_ophaalpunten()
-{
-#ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-#endif
-    label->setText(tr("Hieronder de lijst met ophaalpunten die al minstens een jaar niet meer bezocht zijn.\n"
-                      "De ophaalpunten die nog nooit bezocht zijn, werden NIET opgenomen in deze lijst.\n"
-                      "Dubbelklik op een ophaalpunt om de informatie te zien."));
-
-    contactTree->clear();
-
-    QSqlQuery query;
-    query.prepare("SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode , ophaalpunten.last_contact_date, ophaalpunten.contact_again_on, ophaalpunten.last_ophaling_date, ophaalpunten.forecast_new_ophaling_date "
-                  "FROM ophaalpunten WHERE ophaalpunten.last_ophaling_date < date( CURDATE() - INTERVAL 1 YEAR)");
-
-    if(query.exec())
-    {
-        while (query.next())
-        {
-            bool aanmelding_running = false;
-
-            int ophaalpunt_id = query.value(0).toInt();
-            QString ophaalpunt_naam = query.value(1).toString();
-            ophaalpunt_naam.replace("\n"," ");
-            QString ophaalpunt_postcode = query.value(2).toString();
-            QDate last_contact_date = query.value(3).toDate();
-            QDate contact_again_on = query.value(4).toDate();
-            QDate last_ophaling_date = query.value(5).toDate();
-            QDate forecast_ophaling_date = query.value(6).toDate();
-
-            QSqlQuery query2;
-            query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal AND ophaalronde_datum is NULL"); // and ophaalronde is NULL
-            query2.bindValue(":ophaal", ophaalpunt_id);
-
-            if(query2.exec())
-            {
-                if (query2.next())
-                {
-                    aanmelding_running = true;
-                }
-            }
-            else
-                vvimDebug() << "something went wrong with checking for an existing aanmelding";
-
-            addToTreeWidget(ophaalpunt_naam, ophaalpunt_id, ophaalpunt_postcode, last_contact_date, last_ophaling_date, forecast_ophaling_date, aanmelding_running);
-        }
-    }
-    else
-    {
-        vvimDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode FROM ophaalpunten WHERE not exists (select null from ophalinghistoriek where ophalinghistoriek.ophaalpunt = ophaalpunten.id)";
-        qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode FROM ophaalpunten WHERE not exists (select null from ophalinghistoriek where ophalinghistoriek.ophaalpunt = ophaalpunten.id)");
-    }
-
-#ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
-#endif
-
-    //contactTree->resizeColumnToContents(OPHAALPUNT_NAAM);
-
-    this->show();
-}
-
-void ListOfOphaalpuntenToContact::show_never_contacted_ophaalpunten()
-{
-#ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-#endif
-    label->setText(tr("Hieronder de lijst met ophaalpunten die nog geen ophaalhistoriek hebben.\n"
-                      "Dubbelklik op een ophaalpunt om de informatie te zien."));
-
-    contactTree->clear();
-
-    QSqlQuery query;
-    query.prepare("SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode , ophaalpunten.last_contact_date, ophaalpunten.contact_again_on, ophaalpunten.last_ophaling_date, ophaalpunten.forecast_new_ophaling_date "
-                  "FROM ophaalpunten WHERE not exists "
-                      "(select null from ophalinghistoriek "
-                       "where ophalinghistoriek.ophaalpunt = ophaalpunten.id)");
-
-    if(query.exec())
-    {
-        while (query.next())
-        {
-            bool aanmelding_running = false;
-
-            int ophaalpunt_id = query.value(0).toInt();
-            QString ophaalpunt_naam = query.value(1).toString();
-            ophaalpunt_naam.replace("\n"," ");
-            QString ophaalpunt_postcode = query.value(2).toString();
-            QDate last_contact_date = query.value(3).toDate();
-            QDate contact_again_on = query.value(4).toDate();
-            QDate last_ophaling_date = query.value(5).toDate();
-            QDate forecast_ophaling_date = query.value(6).toDate();
-
-            QSqlQuery query2;
-            query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal AND ophaalronde_datum is NULL"); // and ophaalronde is NULL
-            query2.bindValue(":ophaal", ophaalpunt_id);
-
-            if(query2.exec())
-            {
-                if (query2.next())
-                {
-                    aanmelding_running = true;
-                }
-            }
-            else
-                vvimDebug() << "something went wrong with checking for an existing aanmelding";
-
-            addToTreeWidget(ophaalpunt_naam, ophaalpunt_id, ophaalpunt_postcode, last_contact_date, last_ophaling_date, forecast_ophaling_date, aanmelding_running);
-        }
-    }
-    else
-    {
-        vvimDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode FROM ophaalpunten WHERE not exists (select null from ophalinghistoriek where ophalinghistoriek.ophaalpunt = ophaalpunten.id)";
-        qFatal("Something went wrong, could not execute query: SELECT ophaalpunten.id, ophaalpunten.naam, ophaalpunten.postcode FROM ophaalpunten WHERE not exists (select null from ophalinghistoriek where ophalinghistoriek.ophaalpunt = ophaalpunten.id)");
-    }
-
-#ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
-#endif
-
-    //contactTree->resizeColumnToContents(OPHAALPUNT_NAAM);
-
-    this->show();
-}
 void ListOfOphaalpuntenToContact::sortTreeWidget(int column)
 {
     vvimDebug() << "<vvim>" << "goes wrong for sorting numbers, see" << "http://stackoverflow.com/questions/363200/is-it-possible-to-sort-numbers-in-a-qtreewidget-column";

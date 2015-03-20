@@ -30,9 +30,7 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(ui->configurationMenuButton, SIGNAL(triggered()), this, SLOT(showConfiguration()));
     connect(ui->kiesOphaalpuntenMenuButton, SIGNAL(triggered()), this, SLOT(showKiesOphaalpunten()));
     connect(ui->nieuweLeveringMenuButton, SIGNAL(triggered()), this, SLOT(showNieuweLevering()));
-    connect(ui->wieNogNooitMenuButton, SIGNAL(triggered()), this, SLOT(showBijWieNogNooitOpgehaald()));
-    connect(ui->ouderDanEenJaarMenuButton, SIGNAL(triggered()), this, SLOT(showBijWieOuderDanJaarWidget()));
-    connect(ui->voorspellingMenuButton, SIGNAL(triggered()), this, SLOT(showVoorspelling()));
+    connect(ui->bellijstMenuButton, SIGNAL(triggered()), this, SLOT(showBellijst()));
     connect(ui->toonOphaalpuntenMenuButton, SIGNAL(triggered()), this, SLOT(showOphaalpuntenWidget()));
     connect(ui->effectiefOpgehaaldeHoeveelhedenMenuButton, SIGNAL(triggered()), this, SLOT(showEffectiefOpgehaaldeHoeveelheden()));
     connect(ui->actionAnnuleer_ingegeven_ophaalronde, SIGNAL(triggered()), this, SLOT(showAnnuleerIngegevenOphaalronde()));
@@ -107,17 +105,7 @@ void RouteTool::showNieuweLevering()
     leveringWidget.show();
 }
 
-void RouteTool::showBijWieNogNooitOpgehaald()
-{
-    contactListWidget.show_never_contacted_ophaalpunten(); // does 'init' & 'show' in one go.
-}
-
-void RouteTool::showBijWieOuderDanJaarWidget()
-{
-    contactListWidget.show_one_year_ophaalpunten(); // does 'init' & 'show' in one go.
-}
-
-void RouteTool::showVoorspelling()
+void RouteTool::showBellijst()
 {
     contactListWidget.initialise();
     contactListWidget.show();

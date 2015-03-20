@@ -46,9 +46,7 @@ private slots:
     void showConfiguration();
     void showKiesOphaalpunten();
     void showNieuweLevering();
-    void showBijWieOuderDanJaarWidget();
-    void showBijWieNogNooitOpgehaald();
-    void showVoorspelling();
+    void showBellijst();
     void showOphaalpuntenWidget();
     void showEffectiefOpgehaaldeHoeveelheden();
     void showAnnuleerIngegevenOphaalronde();
