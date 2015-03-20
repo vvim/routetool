@@ -53,14 +53,13 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
         addToTreeModel(historiek_id, ophalingsdatum, chauffeur, ophaalpunt_id, kg_kurk, kg_kaars, zakken_kurk, zakken_kaars, opmerkingen);
     }
 
+    bool emptymodel = false;
     if(model->rowCount() == 0)
     {
         //nothing in historiek? Tell user "empty!"
-        delete model;
-        model = new QStandardItemModel(0, 1);
-        QStandardItem * item_model = new QStandardItem();
-        item_model->setText(tr("Geen ophaalhistoriek voor dit ophaalpunt"));
-        model->appendRow(item_model);
+        emptymodel = true;
+        model->insertRow(0);
+        model->setData(model->index(0, HIST_OPMERKINGEN), tr("Geen ophaalhistoriek voor dit ophaalpunt"));
     }
 
     ophalingHistoriekModel = new OphaalHistoriekDialogSortFilterProxyModel(this);
@@ -72,6 +71,17 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
     ui->historiekTreeView->setAlternatingRowColors(true);
     ui->historiekTreeView->setColumnHidden(HIST_HISTORIEK_ID,true);
     ui->historiekTreeView->setColumnHidden(HIST_OPHAALPUNT_ID,true);
+
+    if(emptymodel)
+    {
+        //nothing in historiek? Hide all irrelevant columns
+        ui->historiekTreeView->setColumnHidden(HIST_OPHALINGSDATUM,true);
+        ui->historiekTreeView->setColumnHidden(HIST_CHAUFFEUR,true);
+        ui->historiekTreeView->setColumnHidden(HIST_WEIGHT_KURK,true);
+        ui->historiekTreeView->setColumnHidden(HIST_WEIGHT_KAARS,true);
+        ui->historiekTreeView->setColumnHidden(HIST_ZAK_KURK,true);
+        ui->historiekTreeView->setColumnHidden(HIST_ZAK_KAARS,true);
+    }
 
     ui->historiekTreeView->resizeColumnToContents(HIST_ZAK_KAARS);
     ui->historiekTreeView->resizeColumnToContents(HIST_ZAK_KURK);
