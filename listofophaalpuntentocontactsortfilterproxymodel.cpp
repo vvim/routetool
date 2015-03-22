@@ -43,8 +43,29 @@ QVariant ListOfOphaalpuntenToContactSortFilterProxyModel::data(const QModelIndex
     {
 
     case Qt::DisplayRole:
-        if((col == LIST_LAST_CONTACT_DATE) || (col == LIST_LAST_OPHALING_DATE) || (col == LIST_FORECAST_NEW_OPHALING_DATE))
-            return QLocale().toString(QSortFilterProxyModel::data(index,role).toDate(),"d MMM yyyy");
+        QDate date_to_display;
+        switch(col)
+        {
+        // todo vvim: IF data(index.role).toDate().isEmpty() then return "nog geen ophaling gepland" ??
+            case LIST_LAST_CONTACT_DATE:
+                date_to_display = QSortFilterProxyModel::data(index,role).toDate();
+                if(date_to_display.isNull())
+                    return "geen contact bekend";
+                return QLocale().toString(date_to_display,"d MMM yyyy");
+            break;
+            case LIST_LAST_OPHALING_DATE:
+                date_to_display = QSortFilterProxyModel::data(index,role).toDate();
+                if(date_to_display.isNull())
+                    return "geen ophaling bekend";
+                return QLocale().toString(date_to_display,"d MMM yyyy");
+            break;
+            case LIST_FORECAST_NEW_OPHALING_DATE:
+                date_to_display = QSortFilterProxyModel::data(index,role).toDate();
+                if(date_to_display.isNull())
+                    return "geen voorspelling mogelijk";
+                return QLocale().toString(date_to_display,"d MMM yyyy");
+            break;
+        }
         break;
     }
 
