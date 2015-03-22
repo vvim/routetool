@@ -45,6 +45,7 @@ private:
     void UpdateOphaalpunt(int ophaalpuntid);
     void UpdateAllOphaalpunten();
     void addToTreeWidget(QString NaamOphaalpunt, int OphaalpuntId, QString Postcode, QDate LastContactDate, QDate LastOphalingDate, QDate ForecastNewOphalingDate, bool color_item = false);
+    void initModel();
 };
 
 #endif // LISTOFOPHAALPUNTENTOCONTACT_H

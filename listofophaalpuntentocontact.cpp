@@ -19,20 +19,32 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
     nieuweaanmeldingWidget = new NieuweAanmelding();
     buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok);
 
-    contactTree = new QTreeWidget();
-
-    contactTree->setColumnCount(LIST_FORECAST_NEW_OPHALING_DATE + 1);
-    contactTree->setRootIsDecorated(false);
-    contactTree->setAlternatingRowColors(true);
 
     QStringList labels;
     labels << "Ophaalpunt" << "Ophaalpunt_id" << "Postcode" << "Laatste contact" << "Laatste ophaling" << "Voorspelde ophaling";
+
+    /////////// <OLD CODE>
+    contactTree = new QTreeWidget();
+    contactTree->setColumnCount(LIST_FORECAST_NEW_OPHALING_DATE + 1);
+    contactTree->setRootIsDecorated(false);
+    contactTree->setAlternatingRowColors(true);
     contactTree->setHeaderLabels(labels);
     contactTree->setColumnHidden(LIST_OPHAALPUNT_ID,true);
+    /////////// </OLD CODE>
+
+    contactTreeView = new QTreeView();
+    contactTreeView->setRootIsDecorated(false);
+    contactTreeView->setAlternatingRowColors(true);
+    contactTreeView->setSortingEnabled(true);
+    contactTreeView->sortByColumn(1, Qt::AscendingOrder);
+
+    model = NULL;
+    listToContactModel = NULL;
 
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(label);
     layout->addWidget(contactTree);
+    layout->addWidget(contactTreeView);
     layout->addWidget(buttonBox);
 
     setLayout(layout);
@@ -43,6 +55,7 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
     connect(info,SIGNAL(nieuweAanmelding(int)),nieuweaanmeldingWidget,SLOT(aanmeldingVoorOphaalpunt(int)));
     connect(contactTree->header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(sortTreeWidget(int)));
     connect(contactTree,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(showOphaalpunt(QTreeWidgetItem*)));
+    connect(contactTreeView,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(showOphaalpunt(QTreeWidgetItem*)));
 
     vvimDebug() << "<vvim> TODO: should we call UptodateAllOphaalpunten() everytime we initialise the contactTree?";
     UpdateAllOphaalpunten();
@@ -56,6 +69,9 @@ ListOfOphaalpuntenToContact::~ListOfOphaalpuntenToContact()
     delete info;
     delete nieuweaanmeldingWidget;
     delete contactTree;
+    delete contactTreeView;
+    delete model;
+    delete listToContactModel;
     delete buttonBox;
     delete label;
     vvimDebug() << "ListOfOphaalpuntenToContact() deconstructed";
@@ -220,6 +236,35 @@ void ListOfOphaalpuntenToContact::UpdateAllOphaalpunten()
 
 }
 
+void ListOfOphaalpuntenToContact::initModel()
+{
+    vvimDebug() << "[ListOfOphaalpuntenToContact::initModel]" << "start";
+    delete model;
+    delete listToContactModel;
+
+    QStringList labels;
+    labels << "Ophaalpunt" << "Ophaalpunt_id" << "Postcode" << "Laatste contact" << "Laatste ophaling" << "Voorspelde ophaling";
+
+    model = new QStandardItemModel(0, labels.count());
+
+    listToContactModel = new ListOfOphaalpuntenToContactSortFilterProxyModel(this);
+    listToContactModel->setDynamicSortFilter(true);
+    listToContactModel->setSourceModel(model);
+
+    for(int i = 0; i < labels.count(); i++)
+    {
+       model->setHeaderData(i,Qt::Horizontal, /* QObject::tr( */ labels[i] /*)*/ );  // why does 'tr()' not work? -> QString& instead of QString...
+    }
+
+    contactTreeView->setModel(listToContactModel);
+
+    contactTreeView->hideColumn(LIST_OPHAALPUNT_ID);
+
+// ???    contactTreeView>setEditTriggers(QAbstractItemView::NoEditTriggers); // thanks to http://www.qtcentre.org/threads/22511-QTreeWidget-read-only
+
+}
+
+
 void ListOfOphaalpuntenToContact::initialise()
 {
 
@@ -231,6 +276,8 @@ void ListOfOphaalpuntenToContact::initialise()
                       "Dubbleklik op een kolom om te sorteren."));
 
     contactTree->clear();
+
+    initModel();
 
     QSqlQuery query("SELECT id, naam, postcode, last_contact_date, contact_again_on, last_ophaling_date, forecast_new_ophaling_date "
                     "FROM ophaalpunten "
@@ -308,6 +355,14 @@ void ListOfOphaalpuntenToContact::addToTreeWidget(QString NaamOphaalpunt, int Op
         for (int i = 0 ; i < contactTree->columnCount(); i++)
         item->setForeground(i,Qt::blue);
     }
+
+    model->insertRow(0);
+    model->setData(model->index(0,LIST_OPHAALPUNT_NAAM), NaamOphaalpunt);
+    model->setData(model->index(0,LIST_OPHAALPUNT_ID), OphaalpuntId);
+    model->setData(model->index(0,LIST_POSTCODE), Postcode);
+    model->setData(model->index(0,LIST_LAST_CONTACT_DATE), LastContactDate);
+    model->setData(model->index(0,LIST_LAST_OPHALING_DATE), LastOphalingDate);
+    model->setData(model->index(0,LIST_FORECAST_NEW_OPHALING_DATE), ForecastNewOphalingDate);
 }
 
 
