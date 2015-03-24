@@ -37,13 +37,14 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
     contactTreeView->setAlternatingRowColors(true);
     contactTreeView->setSortingEnabled(true);
     contactTreeView->sortByColumn(1, Qt::AscendingOrder);
+    contactTreeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     model = NULL;
     listToContactModel = NULL;
 
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(label);
-    layout->addWidget(contactTree);
+    //layout->addWidget(contactTree);
     layout->addWidget(contactTreeView);
     layout->addWidget(buttonBox);
 
@@ -56,6 +57,7 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
     connect(contactTree->header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(sortTreeWidget(int)));
     connect(contactTree,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(showOphaalpunt(QTreeWidgetItem*)));
     connect(contactTreeView,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(showOphaalpunt(QTreeWidgetItem*)));
+    connect(contactTreeView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(showOphaalpunt(QModelIndex)));
 
     vvimDebug() << "<vvim> TODO: should we call UptodateAllOphaalpunten() everytime we initialise the contactTree?";
     UpdateAllOphaalpunten();
@@ -315,6 +317,16 @@ void ListOfOphaalpuntenToContact::showOphaalpunt(QTreeWidgetItem* item)
     info->showAanmeldingAndHistoriekButton(true);
     info->setWindowTitle(tr("info over ophaalpunt"));
     info->showOphaalpunt(item->text(LIST_OPHAALPUNT_ID).toInt());
+}
+
+void ListOfOphaalpuntenToContact::showOphaalpunt(QModelIndex index)
+{
+    int row = index.row();
+    int ophaalpunt_id = listToContactModel->data(listToContactModel->index(row, LIST_OPHAALPUNT_ID)).toInt();
+    vvimDebug() << "get ophaalpunt id from row " << row << "is" << ophaalpunt_id;
+    info->showAanmeldingAndHistoriekButton(true);
+    info->setWindowTitle(tr("info over ophaalpunt"));
+    info->showOphaalpunt(ophaalpunt_id);
 }
 
 void ListOfOphaalpuntenToContact::ok_button_pushed()

@@ -24,6 +24,7 @@ signals:
 
 private slots:
     void showOphaalpunt(QTreeWidgetItem*);
+    void showOphaalpunt(QModelIndex);
     void ok_button_pushed();
     void sortTreeWidget(int column);
     void databaseBeenUpdated();
