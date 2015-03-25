@@ -12,8 +12,6 @@
 ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
     QWidget(parent)
 {
-    sortingascending = true;
-
     label = new QLabel();
     info = new InfoOphaalpunt();
     nieuweaanmeldingWidget = new NieuweAanmelding();
@@ -22,15 +20,6 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
 
     QStringList labels;
     labels << "Ophaalpunt" << "Ophaalpunt_id" << "Postcode" << "Laatste contact" << "Laatste ophaling" << "Voorspelde ophaling";
-
-    /////////// <OLD CODE>
-    contactTree = new QTreeWidget();
-    contactTree->setColumnCount(LIST_FORECAST_NEW_OPHALING_DATE + 1);
-    contactTree->setRootIsDecorated(false);
-    contactTree->setAlternatingRowColors(true);
-    contactTree->setHeaderLabels(labels);
-    contactTree->setColumnHidden(LIST_OPHAALPUNT_ID,true);
-    /////////// </OLD CODE>
 
     contactTreeView = new QTreeView();
     contactTreeView->setRootIsDecorated(false);
@@ -44,7 +33,6 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
 
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(label);
-    //layout->addWidget(contactTree);
     layout->addWidget(contactTreeView);
     layout->addWidget(buttonBox);
 
@@ -54,8 +42,6 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
 
     connect(buttonBox,SIGNAL(accepted()),this,SLOT(ok_button_pushed()));
     connect(info,SIGNAL(nieuweAanmelding(int)),nieuweaanmeldingWidget,SLOT(aanmeldingVoorOphaalpunt(int)));
-    connect(contactTree->header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(sortTreeWidget(int)));
-    connect(contactTree,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(showOphaalpunt(QTreeWidgetItem*)));
     connect(contactTreeView,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(showOphaalpunt(QTreeWidgetItem*)));
     connect(contactTreeView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(showOphaalpunt(QModelIndex)));
 
@@ -70,7 +56,6 @@ ListOfOphaalpuntenToContact::~ListOfOphaalpuntenToContact()
     vvimDebug() << "start to deconstruct ListOfOphaalpuntenToContact()";
     delete info;
     delete nieuweaanmeldingWidget;
-    delete contactTree;
     delete contactTreeView;
     delete model;
     delete listToContactModel;
@@ -277,8 +262,6 @@ void ListOfOphaalpuntenToContact::initialise()
                       "Dubbelklik op een ophaalpunt om de informatie te zien.\n"
                       "Dubbleklik op een kolom om te sorteren."));
 
-    contactTree->clear();
-
     initModel();
 
     QSqlQuery query("SELECT id, naam, postcode, last_contact_date, contact_again_on, last_ophaling_date, forecast_new_ophaling_date "
@@ -312,13 +295,6 @@ void ListOfOphaalpuntenToContact::initialise()
 #endif
 }
 
-void ListOfOphaalpuntenToContact::showOphaalpunt(QTreeWidgetItem* item)
-{
-    info->showAanmeldingAndHistoriekButton(true);
-    info->setWindowTitle(tr("info over ophaalpunt"));
-    info->showOphaalpunt(item->text(LIST_OPHAALPUNT_ID).toInt());
-}
-
 void ListOfOphaalpuntenToContact::showOphaalpunt(QModelIndex index)
 {
     int row = index.row();
@@ -334,40 +310,10 @@ void ListOfOphaalpuntenToContact::ok_button_pushed()
     this->close();
 }
 
-void ListOfOphaalpuntenToContact::sortTreeWidget(int column)
-{
-    vvimDebug() << "<vvim>" << "goes wrong for sorting numbers, see" << "http://stackoverflow.com/questions/363200/is-it-possible-to-sort-numbers-in-a-qtreewidget-column";
-    vvimDebug() << "<vvim>" << "read http://stackoverflow.com/questions/13075643/sorting-by-date-in-qtreewidget" << "The model you use for the tree view need to return QDate or QDateTime for the column in the data() function";
-    // goes wrong for sorting numbers, see
-    // http://stackoverflow.com/questions/363200/is-it-possible-to-sort-numbers-in-a-qtreewidget-column
-    if(sortingascending)
-        contactTree->sortByColumn(column,Qt::AscendingOrder);
-    else
-        contactTree->sortByColumn(column,Qt::DescendingOrder);
-    sortingascending = !sortingascending;
-}
-
 void ListOfOphaalpuntenToContact::addToTreeWidget(QString NaamOphaalpunt, int OphaalpuntId, QString Postcode,
                                                   QDate LastContactDate, QDate LastOphalingDate, QDate ForecastNewOphalingDate,
                                                   bool color_item)
 {
-    QTreeWidgetItem *item = new QTreeWidgetItem(contactTree);
-    item->setText(LIST_OPHAALPUNT_NAAM, NaamOphaalpunt);
-    item->setText(LIST_OPHAALPUNT_ID, QString().number(OphaalpuntId));
-    item->setText(LIST_POSTCODE, Postcode);
-    item->setText(LIST_LAST_CONTACT_DATE, QLocale().toString(LastContactDate,"dd MMM yyyy"));
-    item->setText(LIST_LAST_OPHALING_DATE, QLocale().toString(LastOphalingDate,"dd MMM yyyy"));
-    item->setText(LIST_FORECAST_NEW_OPHALING_DATE, QLocale().toString(ForecastNewOphalingDate,"dd MMM yyyy"));
-
-    //item->setFlags(item->flags()|Qt::ItemIsUserCheckable);
-    //item->setCheckState(0,Qt::Unchecked);
-
-    if(color_item)
-    {
-        for (int i = 0 ; i < contactTree->columnCount(); i++)
-        item->setForeground(i,Qt::blue);
-    }
-
     model->insertRow(0);
     model->setData(model->index(0,LIST_OPHAALPUNT_NAAM), NaamOphaalpunt);
     model->setData(model->index(0,LIST_OPHAALPUNT_ID), OphaalpuntId);
@@ -375,6 +321,13 @@ void ListOfOphaalpuntenToContact::addToTreeWidget(QString NaamOphaalpunt, int Op
     model->setData(model->index(0,LIST_LAST_CONTACT_DATE), LastContactDate);
     model->setData(model->index(0,LIST_LAST_OPHALING_DATE), LastOphalingDate);
     model->setData(model->index(0,LIST_FORECAST_NEW_OPHALING_DATE), ForecastNewOphalingDate);
+
+    if(color_item)
+    {
+        for (int i = 0 ; i < model->columnCount(); i++)
+        //item->setForeground(i,Qt::blue);
+            ;
+    }
 }
 
 

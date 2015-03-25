@@ -23,25 +23,19 @@ signals:
     void contentsOfDatabaseChanged();
 
 private slots:
-    void showOphaalpunt(QTreeWidgetItem*);
     void showOphaalpunt(QModelIndex);
     void ok_button_pushed();
-    void sortTreeWidget(int column);
     void databaseBeenUpdated();
 
 private:
     InfoOphaalpunt *info;
     NieuweAanmelding *nieuweaanmeldingWidget;
-    QTreeWidget *contactTree;
     QDialogButtonBox *buttonBox;
     QLabel *label;
 
     QStandardItemModel *model;
     ListOfOphaalpuntenToContactSortFilterProxyModel *listToContactModel;
     QTreeView *contactTreeView;
-
-
-    bool sortingascending;
 
     void UpdateOphaalpunt(int ophaalpuntid);
     void UpdateAllOphaalpunten();
