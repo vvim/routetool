@@ -40,39 +40,49 @@ QVariant ListOfOphaalpuntenToContactSortFilterProxyModel::data(const QModelIndex
     int col = index.column();
     QDate date_to_display;
 
+    QModelIndex aanmelding_present = index.sibling(index.row(), LIST_AANMELDING_PRESENT);
+
     switch(role)
     {
 
-    case Qt::DisplayRole:
-        switch(col)
-        {
-        // todo vvim: IF data(index.role).toDate().isEmpty() then return "nog geen ophaling gepland" ??
-            case LIST_LAST_CONTACT_DATE:
-                date_to_display = QSortFilterProxyModel::data(index,role).toDate();
-                if(date_to_display.isNull())
-                    return "geen contact bekend";
-                return QLocale().toString(date_to_display,"d MMM yyyy");
-            break;
-            case LIST_LAST_OPHALING_DATE:
-                date_to_display = QSortFilterProxyModel::data(index,role).toDate();
-                if(date_to_display.isNull())
-                    return "geen ophaling bekend";
-                return QLocale().toString(date_to_display,"d MMM yyyy");
-            break;
-            case LIST_FORECAST_NEW_OPHALING_DATE:
-                date_to_display = QSortFilterProxyModel::data(index,role).toDate();
-                if(date_to_display.isNull())
-                    return "geen voorspelling mogelijk";
-                return QLocale().toString(date_to_display,"d MMM yyyy");
-            break;
-        }
-        break;
-    case Qt::ForegroundRole:
-        if(sourceModel()->data(sourceModel()->index(row,LIST_AANMELDING_PRESENT)).toBool())
-        {
-            return Qt::blue;
-        }
-        break;
+        case Qt::DisplayRole:
+            switch(col)
+            {
+            // todo vvim: IF data(index.role).toDate().isEmpty() then return "nog geen ophaling gepland" ??
+                case LIST_LAST_CONTACT_DATE:
+                    date_to_display = QSortFilterProxyModel::data(index,role).toDate();
+                    if(date_to_display.isNull())
+                        return "geen contact bekend";
+                    return QLocale().toString(date_to_display,"d MMM yyyy");
+                break;
+                case LIST_LAST_OPHALING_DATE:
+                    date_to_display = QSortFilterProxyModel::data(index,role).toDate();
+                    if(date_to_display.isNull())
+                        return "geen ophaling bekend";
+                    return QLocale().toString(date_to_display,"d MMM yyyy");
+                break;
+                case LIST_FORECAST_NEW_OPHALING_DATE:
+                    date_to_display = QSortFilterProxyModel::data(index,role).toDate();
+                    if(date_to_display.isNull())
+                        return "geen voorspelling mogelijk";
+                    return QLocale().toString(date_to_display,"d MMM yyyy");
+                break;
+            }
+            break; // end     case Qt::DisplayRole:
+
+
+        case Qt::ForegroundRole:
+
+            if(data(aanmelding_present).toBool())
+            {
+                return Qt::blue;
+            }
+            else
+            {
+                return Qt::black;
+            }
+            break; // end    case Qt::ForegroundRole:
+
     }
 
     return QSortFilterProxyModel::data(index,role);
