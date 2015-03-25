@@ -243,9 +243,6 @@ void ListOfOphaalpuntenToContact::initModel()
 
     contactTreeView->hideColumn(LIST_OPHAALPUNT_ID);
     contactTreeView->hideColumn(LIST_AANMELDING_PRESENT);
-
-// ???    contactTreeView>setEditTriggers(QAbstractItemView::NoEditTriggers); // thanks to http://www.qtcentre.org/threads/22511-QTreeWidget-read-only
-
 }
 
 
@@ -266,19 +263,35 @@ void ListOfOphaalpuntenToContact::initialise()
                     "ORDER BY postcode");
     if(query.exec())
     {
-        while (query.next())
-        {
-            int ophaalpunt_id = query.value(0).toInt();
-            QString ophaalpunt_naam = query.value(1).toString();
-            ophaalpunt_naam.replace("\n"," ");
-            QString ophaalpunt_postcode = query.value(2).toString();
-            QDate last_contact_date = query.value(3).toDate();
-            QDate contact_again_on = query.value(4).toDate();
-            QDate last_ophaling_date = query.value(5).toDate();
-            QDate forecast_ophaling_date = query.value(6).toDate();
+       while (query.next())
+       {
+           bool aanmelding_running = false;
 
-            addToTreeView(ophaalpunt_naam, ophaalpunt_id, ophaalpunt_postcode, last_contact_date, last_ophaling_date, forecast_ophaling_date);
-        }
+           int ophaalpunt_id = query.value(0).toInt();
+           QString ophaalpunt_naam = query.value(1).toString();
+           ophaalpunt_naam.replace("\n"," ");
+           QString ophaalpunt_postcode = query.value(2).toString();
+           QDate last_contact_date = query.value(3).toDate();
+           QDate contact_again_on = query.value(4).toDate();
+           QDate last_ophaling_date = query.value(5).toDate();
+           QDate forecast_ophaling_date = query.value(6).toDate();
+
+           QSqlQuery query2;
+           query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal AND ophaalronde_datum is NULL"); // and ophaalronde is NULL
+           query2.bindValue(":ophaal", ophaalpunt_id);
+
+           if(query2.exec())
+           {
+               if (query2.next())
+               {
+                   aanmelding_running = true;
+               }
+           }
+           else
+               vvimDebug() << "something went wrong with checking for an existing aanmelding";
+
+           addToTreeView(ophaalpunt_naam, ophaalpunt_id, ophaalpunt_postcode, last_contact_date, last_ophaling_date, forecast_ophaling_date, aanmelding_running);
+       }
     }
     else
     {
