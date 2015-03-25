@@ -36,14 +36,14 @@ bool ListOfOphaalpuntenToContactSortFilterProxyModel::lessThan(const QModelIndex
 
 QVariant ListOfOphaalpuntenToContactSortFilterProxyModel::data(const QModelIndex &index, int role) const
 {
-    // not used: int row = index.row();
+    int row = index.row();
     int col = index.column();
+    QDate date_to_display;
 
     switch(role)
     {
 
     case Qt::DisplayRole:
-        QDate date_to_display;
         switch(col)
         {
         // todo vvim: IF data(index.role).toDate().isEmpty() then return "nog geen ophaling gepland" ??
@@ -65,6 +65,12 @@ QVariant ListOfOphaalpuntenToContactSortFilterProxyModel::data(const QModelIndex
                     return "geen voorspelling mogelijk";
                 return QLocale().toString(date_to_display,"d MMM yyyy");
             break;
+        }
+        break;
+    case Qt::ForegroundRole:
+        if(sourceModel()->data(sourceModel()->index(row,LIST_AANMELDING_PRESENT)).toBool())
+        {
+            return Qt::blue;
         }
         break;
     }

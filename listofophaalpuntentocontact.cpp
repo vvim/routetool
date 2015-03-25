@@ -226,7 +226,7 @@ void ListOfOphaalpuntenToContact::initModel()
     delete listToContactModel;
 
     QStringList labels;
-    labels << "Ophaalpunt" << "Ophaalpunt_id" << "Postcode" << "Laatste contact" << "Laatste ophaling" << "Voorspelde ophaling";
+    labels << "Ophaalpunt" << "Ophaalpunt_id" << "Postcode" << "Laatste contact" << "Laatste ophaling" << "Voorspelde ophaling" << "Aanmelding bekend";
 
     model = new QStandardItemModel(0, labels.count());
 
@@ -242,6 +242,7 @@ void ListOfOphaalpuntenToContact::initModel()
     contactTreeView->setModel(listToContactModel);
 
     contactTreeView->hideColumn(LIST_OPHAALPUNT_ID);
+    contactTreeView->hideColumn(LIST_AANMELDING_PRESENT);
 
 // ???    contactTreeView>setEditTriggers(QAbstractItemView::NoEditTriggers); // thanks to http://www.qtcentre.org/threads/22511-QTreeWidget-read-only
 
@@ -276,7 +277,7 @@ void ListOfOphaalpuntenToContact::initialise()
             QDate last_ophaling_date = query.value(5).toDate();
             QDate forecast_ophaling_date = query.value(6).toDate();
 
-            addToTreeWidget(ophaalpunt_naam, ophaalpunt_id, ophaalpunt_postcode, last_contact_date, last_ophaling_date, forecast_ophaling_date);
+            addToTreeView(ophaalpunt_naam, ophaalpunt_id, ophaalpunt_postcode, last_contact_date, last_ophaling_date, forecast_ophaling_date);
         }
     }
     else
@@ -306,7 +307,7 @@ void ListOfOphaalpuntenToContact::ok_button_pushed()
     this->close();
 }
 
-void ListOfOphaalpuntenToContact::addToTreeWidget(QString NaamOphaalpunt, int OphaalpuntId, QString Postcode,
+void ListOfOphaalpuntenToContact::addToTreeView(QString NaamOphaalpunt, int OphaalpuntId, QString Postcode,
                                                   QDate LastContactDate, QDate LastOphalingDate, QDate ForecastNewOphalingDate,
                                                   bool color_item)
 {
@@ -317,13 +318,7 @@ void ListOfOphaalpuntenToContact::addToTreeWidget(QString NaamOphaalpunt, int Op
     model->setData(model->index(0,LIST_LAST_CONTACT_DATE), LastContactDate);
     model->setData(model->index(0,LIST_LAST_OPHALING_DATE), LastOphalingDate);
     model->setData(model->index(0,LIST_FORECAST_NEW_OPHALING_DATE), ForecastNewOphalingDate);
-
-    if(color_item)
-    {
-        for (int i = 0 ; i < model->columnCount(); i++)
-        //item->setForeground(i,Qt::blue);
-            ;
-    }
+    model->setData(model->index(0,LIST_AANMELDING_PRESENT), color_item);
 }
 
 
