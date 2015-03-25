@@ -17,10 +17,6 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
     nieuweaanmeldingWidget = new NieuweAanmelding();
     buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok);
 
-
-    QStringList labels;
-    labels << "Ophaalpunt" << "Ophaalpunt_id" << "Postcode" << "Laatste contact" << "Laatste ophaling" << "Voorspelde ophaling";
-
     contactTreeView = new QTreeView();
     contactTreeView->setRootIsDecorated(false);
     contactTreeView->setAlternatingRowColors(true);
