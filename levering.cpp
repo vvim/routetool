@@ -165,7 +165,7 @@ void Levering::ophaalpuntChanged()
 
 }
 
-void Levering::loadOphaalpunten()
+void Levering::loadOphaalpunten() // is deze functie wel ergens voor nodig?
 {
     vvimDebug() << "database has been changed, so we should reload the Completer";
     // autocompletion for locationEdit:

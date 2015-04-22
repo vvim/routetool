@@ -65,7 +65,7 @@ private slots:
     void accept();
     void reject();
     void ophaalpuntChanged();
-    void loadOphaalpunten();
+    void loadOphaalpunten(); // is deze functie wel ergens voor nodig? copy+paste accident? I don't see any use for loading the collection points when adding a delivery?
     void toonOphaalpuntInformatie();
     void vulInformatieOphaalpuntIn();
 };
