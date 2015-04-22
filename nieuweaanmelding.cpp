@@ -296,7 +296,7 @@ void NieuweAanmelding::loadOphaalpunten()
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     #endif
 
-    QSqlQuery query("SELECT id, naam FROM ophaalpunten");
+    QSqlQuery query("SELECT id, naam FROM ophaalpunten WHERE kurk > 0 OR parafine > 0");
         while (query.next()) {
             int id = query.value(0).toInt();
             QString naam	= query.value(1).toString();
@@ -304,6 +304,8 @@ void NieuweAanmelding::loadOphaalpunten()
 
             ophaalpunten[naam] = id;
         }
+
+        vvimDebug() << "TOTAL of ophaalpunten loaded in completer from the \"create a new collection request\" window : " << words.length();
 
     #ifndef QT_NO_CURSOR
         QApplication::restoreOverrideCursor();

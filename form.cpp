@@ -675,7 +675,7 @@ void Form::reloadCompleter()
 #endif
     vvimDebug() << "2. setOverrideCursor";
 
-    QSqlQuery query("SELECT naam, straat, nr, bus, postcode, plaats, land FROM ophaalpunten");
+    QSqlQuery query("SELECT naam, straat, nr, bus, postcode, plaats, land FROM ophaalpunten WHERE kurk > 0 OR parafine > 0");
     vvimDebug() << "3. SELECT query ready";
     if(!query.exec())
         vvimDebug() << "Something went wrong with querying information on the ophaalpunten" << query.lastError();
@@ -691,9 +691,9 @@ void Form::reloadCompleter()
             QString plaats	= query.value(5).toString();
             QString land	= query.value(6).toString();
             words << naam.append(", %1 %2, %3 %4, %5").arg(straat).arg(nr).arg(postcode).arg(plaats).arg(land);
-            vvimDebug() << "5." << words.length();
         }
 
+        vvimDebug() << "5. TOTAL of ophaalpunten loaded in completer : " << words.length();
 
         vvimDebug() << "6. IF completer -> delete it, thank you" << completer;
         vvimDebug() << "6. IF completer -> delete it, thank you - value:" << completer;

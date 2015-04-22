@@ -101,7 +101,7 @@ void ExportCollectionHistory::loadOphaalpunten()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
 
-    QSqlQuery query("SELECT naam, straat, nr, bus, postcode, plaats, land, id FROM ophaalpunten");
+    QSqlQuery query("SELECT naam, straat, nr, bus, postcode, plaats, land, id FROM ophaalpunten WHERE kurk > 0 OR parafine > 0");
     while (query.next()) {
         QString naam	= query.value(0).toString();
         QString straat	= query.value(1).toString();
@@ -120,6 +120,8 @@ void ExportCollectionHistory::loadOphaalpunten()
 
         words << ophaalpunt;
     }
+
+    vvimDebug() << "TOTAL of ophaalpunten loaded in completer from the \"export collection history\" window : " << words.length();
 
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();

@@ -259,7 +259,7 @@ void ListOfOphaalpuntenToContact::initialise()
     initModel();
 
     QSqlQuery query("SELECT id, naam, postcode, last_contact_date, contact_again_on, last_ophaling_date, forecast_new_ophaling_date "
-                    "FROM ophaalpunten "
+                    "FROM ophaalpunten WHERE kurk > 0 or parafine > 0 "
                     "ORDER BY postcode");
     if(query.exec())
     {
@@ -292,6 +292,7 @@ void ListOfOphaalpuntenToContact::initialise()
 
            addToTreeView(ophaalpunt_naam, ophaalpunt_id, ophaalpunt_postcode, last_contact_date, last_ophaling_date, forecast_ophaling_date, aanmelding_running);
        }
+       vvimDebug() << "TOTAL of ophaalpunten loaded in \"Bellijst\" :" << model->rowCount();
     }
     else
     {
