@@ -43,6 +43,7 @@ void checkSettings()
         Configuration *c = new Configuration();
         c->show();
 
+        // how to correctly delete "c" after it is done? // why not make it c.show() ???
         // how to correctly delete "c" after it is done?
     }
 
