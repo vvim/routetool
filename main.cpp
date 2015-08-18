@@ -101,6 +101,7 @@ bool connectToDatabase()
     }
 
     qDebug( "Connected to database" );
+    vvimDebug() << "Connected to database at " << settings.value("db/host").toString();
 
     return true;
 }
