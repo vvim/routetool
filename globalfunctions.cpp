@@ -29,14 +29,14 @@ void checkSettings()
 
     if(!all_keys_found)
     {
-        vvimDebug() << "show Dialog";
+        vvimDebug() << QObject::tr("show Dialog");
         Configuration *c = new Configuration();
         c->show();
 
         // how to correctly delete "c" after it is done? // why not make it c.show() ???
     }
 
-    vvimDebug() << "Configuration checkSettings(): OK! All settings are filled in.";
+    vvimDebug() << QObject::tr("Configuration checkSettings(): OK! All settings are filled in.");
 }
 
 void myMessageOutput(QtMsgType type, const char *msg)
@@ -65,7 +65,7 @@ bool startLoggingToFile()
     debuglogfile = fopen(filename.toStdString().c_str(), "a");
     if (NULL == debuglogfile) {
         QString error = "";
-        error.append("cannot open debuglogfile '%1'").arg(filename);
+        error.append(QObject::tr("cannot open debuglogfile '%1'")).arg(filename);
         perror(error.toStdString().c_str());
         return false;
     }
@@ -83,9 +83,9 @@ bool connectToDatabase()
     db.setDatabaseName(settings.value("db/databasename").toString());
     db.setUserName(settings.value("db/username").toString() );
     db.setPassword(settings.value("db/password").toString());
-    qDebug() << " ++ 1) original connect options:" << db.connectOptions();
+    qDebug() << QObject::tr(" ++ 1) original connect options:") << db.connectOptions();
     db.setConnectOptions( "MYSQL_OPT_RECONNECT=true;" ) ;
-    qDebug() << " ++ 2) new connect options:" << db.connectOptions();
+    qDebug() << QObject::tr(" ++ 2) new connect options:") << db.connectOptions();
 
     if( !db.open() )
     {
@@ -109,18 +109,18 @@ bool connectToDatabase()
 
 bool reConnectToDatabase(QSqlError lasterror, QString SQLquery, QString callingfunction)
 {
-    vvimDebug() << callingfunction << "Cannot execute query. DB lost? Try to reconnect!" << lasterror.text();
+    vvimDebug() << callingfunction << QObject::tr("Cannot execute query. DB lost? Try to reconnect!") << lasterror.text();
 
     if(!connectToDatabase())
     {
-        QString textforlogfile = QString("Something went wrong, could not reconnect to execute query: %1 error %2").arg(SQLquery).arg(lasterror.text());
+        QString textforlogfile = QString(QObject::tr("Something went wrong, could not reconnect to execute query: %1 error %2").arg(SQLquery).arg(lasterror.text()));
         vvimDebug() << callingfunction << "FATAL:" << textforlogfile ;
         qFatal((textforlogfile).toStdString().c_str());
         return false;
     }
     else
     {
-        vvimDebug() << callingfunction << "Reconnection successful!";
+        vvimDebug() << callingfunction << QObject::tr("Reconnection successful!");
         return true;
     }
 }
