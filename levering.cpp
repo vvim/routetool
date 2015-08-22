@@ -6,9 +6,7 @@
 #include <QMessageBox>
 #include <QFormLayout>
 #include <QVBoxLayout>
-
-#define vvimDebug()\
-    qDebug() << "[" << Q_FUNC_INFO << "]"
+#include "globalfunctions.h"
 
 Levering::Levering(QWidget *parent) :
     QWidget(parent)
@@ -179,15 +177,31 @@ void Levering::loadOphaalpunten() // is deze functie wel ergens voor nodig?
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     #endif
 
-    QSqlQuery query("SELECT id, naam FROM ophaalpunten"); // adres ??
-        while (query.next()) {
-            int id = query.value(0).toInt();
-            QString naam	= query.value(1).toString();
-            words << naam;
+    QString SQLquery = "SELECT id, naam FROM ophaalpunten"; // adres ??
+    QSqlQuery query(SQLquery); // adres ??
 
-            ophaalpunten[naam] = id;
-            // adres[id_of_naam] = ADRES ??
+    if(!query.exec())
+    {
+        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, halting";
+            exit(-1);
         }
+        if(!query.exec())
+        {
+            vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery << query.lastError().text();
+            exit(-1);
+        }
+    }
+
+    while (query.next()) {
+        int id = query.value(0).toInt();
+        QString naam	= query.value(1).toString();
+        words << naam;
+
+        ophaalpunten[naam] = id;
+        // adres[id_of_naam] = ADRES ??
+    }
 
     #ifndef QT_NO_CURSOR
         QApplication::restoreOverrideCursor();

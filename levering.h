@@ -23,8 +23,6 @@
 #include "infoophaalpunt.h"
 #include "slevering.h"
 
-extern QSettings settings;
-
 class Levering : public QWidget
 {
     Q_OBJECT

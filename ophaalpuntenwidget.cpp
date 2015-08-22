@@ -3,9 +3,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include "ophaalpuntenwidget.h"
-
-#define vvimDebug()\
-    qDebug() << "[" << Q_FUNC_INFO << "]"
+#include "globalfunctions.h"
 
 OphaalpuntenWidget::OphaalpuntenWidget(QWidget *parent) :
     QWidget(parent)
@@ -77,7 +75,30 @@ void OphaalpuntenWidget::loadOphaalpunten()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
 
-    QSqlQuery query("SELECT naam, straat, nr, bus, postcode, plaats, land, id FROM ophaalpunten ORDER by postcode, naam");
+    QString SQLquery = "SELECT naam, straat, nr, bus, postcode, plaats, land, id FROM ophaalpunten ORDER by postcode, naam";
+    QSqlQuery query(SQLquery);
+
+    vvimDebug() << "<vvim> TODO: testen -> geeft 'query.next()' al meteen de tweede oplossing, of de eerste? En wat met 'query.exec()'' gevolgd door 'query.next()' ?";
+    vvimDebug() << "<vvim> TODO: TEST mis ik hier het allereerste ophaalpunt???";
+
+    if(!query.exec())
+    {
+        vvimDebug() << "something went wrong with the query" << query.lastError().text() << "trying to reconnect to the DB";
+        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB: FAIL";
+        }
+        else
+        {
+            vvimDebug() << "reconnected to DB";
+            if(!query.exec())
+            {
+                vvimDebug() << "query failed after reconnecting to DB" << SQLquery << query.lastError();
+            }
+        }
+    }
+
+
     while (query.next()) {
         QString naam	= query.value(0).toString();
         QString straat	= query.value(1).toString();

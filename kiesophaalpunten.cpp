@@ -194,31 +194,38 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
 
     if(!query.exec())
     {
-        reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO));
-    }
-    else
-    {
-        while (query.next())
+        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
         {
-            QString ophaalpunt_naam = query.value(0).toString();
-
-            addToTreeModel(     ophaalpunt_naam,
-                                query.value(1).toDouble(),  // kg_kurk
-                                query.value(2).toDouble(),  // kg_kaars
-                                query.value(3).toDouble(),  // zakken_kurk
-                                query.value(4).toDouble(),  // zakken_kaars
-                                query.value(5).toInt(),     // aanmelding_id
-                                query.value(6).toInt(),     // ophaalpunt_id
-                                query.value(7).toString(),  // opmerkingen (uit table aanmelding)
-                                query.value(8).toString(),  // straat
-                                query.value(9).toString(),  // huisnr
-                                query.value(10).toString(), // busnr
-                                query.value(11).toString(), // postcode
-                                query.value(12).toString(), // plaats
-                                query.value(13).toString(), // land
-                                query.value(14).toDate()    // datum
-                            );
+            vvimDebug() << "unable to reconnect to DB, halting";
+            exit(-1);
         }
+        if(!query.exec())
+        {
+            vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery << query.lastError().text();
+            exit(-1);
+        }
+    }
+
+    while (query.next())
+    {
+        QString ophaalpunt_naam = query.value(0).toString();
+
+        addToTreeModel(     ophaalpunt_naam,
+                            query.value(1).toDouble(),  // kg_kurk
+                            query.value(2).toDouble(),  // kg_kaars
+                            query.value(3).toDouble(),  // zakken_kurk
+                            query.value(4).toDouble(),  // zakken_kaars
+                            query.value(5).toInt(),     // aanmelding_id
+                            query.value(6).toInt(),     // ophaalpunt_id
+                            query.value(7).toString(),  // opmerkingen (uit table aanmelding)
+                            query.value(8).toString(),  // straat
+                            query.value(9).toString(),  // huisnr
+                            query.value(10).toString(), // busnr
+                            query.value(11).toString(), // postcode
+                            query.value(12).toString(), // plaats
+                            query.value(13).toString(), // land
+                            query.value(14).toDate()    // datum
+                        );
     }
 
 #ifndef QT_NO_CURSOR
@@ -465,10 +472,23 @@ void KiesOphaalpunten::deleteSelected()
 
     if(!query.exec())
     {
-        QMessageBox::critical(this,tr("Verwijderen van aanmeldingen niet gelukt"),
-                            query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
-        qFatal(QString("Something went wrong, could not execute %1, error is: %2").arg(prepare_query).arg(query.lastError().text()).toStdString().c_str());
-        return;
+        vvimDebug() << "first try went wrong, will try to reconnect to DB" << query.lastError();
+        if(!reConnectToDatabase(query.lastError(), prepare_query, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, return" << "Verwijderen van aanmeldingen niet gelukt";
+            return;
+        }
+
+        vvimDebug() << "reconnected to DB, retry query:";
+
+        if(!query.exec())
+        {
+            vvimDebug() << "something went wrong with query:" << query.lastError().text();
+            QMessageBox::critical(this,tr("Verwijderen van aanmeldingen niet gelukt"),
+                                query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
+            qFatal(QString("Something went wrong, could not execute %1, error is: %2").arg(prepare_query).arg(query.lastError().text()).toStdString().c_str());
+            return;
+        }
     }
 
     vvimDebug() << prepare_query << "DONE";

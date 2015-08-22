@@ -4,9 +4,7 @@
 #include <QSqlError>
 #include <math.h>
 #include <QMessageBox>
-
-#define vvimDebug()\
-    qDebug() << "[" << Q_FUNC_INFO << "]"
+#include "globalfunctions.h"
 
 NieuweAanmelding::NieuweAanmelding(QWidget *parent) :
     QWidget(parent)
@@ -164,19 +162,33 @@ void NieuweAanmelding::resetValues()
 void NieuweAanmelding::aanmeldingVoorOphaalpunt(int ophaalpunt_id)
 {
     resetValues();
+    QString SQLquery = QString("SELECT naam, contactpersoon FROM ophaalpunten WHERE id = %1").arg(ophaalpunt_id);
     QSqlQuery query;
     query.prepare("SELECT naam, contactpersoon FROM ophaalpunten WHERE id = :id");
     query.bindValue(":id", ophaalpunt_id);
 
+
     if(!query.exec())
-        vvimDebug() << "[NieuweAanmelding::aanmeldingVoorOphaalpunt()]" << "SELECT FAILED!" << query.lastError();
-    else
     {
-        if (query.next())
+        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
         {
-            locationEdit->setText(query.value(0).toString());
-            nameEdit->setText(query.value(1).toString());
+            vvimDebug() << "unable to reconnect to DB, halting";
+            exit(-1);
         }
+        if(!query.exec())
+        {
+            vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery << query.lastError();
+            exit(-1);
+        }
+    }
+
+    vvimDebug() << "<vvim> TODO: testen -> geeft 'query.next()' al meteen de tweede oplossing, of de eerste? En wat met 'query.exec()'' gevolgd door 'query.next()' ?";
+    vvimDebug() << "<vvim> TODO: TEST mis ik hier de allereerste aanmelding???";
+
+    if (query.next())
+    {
+        locationEdit->setText(query.value(0).toString());
+        nameEdit->setText(query.value(1).toString());
     }
 
     this->show();
@@ -248,11 +260,31 @@ void NieuweAanmelding::accept()
     // ophaalronde_datum wordt pas ingevuld als aanmelding is geselecteerd voor een ophaalronde
     // volgorde wordt pas ingevuld als aanmelding is geselecteerd voor een ophaalronde
 
+    QString SQLquery = tr("INSERT aanmelding voor ophaalpunt %1 FAALT!").arg(locationEdit->text());
+
     if(!query.exec())
     {
-        QMessageBox::critical(this, tr("INSERT aanmelding voor ophaalpunt %1 FAALT!").arg(locationEdit->text()),
-                    query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
-        qCritical(QString(tr("INSERT aanmelding voor ophaalpunt %1 FAALT!").arg(locationEdit->text()).append(query.lastError().text())).toStdString().c_str());
+        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            QMessageBox::critical(this, tr("Databankverbinding verloren"),
+                        tr("\n\nHerstel de fout en probeer opnieuw."), QMessageBox::Cancel);
+            qCritical(SQLquery.append(" - reconnection to DB failed on first try").toStdString().c_str());
+        }
+        else
+        {
+            if(!query.exec())
+            {
+                QMessageBox::critical(this, SQLquery,
+                            query.lastError().text().append(tr("\n\nDatabankverbinding succesvol herstart, toch ging de query fout.\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
+                qCritical(QString(tr("INSERT aanmelding voor ophaalpunt %1 FAALT!").arg(locationEdit->text()).append(query.lastError().text())).toStdString().c_str());
+                vvimDebug() << "Reconnection to DB was succesful but query still failed" << SQLquery << query.lastError();
+            }
+            else
+            {
+                vvimDebug() << "successfully added ophaalpunt" << locationEdit->text() << "( id" << ophaalpunten[locationEdit->text()] << ") to table AANMELDING";
+                this->close();
+            }
+        }
     }
     else
     {
@@ -296,16 +328,32 @@ void NieuweAanmelding::loadOphaalpunten()
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     #endif
 
-    QSqlQuery query("SELECT id, naam FROM ophaalpunten WHERE kurk > 0 OR parafine > 0");
-        while (query.next()) {
-            int id = query.value(0).toInt();
-            QString naam	= query.value(1).toString();
-            words << naam;
+    QString SQLquery = "SELECT id, naam FROM ophaalpunten WHERE kurk > 0 OR parafine > 0";
 
-            ophaalpunten[naam] = id;
+    QSqlQuery query(SQLquery);
+
+    if(!query.exec())
+    {
+        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB";
         }
+        if(!query.exec())
+        {
+            vvimDebug() << "query failed after reconnecting to DB" << SQLquery << query.lastError();
+        }
+    }
 
-        vvimDebug() << "TOTAL of ophaalpunten loaded in completer from the \"create a new collection request\" window : " << words.length();
+
+    while (query.next()) {
+        int id = query.value(0).toInt();
+        QString naam	= query.value(1).toString();
+        words << naam;
+
+        ophaalpunten[naam] = id;
+    }
+
+    vvimDebug() << "TOTAL of ophaalpunten loaded in completer from the \"create a new collection request\" window : " << words.length();
 
     #ifndef QT_NO_CURSOR
         QApplication::restoreOverrideCursor();

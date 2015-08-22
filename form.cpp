@@ -10,9 +10,7 @@
 #include <QVariant>
 #include <QSqlQuery>
 #include <QSqlError>
-
-#define vvimDebug()\
-    qDebug() << "[" << Q_FUNC_INFO << "]"
+#include "globalfunctions.h"
 
 #ifdef Q_OS_WIN
     #include <windows.h> // for Sleep
@@ -675,48 +673,59 @@ void Form::reloadCompleter()
 #endif
     vvimDebug() << "2. setOverrideCursor";
 
-    QSqlQuery query("SELECT naam, straat, nr, bus, postcode, plaats, land FROM ophaalpunten WHERE kurk > 0 OR parafine > 0");
+    QString SQLquery = "SELECT naam, straat, nr, bus, postcode, plaats, land FROM ophaalpunten WHERE kurk > 0 OR parafine > 0";
+    QSqlQuery query(SQLquery);
+
     vvimDebug() << "3. SELECT query ready";
     if(!query.exec())
-        vvimDebug() << "Something went wrong with querying information on the ophaalpunten" << query.lastError();
-    else
     {
-        vvimDebug() << "4. no SQL query";
-        while (query.next()) {
-            QString naam	= query.value(0).toString();
-            QString straat	= query.value(1).toString();
-            QString nr	    = query.value(2).toString();
-            QString bus	    = query.value(3).toString();
-            QString postcode	= query.value(4).toString();
-            QString plaats	= query.value(5).toString();
-            QString land	= query.value(6).toString();
-            words << naam.append(", %1 %2, %3 %4, %5").arg(straat).arg(nr).arg(postcode).arg(plaats).arg(land);
-        }
-
-        vvimDebug() << "5. TOTAL of ophaalpunten loaded in completer : " << words.length();
-
-        vvimDebug() << "6. IF completer -> delete it, thank you" << completer;
-        vvimDebug() << "6. IF completer -> delete it, thank you - value:" << completer;
-        vvimDebug() << "!!! check in all classes if completer is set to NULL in constructor, thank you";
-
-        if(completer)
+        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
         {
-            vvimDebug() << "7. - completer TRUE => delete completer";
-            delete completer;
+            vvimDebug() << "unable to reconnect to DB, halting";
+            exit(-1);
         }
-        else
-            vvimDebug() << "7. - completer FALSE, no need to delete it";
-
-
-
-        completer = new MyCompleter(words, this);
-        vvimDebug() << "8. new completer 'words'";
-        completer->setCaseSensitivity(Qt::CaseInsensitive);
-        vvimDebug() << "9. Case insensitive";
-
-        ui->lePostalAddress->setCompleter(completer);
-        vvimDebug() << "10. lePostalAddress";
+        if(!query.exec())
+        {
+            vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery;
+            exit(-1);
+        }
     }
+
+    vvimDebug() << "4. no SQL query";
+    while (query.next()) {
+        QString naam	= query.value(0).toString();
+        QString straat	= query.value(1).toString();
+        QString nr	    = query.value(2).toString();
+        QString bus	    = query.value(3).toString();
+        QString postcode	= query.value(4).toString();
+        QString plaats	= query.value(5).toString();
+        QString land	= query.value(6).toString();
+        words << naam.append(", %1 %2, %3 %4, %5").arg(straat).arg(nr).arg(postcode).arg(plaats).arg(land);
+    }
+
+    vvimDebug() << "5. TOTAL of ophaalpunten loaded in completer : " << words.length();
+
+    vvimDebug() << "6. IF completer -> delete it, thank you" << completer;
+    vvimDebug() << "6. IF completer -> delete it, thank you - value:" << completer;
+    vvimDebug() << "!!! check in all classes if completer is set to NULL in constructor, thank you";
+
+    if(completer)
+    {
+        vvimDebug() << "7. - completer TRUE => delete completer";
+        delete completer;
+    }
+    else
+        vvimDebug() << "7. - completer FALSE, no need to delete it";
+
+
+
+    completer = new MyCompleter(words, this);
+    vvimDebug() << "8. new completer 'words'";
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    vvimDebug() << "9. Case insensitive";
+
+    ui->lePostalAddress->setCompleter(completer);
+    vvimDebug() << "10. lePostalAddress";
 
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();

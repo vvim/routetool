@@ -1,10 +1,9 @@
 #include "exportcollectionhistory.h"
 #include <QtGui>
 #include <QSqlQuery>
+#include <QSqlError>
 #include <QSqlRecord>
-
-#define vvimDebug()\
-    qDebug() << "[" << Q_FUNC_INFO << "]"
+#include "globalfunctions.h"
 
 #define EndOfLine "\r\n"
 
@@ -101,8 +100,26 @@ void ExportCollectionHistory::loadOphaalpunten()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
 
-    QSqlQuery query("SELECT naam, straat, nr, bus, postcode, plaats, land, id FROM ophaalpunten WHERE kurk > 0 OR parafine > 0");
-    while (query.next()) {
+    QString SQLquery = "SELECT naam, straat, nr, bus, postcode, plaats, land, id FROM ophaalpunten WHERE kurk > 0 OR parafine > 0";
+
+    QSqlQuery query(SQLquery);
+
+    if(!query.exec())
+    {
+        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, halting";
+            exit(-1);
+        }
+        if(!query.exec())
+        {
+            vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery;
+            exit(-1);
+        }
+    }
+
+    while (query.next())
+    {
         QString naam	= query.value(0).toString();
         QString straat	= query.value(1).toString();
         QString nr	    = query.value(2).toString();
@@ -225,6 +242,7 @@ bool ExportCollectionHistory::saveToCSV()
     data.setGenerateByteOrderMark(true);
 
     QSqlQuery query;
+    QString SQLquery;
 
     if(ophaalpunt_id < 1)
     {
@@ -233,6 +251,7 @@ bool ExportCollectionHistory::saveToCSV()
         // when no location (ophaalpunt) has been pointed out, we export collections from ALL locations
         // therefore, extra location information could be useful
         query.prepare("SELECT ophalinghistoriek.*, ophaalpunten.naam, ophaalpunten.postcode, ophaalpunten.code, soort_ophaalpunt.soort FROM ophalinghistoriek, ophaalpunten, soort_ophaalpunt WHERE ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id AND ophaalpunten.code = soort_ophaalpunt.code ORDER BY ophalingsdatum");
+        SQLquery = "SELECT ophalinghistoriek.*, ophaalpunten.naam, ophaalpunten.postcode, ophaalpunten.code, soort_ophaalpunt.soort FROM ophalinghistoriek, ophaalpunten, soort_ophaalpunt WHERE ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id AND ophaalpunten.code = soort_ophaalpunt.code ORDER BY ophalingsdatum";
         data << tr("\"Export van de ophalinghistoriek uit databank voor alle ophaalpunten van %1 tot %2\"").arg(startdate).arg(enddate)+EndOfLine;
         data << EndOfLine;
     }
@@ -241,6 +260,7 @@ bool ExportCollectionHistory::saveToCSV()
         vvimDebug() << "Show history of location" << ophaalpuntEdit->text();
         query.prepare("SELECT ophalinghistoriek.* FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = :ophaalpuntid AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id ORDER BY ophalingsdatum");
         query.bindValue(":ophaalpuntid", ophaalpunt_id);
+        SQLquery = QString("SELECT ophalinghistoriek.* FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = %1 AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id ORDER BY ophalingsdatum").arg(ophaalpunt_id);
         data << tr("\"Export van de ophalinghistoriek uit databank\"")+EndOfLine;
         data << EndOfLine;
         data << tr("\"Ophaalpunt\";\"Adres\";\"Postcode\";\"Plaats\";\"Soort ophaalpunt\";\"Export startdatum\";\"Export einddatum\"")+EndOfLine;
@@ -250,7 +270,21 @@ bool ExportCollectionHistory::saveToCSV()
         ophaalpunt.prepare("SELECT ophaalpunten.naam, ophaalpunten.straat, ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, soort_ophaalpunt.soort FROM ophaalpunten, soort_ophaalpunt WHERE ophaalpunten.id = :ophaalpuntid AND ophaalpunten.code = soort_ophaalpunt.code");
         ophaalpunt.bindValue(":ophaalpuntid", ophaalpunt_id);
 
+        QString ophaalpuntSQLquery = QString("SELECT ophaalpunten.naam, ophaalpunten.straat, ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, soort_ophaalpunt.soort FROM ophaalpunten, soort_ophaalpunt WHERE ophaalpunten.id = %1 AND ophaalpunten.code = soort_ophaalpunt.code").arg(ophaalpunt_id);
+        bool db_problems = false;
         if(!ophaalpunt.exec())
+        {
+            if(!reConnectToDatabase(ophaalpunt.lastError(), ophaalpuntSQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+            {
+                vvimDebug() << "unable to reconnect to DB, will fill data with an error";
+                db_problems = true;
+            }
+            else
+              db_problems = false;
+        }
+
+        // so ugly... why not rethink this through?
+        if(db_problems)
         {
             data << tr("\"ERROR: kon geen verbinding maken met de databank voor informatie van ophaalpunt %1\"").arg(ophaalpunt_id);
             data << ";\"\"";
@@ -288,11 +322,25 @@ bool ExportCollectionHistory::saveToCSV()
     query.bindValue(":startdate",timeperiod_startEdit->date());
     query.bindValue(":enddate",timeperiod_endEdit->date());
 
+
     if(!query.exec())
     {
-        vvimDebug() << "FAILED: We could not execute the query SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = :ophaalpuntid AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id .";
-        vvimDebug() << "show messagebox to user and return to Export Collection History Dialog Box";
-        QMessageBox::information(this, tr("Fout bij verbinding met de databank"), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "FAILED: We could not execute the query SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = :ophaalpuntid AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id .";
+            vvimDebug() << "show messagebox to user and return to Export Collection History Dialog Box";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank"), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+        }
+        else
+        {
+            // retry!
+            if(!query.exec())
+            {
+                vvimDebug() << "FAILED: We could not execute the query SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = :ophaalpuntid AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id .";
+                vvimDebug() << "show messagebox to user and return to Export Collection History Dialog Box";
+                QMessageBox::information(this, tr("Fout bij verbinding met de databank"), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            }
+        }
     }
 
     QStringList strList;

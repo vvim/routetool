@@ -7,9 +7,7 @@
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include "nieuweaanmelding.h"
-
-#define vvimDebug()\
-    qDebug() << "[" << Q_FUNC_INFO << "]"
+#include "globalfunctions.h"
 
 #define CODE_INTERCOMMUNALE 1
 
@@ -27,15 +25,29 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
 
     // insert items to ComboBox
     codeComboBox->insertItem(0,"");
-    QSqlQuery query;
-    query.prepare("SELECT * FROM soort_ophaalpunt ORDER by code");
-    if(!query.exec())
-        qCritical(QString(tr("SELECT for soort_ophaalpunt FAILED!").append(query.lastError().text())).toStdString().c_str());
 
-    while(query.next())
+    QString SQLquery = "SELECT * FROM soort_ophaalpunt ORDER by code";
+
+    QSqlQuery query_ophaalpunt(SQLquery);
+
+    if(!query_ophaalpunt.exec())
+    {
+        if(!reConnectToDatabase(query_ophaalpunt.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, halting";
+            exit(-1);
+        }
+        if(!query_ophaalpunt.exec())
+        {
+            vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery;
+            exit(-1);
+        }
+    }
+
+    while(query_ophaalpunt.next())
     {
         // query.value(0) == code; query.value(1) == soort
-        codeComboBox->insertItem(query.value(0).toInt(),query.value(1).toString());
+        codeComboBox->insertItem(query_ophaalpunt.value(0).toInt(),query_ophaalpunt.value(1).toString());
     }
 
     code_intercommunaleLabel = new QLabel(tr(""));
@@ -45,14 +57,28 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     // insert items to ComboBox
     code_intercommunaleComboBox->insertItem(0,"");
 
-    query.prepare("SELECT * FROM intercommunales ORDER by id");
-    if(!query.exec())
-        vvimDebug() << "SELECT for intercommunales FAILED!" << query.lastError();
+    SQLquery = "SELECT * FROM intercommunales ORDER by id";
+    QSqlQuery query_intercommunales(SQLquery);
 
-    while(query.next())
+    if(!query_intercommunales.exec())
+    {
+        if(!reConnectToDatabase(query_intercommunales.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, halting";
+            exit(-1);
+        }
+        if(!query_intercommunales.exec())
+        {
+            vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery;
+            exit(-1);
+        }
+    }
+
+
+    while(query_intercommunales.next())
     {
         // query.value(0) == id; query.value(1) == naam_intercommunale
-        code_intercommunaleComboBox->insertItem(query.value(0).toInt(),query.value(1).toString());
+        code_intercommunaleComboBox->insertItem(query_intercommunales.value(0).toInt(),query_intercommunales.value(1).toString());
     }
 
 
@@ -95,17 +121,29 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     // insert items to ComboBox
     taalvoorkeurComboBox->insertItem(0,"");
 
-    query.prepare("SELECT * FROM talen ORDER by id");
-    if(!query.exec())
-        qCritical(QString(tr("SELECT for talen FAILED!").append(query.lastError().text())).toStdString().c_str());
+    SQLquery = "SELECT * FROM talen ORDER by id";
 
+    QSqlQuery query_talen(SQLquery);
 
-    while(query.next())
+    if(!query_talen.exec())
     {
-        // query.value(0) == id; query.value(1) == taal
-        taalvoorkeurComboBox->insertItem(query.value(0).toInt(),query.value(1).toString());
+        if(!reConnectToDatabase(query_talen.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, halting";
+            exit(-1);
+        }
+        if(!query_talen.exec())
+        {
+            vvimDebug() << "query_talen failed after reconnecting to DB, halting" << SQLquery;
+            exit(-1);
+        }
     }
 
+    while(query_talen.next())
+    {
+        // query.value(0) == id; query.value(1) == taal
+        taalvoorkeurComboBox->insertItem(query_talen.value(0).toInt(),query_talen.value(1).toString());
+    }
 
     preferred_contactLabel = new QLabel(tr("Contactvoorkeur:"));
 
@@ -114,14 +152,27 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     // insert items to ComboBox
     preferred_contactComboBox->insertItem(0,"");
 
-    query.prepare("SELECT * FROM contacteren ORDER by id");
-    if(!query.exec())
-        qCritical(QString(tr("SELECT for contacteren FAILED!").append(query.lastError().text())).toStdString().c_str());
+    SQLquery = "SELECT * FROM contacteren ORDER by id";
+    QSqlQuery query_contacteren(SQLquery);
 
-    while(query.next())
+    if(!query_contacteren.exec())
+    {
+        if(!reConnectToDatabase(query_contacteren.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, halting";
+            exit(-1);
+        }
+        if(!query_contacteren.exec())
+        {
+            vvimDebug() << "query_contacteren failed after reconnecting to DB, halting" << SQLquery;
+            exit(-1);
+        }
+    }
+
+    while(query_contacteren.next())
     {
         // query.value(0) == id; query.value(1) == medium
-        preferred_contactComboBox->insertItem(query.value(0).toInt(),query.value(1).toString());
+        preferred_contactComboBox->insertItem(query_contacteren.value(0).toInt(),query_contacteren.value(1).toString());
     }
 
 
@@ -133,15 +184,29 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     // insert items to ComboBox
     frequentie_attestComboBox->insertItem(0,"");
 
-    query.prepare("SELECT * FROM frequentie ORDER by id");
-    if(!query.exec())
-        qCritical(QString(tr("SELECT for frequentie FAILED!").append(query.lastError().text())).toStdString().c_str());
+    SQLquery = "SELECT * FROM frequentie ORDER by id";
+    QSqlQuery query_frequentie(SQLquery);
+
+    if(!query_frequentie.exec())
+    {
+        if(!reConnectToDatabase(query_frequentie.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, halting";
+            exit(-1);
+        }
+        if(!query_frequentie.exec())
+        {
+            vvimDebug() << "query_frequentie failed after reconnecting to DB, halting" << SQLquery;
+            exit(-1);
+        }
+    }
+    //    qCritical(QString(tr("SELECT for frequentie FAILED!").append(query.lastError().text())).toStdString().c_str());
 
 
-    while(query.next())
+    while(query_frequentie.next())
     {
         // query.value(0) == id; query.value(1) == frequentie
-        frequentie_attestComboBox->insertItem(query.value(0).toInt(),query.value(1).toString());
+        frequentie_attestComboBox->insertItem(query_frequentie.value(0).toInt(),query_frequentie.value(1).toString());
     }
 
 
@@ -336,6 +401,7 @@ void InfoOphaalpunt::accept()
     {
         //changing existing ophaalpunt
         /** update db **/
+        QString SQLquery = "UPDATE ophaalpunten SET naam = :naam, kurk = :kurk, parafine = :parafine, code = :code, code_intercommunale = :code_intercommunale, straat = :straat, nr = :nr, bus = :bus, postcode = :postcode, plaats = :plaats, land = :land, openingsuren = :openingsuren, contactpersoon = :contactpersoon, telefoonnummer1 = :telefoonnummer1, telefoonnummer2 = :telefoonnummer2, email1 = :email1, email2 = :email2, taalvoorkeur = :taalvoorkeur, preferred_contact = :preferred_contact, attest_nodig = :attest_nodig, frequentie_attest = :frequentie_attest, extra_informatie = :extra_informatie, last_contact_date = :last_contact_date WHERE id = :id";
         QSqlQuery query;
 
         //ESCAPING QUERY: http://stackoverflow.com/questions/19045281/insert-strings-that-contain-or-to-the-database-table-qt and http://qt-project.org/doc/qt-5/qsqlquery.html#prepare
@@ -386,6 +452,15 @@ void InfoOphaalpunt::accept()
 
         if(!query.exec())
         {
+            if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+            {
+                vvimDebug() << "unable to reconnect to DB, halting";
+                exit(-1);
+            }
+        }
+
+        if(!query.exec())
+        {
             QMessageBox::critical(this, tr("UPDATE informatie voor ophaalpunt %1 FAALT!").arg(ophaalpuntEdit->text()),
                         query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
             qCritical(QString(tr("UPDATE informatie voor ophaalpunt %1 FAALT!").arg(ophaalpuntEdit->text()).append(query.lastError().text())).toStdString().c_str());
@@ -401,6 +476,10 @@ void InfoOphaalpunt::accept()
     {
         //adding new ophaalpunt
         /** insert into db **/
+
+        QString SQLquery = "INSERT INTO ophaalpunten (id,timestamp,naam, kurk, parafine, code, code_intercommunale, straat, nr, bus, postcode, plaats, land, openingsuren, contactpersoon, telefoonnummer1, telefoonnummer2, email1, email2, taalvoorkeur, preferred_contact, attest_nodig, frequentie_attest, extra_informatie, last_contact_date, contact_again_on)"
+                           "                  VALUES (NULL, NULL, :naam, :kurk, :parafine, :code, :code_intercommunale, :straat, :nr, :bus, :postcode, :plaats, :land, :openingsuren, :contactpersoon, :telefoonnummer1, :telefoonnummer2, :email1, :email2, :taalvoorkeur, :preferred_contact, :attest_nodig, :frequentie_attest, :extra_informatie, :last_contact_date, NULL)";
+
         QSqlQuery query;
 
         query.prepare("INSERT INTO ophaalpunten (id,timestamp,naam, kurk, parafine, code, code_intercommunale, straat, nr, bus, postcode, plaats, land, openingsuren, contactpersoon, telefoonnummer1, telefoonnummer2, email1, email2, taalvoorkeur, preferred_contact, attest_nodig, frequentie_attest, extra_informatie, last_contact_date, contact_again_on)"
@@ -436,6 +515,15 @@ void InfoOphaalpunt::accept()
         else
             query.bindValue(":last_contact_date","NULL");
 
+
+        if(!query.exec())
+        {
+            if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+            {
+                vvimDebug() << "unable to reconnect to DB, halting";
+                exit(-1);
+            }
+        }
 
         if(!query.exec())
         {
@@ -483,11 +571,24 @@ void InfoOphaalpunt::reset()
         // widget shows EXISTING ophaalpunt, reset info to information found in DB
         vvimDebug() << "haal uit databank informatie id" << id;
 
+        QString SQLquery = QString("SELECT * FROM ophaalpunten WHERE id = %1").arg(id);
         QSqlQuery query;
         query.prepare("SELECT * FROM ophaalpunten WHERE id = :id");
         query.bindValue(":id", id);
+
         if(!query.exec())
-            vvimDebug() << "SELECT FAILED!" << query.lastError();
+        {
+            if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+            {
+                vvimDebug() << "unable to reconnect to DB, halting";
+                exit(-1);
+            }
+            if(!query.exec())
+            {
+                vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery;
+                exit(-1);
+            }
+        }
 
         if (query.next())
         {

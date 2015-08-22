@@ -22,8 +22,6 @@
 #include "mylineedit.h"
 #include "infoophaalpunt.h"
 
-extern QSettings settings;
-
 class NieuweAanmelding : public QWidget
 {
     Q_OBJECT
