@@ -106,3 +106,21 @@ bool connectToDatabase()
 
     return true;
 }
+
+bool reConnectToDatabase(QSqlError lasterror, QString SQLquery, QString callingfunction)
+{
+    vvimDebug() << callingfunction << "Cannot execute query. DB lost? Try to reconnect!" << lasterror.text();
+
+    if(!connectToDatabase())
+    {
+        QString textforlogfile = QString("Something went wrong, could not reconnect to execute query: %1 error %2").arg(SQLquery).arg(lasterror.text());
+        vvimDebug() << callingfunction << "FATAL:" << textforlogfile ;
+        qFatal((textforlogfile).toStdString().c_str());
+        return false;
+    }
+    else
+    {
+        vvimDebug() << callingfunction << "Reconnection successful!";
+        return true;
+    }
+}

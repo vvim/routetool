@@ -11,8 +11,8 @@
 #include <QStandardItemModel>
 #include "sophaalpunt.h"
 #include "mysortfilterproxymodel.h"
+#include "globalfunctions.h"
 
-extern QSettings settings;
 
 class KiesOphaalpunten : public QWidget
 {

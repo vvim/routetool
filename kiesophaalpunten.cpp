@@ -9,10 +9,6 @@
 #include <QDate>
 #include "kiesophaalpunten.h"
 
-#define vvimDebug()\
-    qDebug() << "[" << Q_FUNC_INFO << "]"
-
-
 /*
 #define AANMELDING_DATE 0
 #define OPHAALPUNT_NAAM 1
@@ -188,14 +184,19 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
 #endif
 
     initModel();
+    QString SQLquery = "SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten,"
+            " aanmelding.id, ophaalpunten.id, aanmelding.opmerkingen,"
+            " ophaalpunten.straat, ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land, aanmelding.datum "
+            " FROM aanmelding, ophaalpunten"
+            " WHERE ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL";
 
-    QSqlQuery query("SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten,"
-                          " aanmelding.id, ophaalpunten.id, aanmelding.opmerkingen,"
-                          " ophaalpunten.straat, ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land, aanmelding.datum "
-                   " FROM aanmelding, ophaalpunten"
-                   " WHERE ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL");
+    QSqlQuery query(SQLquery);
 
-    if(query.exec())
+    if(!query.exec())
+    {
+        reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO));
+    }
+    else
     {
         while (query.next())
         {
@@ -218,11 +219,6 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
                                 query.value(14).toDate()    // datum
                             );
         }
-    }
-    else
-    {
-        vvimDebug() << "FATAL:" << "Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id, ophaalpunten.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL; error:" << query.lastError();
-        qFatal(QString("Something went wrong, could not execute query: SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, CONCAT_WS(' ', ophaalpunten.straat, ophaalpunten.nr,  ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land) AS ADRES, aanmelding.id, ophaalpunten.id from aanmelding, ophaalpunten where ophaalpunten.id = aanmelding.ophaalpunt AND aanmelding.ophaalronde_datum is NULL, error is: ").append(query.lastError().text()).toStdString().c_str());
     }
 
 #ifndef QT_NO_CURSOR

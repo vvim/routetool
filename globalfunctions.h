@@ -44,4 +44,6 @@ bool startLoggingToFile();
 
 bool connectToDatabase();
 
+bool reConnectToDatabase(QSqlError lasterror, QString SQLquery, QString callingfunction);
+
 #endif // GLOBALFUNCTIONS_H
