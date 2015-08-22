@@ -355,8 +355,8 @@ void OpgehaaldeHoeveelheid::accept()
     QDate ophaalrondedatum = ophalingDateEdit->date();
     QString chauffeur = chauffeurEdit->text();
 
-    int row = 0;
-    for( row; row < model->rowCount(); ++row )
+    int row;
+    for(row=0; row < model->rowCount(); ++row )
     {
         int aanmelding_id = model->item(row,8)->data(Qt::UserRole+1).toInt();
 
