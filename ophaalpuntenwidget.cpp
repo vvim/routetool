@@ -77,7 +77,7 @@ void OphaalpuntenWidget::loadOphaalpunten()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
 
-    QSqlQuery query("SELECT naam, straat, nr, bus, postcode, plaats, land, id FROM ophaalpunten");
+    QSqlQuery query("SELECT naam, straat, nr, bus, postcode, plaats, land, id FROM ophaalpunten ORDER by postcode, naam");
     while (query.next()) {
         QString naam	= query.value(0).toString();
         QString straat	= query.value(1).toString();
