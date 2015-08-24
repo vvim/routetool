@@ -5,9 +5,7 @@
 #include <QDate>
 #include <QSqlQuery>
 #include <QSqlError>
-
-#define vvimDebug()\
-    qDebug() << "[" << Q_FUNC_INFO << "]"
+#include "globalfunctions.h"
 
 OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent) :
     QDialog(parent),
@@ -33,10 +31,26 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
                   " ORDER BY ophalingsdatum DESC;");
     query.bindValue(":ophaal",ophaalpunt_id);
 
-    // does the table OPHALINGHISTORIEK has an 'id' as well? -> use this in the ListWidget, or is the date "ophalingsdatum" enough to now which 'historiek' has been selected?
-
+    // does the table OPHALINGHISTORIEK have an 'id' as well? -> use this in the ListWidget, or is the date "ophalingsdatum" enough to now which 'historiek' has been selected?
     if(!query.exec())
-        vvimDebug() << "[OphaalHistoriekDialog]" << "Something went wrong with querying ophaalpunt" << ophaalpunt_id << ":" << query.lastError();
+    {
+        vvimDebug() << "Could not query ophaalpunt" << ophaalpunt_id << "trying to reconnect to DB" << query.lastError();
+        QString SQLquery = QString("SELECT * FROM ophalinghistoriek WHERE ophaalpunt = %1 ORDER BY ophalingsdatum DESC;").arg(ophaalpunt_id);
+        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "Reconnection failed";
+        }
+        else
+        {
+            vvimDebug() << "Reconnection succesful, will try query again.";
+            if(!query.exec())
+            {
+                vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery << query.lastError();
+                exit(-1);
+            }
+        }
+    }
+
 
     while(query.next())
     {

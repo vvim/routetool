@@ -8,9 +8,7 @@
 #include <QUuid>
 #include <QMessageBox>
 #include "transportationlistwriter.h"
-
-#define vvimDebug()\
-    qDebug() << "[" << Q_FUNC_INFO << "]"
+#include "globalfunctions.h"
 
 // 30 minutes
 #define STANDAARD_OPHAALTIJD_IN_SECONDEN 1800
@@ -234,6 +232,30 @@ void TransportationListWriter::print()
                 }
                 else
                     vvimDebug() << " <<< aanmelding is nu officieel in ophaalronde opgenomen :-) >>>";
+
+
+
+                if(!query.exec())
+                {
+                    vvimDebug() << "something went wrong with query. Try to reconnect to DB" << query.lastError().text();
+                    QString SQLquery = QString("UPDATE aanmelding SET ophaalronde_datum = %1 , volgorde = %2 WHERE id = %3").arg(dateEdit->date().toString()).arg(counter).arg(m_markers[i]->ophaalpunt.aanmelding_id);
+
+                    if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+                    {
+                        vvimDebug() << "unable to reconnect to DB: FAIL";
+                        qCritical("Unable to reconnect to DB: FAIL");
+                        vvimDebug() << " !!! fout in wegschrijven aanmelding: " << SQLquery << query.lastError().text();
+                    }
+                    else
+                    {
+                        if(!query.exec())
+                        {
+                            vvimDebug() << "query failed after reconnecting to DB" << SQLquery << query.lastError();
+                            qCritical(SQLquery.append(query.lastError().text()).toStdString().c_str());
+                            vvimDebug() << " !!! fout in wegschrijven aanmelding: " << SQLquery << query.lastError().text();
+                        }
+                    }
+                }
             }
         }
         previous_distance_matrix_i = current_distance_matrix_i;
@@ -293,7 +315,27 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
         query.prepare("SELECT naam, straat, nr, bus, postcode, plaats, land, openingsuren, contactpersoon, telefoonnummer1, extra_informatie"
                        " FROM   ophaalpunten WHERE id = :id ");
         query.bindValue(":id",marker->ophaalpunt.ophaalpunt_id);
-        if((query.exec()) && (query.next()))
+
+        if(!query.exec())
+        {
+            vvimDebug() << "something went wrong with the query" << query.lastError().text() << "trying to reconnect to the DB";
+            QString SQLquery = QString("SELECT naam, straat, nr, bus, postcode, plaats, land, openingsuren, contactpersoon, telefoonnummer1, extra_informatie"
+                                       " FROM   ophaalpunten WHERE id = %1 ").arg(marker->ophaalpunt.ophaalpunt_id);
+            if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+            {
+                vvimDebug() << "unable to reconnect to DB: FAIL";
+            }
+            else
+            {
+                vvimDebug() << "reconnected to DB, try query again";
+                if(!query.exec())
+                {
+                    vvimDebug() << "query failed after reconnecting to DB" << SQLquery << query.lastError();
+                }
+            }
+        }
+
+        if(query.next())
         {
             TransportationListDocumentWriter::Ophaalpunt doc_ophaalpunt;
             doc_ophaalpunt.counter = counter;
