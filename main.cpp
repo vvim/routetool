@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
 
     checkSettings();
 
+    vvimDebug() << "databank:" << settings.value("db/host").toString();
     if (!startLoggingToFile()) exit(0);
     if (!connectToDatabase()) exit(0);
 

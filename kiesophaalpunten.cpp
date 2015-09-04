@@ -199,6 +199,9 @@ void KiesOphaalpunten::populateLegeAanmeldingen()
             vvimDebug() << "unable to reconnect to DB, halting";
             exit(-1);
         }
+
+        vvimDebug() << "reconnected to DB, retry query:";
+        query = QSqlQuery(SQLquery);
         if(!query.exec())
         {
             vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery << query.lastError().text();

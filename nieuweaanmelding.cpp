@@ -175,6 +175,12 @@ void NieuweAanmelding::aanmeldingVoorOphaalpunt(int ophaalpunt_id)
             vvimDebug() << "unable to reconnect to DB, halting";
             exit(-1);
         }
+
+        QSqlQuery query2;
+        query2.prepare("SELECT naam, contactpersoon FROM ophaalpunten WHERE id = :id");
+        query = query2;
+        query.bindValue(":id", ophaalpunt_id);
+
         if(!query.exec())
         {
             vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery << query.lastError();
@@ -260,24 +266,38 @@ void NieuweAanmelding::accept()
     // ophaalronde_datum wordt pas ingevuld als aanmelding is geselecteerd voor een ophaalronde
     // volgorde wordt pas ingevuld als aanmelding is geselecteerd voor een ophaalronde
 
-    QString SQLquery = tr("INSERT aanmelding voor ophaalpunt %1 FAALT!").arg(locationEdit->text());
+    QString SQLqueryMessage = tr("INSERT aanmelding voor ophaalpunt %1 FAALT!").arg(locationEdit->text());
 
     if(!query.exec())
     {
-        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        if(!reConnectToDatabase(query.lastError(), SQLqueryMessage, QString("[%1]").arg(Q_FUNC_INFO)))
         {
             QMessageBox::critical(this, tr("Databankverbinding verloren"),
                         tr("\n\nHerstel de fout en probeer opnieuw."), QMessageBox::Cancel);
-            qCritical(SQLquery.append(" - reconnection to DB failed on first try").toStdString().c_str());
+            qCritical(SQLqueryMessage.append(" - reconnection to DB failed on first try").toStdString().c_str());
         }
         else
         {
+            QSqlQuery query2;
+            query2.prepare("INSERT INTO aanmelding (id,   timestamp, ophaalpunt,  contactpersoon,  datum,  zakken_kurk,  kg_kurk,  zakken_kaarsresten,  kg_kaarsresten,  opmerkingen, ophaalronde_datum, volgorde) "
+                           "VALUES (NULL, NULL,     :ophaalpunt, :contactpersoon, :datum, :zakken_kurk, :kg_kurk, :zakken_kaarsresten, :kg_kaarsresten, :opmerkingen, NULL,           NULL) ");
+            query2.bindValue(":ophaalpunt", ophaalpunten[locationEdit->text()]);  // VERANDER NAARophaalpunt_id
+            query2.bindValue(":contactpersoon", nameEdit->text());
+            query2.bindValue(":datum", dateEdit->date().toString("yyyy-MM-dd"));
+            query2.bindValue(":zakken_kurk", zakkenkurkSpinBox->value());
+            query2.bindValue(":kg_kurk", kgkurkSpinBox->value());
+            query2.bindValue(":zakken_kaarsresten", zakkenkaarsenSpinBox->value());
+            query2.bindValue(":kg_kaarsresten", kgkaarsenSpinBox->value());
+            query2.bindValue(":opmerkingen", opmerkingenEdit->toPlainText());
+
+            query = query2;
+
             if(!query.exec())
             {
-                QMessageBox::critical(this, SQLquery,
+                QMessageBox::critical(this, SQLqueryMessage,
                             query.lastError().text().append(tr("\n\nDatabankverbinding succesvol herstart, toch ging de query fout.\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
                 qCritical(QString(tr("INSERT aanmelding voor ophaalpunt %1 FAALT!").arg(locationEdit->text()).append(query.lastError().text())).toStdString().c_str());
-                vvimDebug() << "Reconnection to DB was succesful but query still failed" << SQLquery << query.lastError();
+                vvimDebug() << "Reconnection to DB was succesful but query still failed" << SQLqueryMessage << query.lastError();
             }
             else
             {
