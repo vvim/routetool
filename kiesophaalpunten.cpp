@@ -480,6 +480,7 @@ void KiesOphaalpunten::deleteSelected()
         }
 
         vvimDebug() << "reconnected to DB, retry query:";
+        query = QSqlQuery(prepare_query);
 
         if(!query.exec())
         {
