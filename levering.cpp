@@ -185,12 +185,15 @@ void Levering::loadOphaalpunten() // is deze functie wel ergens voor nodig?
         if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
         {
             vvimDebug() << "unable to reconnect to DB, halting";
-            exit(-1);
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
         }
+        query = QSqlQuery(SQLquery);
         if(!query.exec())
         {
             vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery << query.lastError().text();
-            exit(-1);
+            QMessageBox::information(this, tr("Fout bij verbinding met heruitvoeren query ").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
         }
     }
 

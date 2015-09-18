@@ -194,6 +194,17 @@ void OpgehaaldeHoeveelheid::setupModel(QDate ophaalronde_datum)
             vvimDebug() << "<vvim> TODO we should cancel the building of the model??? maybe give a return value to the function to alert the constructor???";
             return; // errorboodschap tonen???
         }
+
+        /** retry **/
+        QSqlQuery query2;
+        query2.prepare("SELECT aanmelding.ophaalronde_datum, aanmelding.volgorde, ophaalpunten.naam, aanmelding.opmerkingen, "
+                             "ophaalpunten.id, aanmelding.kg_kurk, aanmelding.zakken_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kaarsresten, aanmelding.datum, aanmelding.id "
+                      "FROM aanmelding, ophaalpunten "
+                      "WHERE aanmelding.ophaalronde_datum = :ophaalrondedatum AND aanmelding.ophaalpunt = ophaalpunten.id "
+                      "ORDER BY aanmelding.volgorde");
+        query = query2;
+        query.bindValue(":ophaalrondedatum",ophaalronde_datum);
+
         if(!query.exec())
         {
             qCritical(tr("Reconnection to DB worked, but executing query %1 still failed: %2.").arg(SQLquery).arg(query.lastError().text()).toStdString().c_str());
@@ -400,10 +411,18 @@ void OpgehaaldeHoeveelheid::accept()
                 if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
                 {
                     vvimDebug() << ".. unable to reconnect to DB, FAIL";
+                    QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+                    return;
                 }
                 else
                 {
                     vvimDebug() << ".. reconnected to DB, try query again:";
+
+                    QSqlQuery query2;
+                    query2.prepare("UPDATE aanmelding SET ophaalronde_datum = NULL, volgorde = NULL WHERE id = :id");
+                    query = query2;
+                    query.bindValue(":id",aanmelding_id);
+
                     if(!query.exec())
                     {
                         qCritical(QString("FAIL: Location was not visited and therefore supposed to be ignored. Couldn't return the location from route to 'aanmelding'. Row #%1 of the model, something went wrong with the UPDATE-query: "
@@ -413,6 +432,7 @@ void OpgehaaldeHoeveelheid::accept()
                                        "UPDATE aanmelding SET ophaalronde_datum = NULL, volgorde = NULL WHERE id = " << aanmelding_id;
                         vvimDebug() << ".. query error:" << query.lastError().text();
                         vvimDebug() << ".. should I break the FOR-loop or continue? For now we choose to CONTINUE";
+                        QMessageBox::information(this, tr("Fout bij heruitvoeren query ").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
                     }
                     else
                         vvimDebug() << ".. succesfully returned row to t_aanmeldingen, erased the content of column 'ophaalronde_datum' and 'volgorde'.";
@@ -475,6 +495,20 @@ void OpgehaaldeHoeveelheid::accept()
                 {
                     vvimDebug() << ".. reconnected to DB, try query again:";
 
+                    QSqlQuery query2;
+                    query2.prepare("INSERT ophalinghistoriek (id,   timestamp,         ophalingsdatum,    chauffeur, ophaalpunt, zakken_kurk, kg_kurk, zakken_kaarsresten, kg_kaarsresten, opmerkingen, aanmeldingsdatum) "
+                                  "                  VALUES (NULL, CURRENT_TIMESTAMP, :ophaalrondedatum, :chauffeur, :ophaalpunt, :zakkenkurk, :kgkurk, :zakkenkaarsresten, :kgkaarsresten, :opmerkingen, :aanmeldingsdatum)");
+                    query = query2;
+                    query.bindValue(":ophaalrondedatum",ophaalrondedatum);
+                    query.bindValue(":chauffeur",chauffeur);
+                    query.bindValue(":ophaalpunt",ophaalpunt_id);
+                    query.bindValue(":zakkenkurk",zakken_kurk);
+                    query.bindValue(":kgkurk",kg_kurk);
+                    query.bindValue(":zakkenkaarsresten",zakken_kaarsresten);
+                    query.bindValue(":kgkaarsresten",kg_kaarsresten);
+                    query.bindValue(":opmerkingen",opmerkingen);
+                    query.bindValue(":aanmeldingsdatum",aanmeldingsdatum);
+
                     if(!query.exec())
                     {
                         qCritical(QString("FAIL: Couldn't put row #%1 of the model in the database, something went wrong with the INSERT-query: ").arg(row).append(query.lastError().text()).toStdString().c_str());
@@ -524,6 +558,11 @@ void OpgehaaldeHoeveelheid::accept()
             else
             {
                 vvimDebug() << ".. reconnected to DB, try query again:";
+                QSqlQuery query2;
+                query2.prepare("DELETE FROM aanmelding WHERE ophaalronde_datum = :ophaalrondedatum");
+                query = query2;
+                query.bindValue(":ophaalrondedatum",ophaalrondedatum);
+
                 if(!query.exec())
                 {
                     vvimDebug() << ".. unable to run query" << query.lastError().text();

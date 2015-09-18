@@ -34,12 +34,15 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     {
         if(!reConnectToDatabase(query_ophaalpunt.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
         {
-            vvimDebug() << "unable to reconnect to DB, halting";
+            vvimDebug() << "query_ophaalpunt: unable to reconnect to DB, halting";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             exit(-1);
         }
+        query_ophaalpunt = QSqlQuery(SQLquery);
         if(!query_ophaalpunt.exec())
         {
-            vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery;
+            vvimDebug() << "query_ophaalpunt failed after reconnecting to DB, halting" << SQLquery;
+            QMessageBox::information(this, tr("Fout bij verbinding met heruitvoeren query ").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             exit(-1);
         }
     }
@@ -64,12 +67,15 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     {
         if(!reConnectToDatabase(query_intercommunales.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
         {
-            vvimDebug() << "unable to reconnect to DB, halting";
+            vvimDebug() << "query_intercommunales: unable to reconnect to DB, halting";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             exit(-1);
         }
+        query_intercommunales = QSqlQuery(SQLquery);
         if(!query_intercommunales.exec())
         {
-            vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery;
+            vvimDebug() << "query_intercommunales failed after reconnecting to DB, halting" << SQLquery;
+            QMessageBox::information(this, tr("Fout bij verbinding met heruitvoeren query ").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             exit(-1);
         }
     }
@@ -129,12 +135,15 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     {
         if(!reConnectToDatabase(query_talen.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
         {
-            vvimDebug() << "unable to reconnect to DB, halting";
+            vvimDebug() << "query_talen: unable to reconnect to DB, halting";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             exit(-1);
         }
+        query_talen = QSqlQuery(SQLquery);
         if(!query_talen.exec())
         {
             vvimDebug() << "query_talen failed after reconnecting to DB, halting" << SQLquery;
+            QMessageBox::information(this, tr("Fout bij verbinding met heruitvoeren query ").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             exit(-1);
         }
     }
@@ -159,15 +168,19 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     {
         if(!reConnectToDatabase(query_contacteren.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
         {
-            vvimDebug() << "unable to reconnect to DB, halting";
+            vvimDebug() << "query_contacteren: unable to reconnect to DB, halting";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             exit(-1);
         }
+        query_contacteren = QSqlQuery(SQLquery);
         if(!query_contacteren.exec())
         {
             vvimDebug() << "query_contacteren failed after reconnecting to DB, halting" << SQLquery;
+            QMessageBox::information(this, tr("Fout bij verbinding met heruitvoeren query ").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             exit(-1);
         }
     }
+
 
     while(query_contacteren.next())
     {
@@ -191,15 +204,19 @@ InfoOphaalpunt::InfoOphaalpunt(QWidget *parent) :
     {
         if(!reConnectToDatabase(query_frequentie.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
         {
-            vvimDebug() << "unable to reconnect to DB, halting";
+            vvimDebug() << "query_frequentie: unable to reconnect to DB, halting";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             exit(-1);
         }
+        query_frequentie = QSqlQuery(SQLquery);
         if(!query_frequentie.exec())
         {
             vvimDebug() << "query_frequentie failed after reconnecting to DB, halting" << SQLquery;
+            QMessageBox::information(this, tr("Fout bij verbinding met heruitvoeren query ").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             exit(-1);
         }
     }
+
     //    qCritical(QString(tr("SELECT for frequentie FAILED!").append(query.lastError().text())).toStdString().c_str());
 
 
@@ -454,16 +471,60 @@ void InfoOphaalpunt::accept()
         {
             if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
             {
-                vvimDebug() << "unable to reconnect to DB, halting";
-                exit(-1);
+                vvimDebug() << "unable to reconnect to DB, try again";
+                QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+                return;
             }
-        }
 
-        if(!query.exec())
-        {
-            QMessageBox::critical(this, tr("UPDATE informatie voor ophaalpunt %1 FAALT!").arg(ophaalpuntEdit->text()),
-                        query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
-            qCritical(QString(tr("UPDATE informatie voor ophaalpunt %1 FAALT!").arg(ophaalpuntEdit->text()).append(query.lastError().text())).toStdString().c_str());
+            QSqlQuery query2;
+            query2.prepare("UPDATE ophaalpunten SET naam = :naam, kurk = :kurk, parafine = :parafine, code = :code, code_intercommunale = :code_intercommunale, straat = :straat, nr = :nr, bus = :bus, postcode = :postcode, plaats = :plaats, land = :land, openingsuren = :openingsuren, contactpersoon = :contactpersoon, telefoonnummer1 = :telefoonnummer1, telefoonnummer2 = :telefoonnummer2, email1 = :email1, email2 = :email2, taalvoorkeur = :taalvoorkeur, preferred_contact = :preferred_contact, attest_nodig = :attest_nodig, frequentie_attest = :frequentie_attest, extra_informatie = :extra_informatie, last_contact_date = :last_contact_date WHERE id = :id");
+
+            query = query2;
+            query.bindValue(":naam",ophaalpuntEdit->text());
+            query.bindValue(":kurk",kurkCheckBox->isChecked());
+            query.bindValue(":parafine",parafineCheckBox->isChecked());
+            query.bindValue(":code",codeComboBox->currentIndex());
+            query.bindValue(":code_intercommunale",code_intercommunaleComboBox->currentIndex());
+            query.bindValue(":straat",straatEdit->text());
+            query.bindValue(":nr",nrEdit->text());
+            query.bindValue(":bus",busEdit->text());
+            query.bindValue(":postcode",postcodeEdit->text());
+            query.bindValue(":plaats",plaatsEdit->text());
+            query.bindValue(":land",landComboBox->currentText());
+            query.bindValue(":openingsuren",openingsurenEdit->toPlainText());
+            query.bindValue(":contactpersoon",contactpersoonEdit->text());
+            query.bindValue(":telefoonnummer1",telefoonnummer1Edit->text());
+            query.bindValue(":telefoonnummer2",telefoonnummer2Edit->text());
+            query.bindValue(":email1",email1Edit->text());
+            query.bindValue(":email2",email2Edit->text());
+            query.bindValue(":taalvoorkeur",taalvoorkeurComboBox->currentIndex());
+            query.bindValue(":preferred_contact",preferred_contactComboBox->currentIndex());
+            query.bindValue(":attest_nodig",attest_nodigCheckBox->isChecked());
+            query.bindValue(":frequentie_attest",frequentie_attestComboBox->currentIndex());
+            query.bindValue(":extra_informatie",extra_informatieEdit->toPlainText());
+            query.bindValue(":id",id);
+            if(everContactedBeforeCheckBox->checkState() == Qt::Checked)
+            {
+                query.bindValue(":last_contact_date",lastContactDateEdit->date());
+            }
+            else
+            {
+                query.bindValue(":last_contact_date",QVariant(QVariant::Date));
+            }
+
+            if(!query.exec())
+            {
+                QMessageBox::critical(this, tr("UPDATE informatie voor ophaalpunt %1 is niet gelukt!").arg(ophaalpuntEdit->text()),
+                            query.lastError().text().append(tr("\n\nWaarschijnlijk is de verbinding met de databank weggevallen, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder.")), QMessageBox::Cancel);
+                qCritical(QString(tr("UPDATE informatie voor ophaalpunt %1 FAALT!").arg(ophaalpuntEdit->text()).append(query.lastError().text())).toStdString().c_str());
+                return;
+            }
+            else
+            {
+                vvimDebug() << "reconnect to DB worked, re-init query worked. Done.";
+                this->close();
+                emit infoChanged();
+            }
         }
         else
         {
@@ -520,16 +581,19 @@ void InfoOphaalpunt::accept()
         {
             if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
             {
-                vvimDebug() << "unable to reconnect to DB, halting";
-                exit(-1);
+                vvimDebug() << "unable to reconnect to DB, try again";
+                QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+                return;
             }
-        }
 
-        if(!query.exec())
-        {
-            QMessageBox::critical(this, tr("AANMAKEN nieuw ophaalpunt %1 FAALT!").arg(ophaalpuntEdit->text()),
-                        query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
+            /** we proberen hier niet om de query opnieuw te runnen, te ingewikkeld **/
+            /** beter fout-boodschap geven nadat de verbinding met de databank is hersteld, en de
+                gebruiker opnieuw het commando laten geven om het ophaalpunt aan te maken **/
+
+            QMessageBox::critical(this, tr("AANMAKEN nieuw ophaalpunt %1  is niet gelukt").arg(ophaalpuntEdit->text()),
+                        query.lastError().text().append(tr("\n\nWaarschijnlijk is de verbinding met de databank weggevallen, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder.")), QMessageBox::Cancel);
             qCritical(QString(tr("AANMAKEN ophaalpunt %1 FAALT!").arg(ophaalpuntEdit->text()).append(query.lastError().text())).toStdString().c_str());
+            return;
         }
         else
         {
@@ -581,12 +645,19 @@ void InfoOphaalpunt::reset()
             if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
             {
                 vvimDebug() << "unable to reconnect to DB, halting";
-                exit(-1);
+                QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+                return;
             }
+            QSqlQuery query2;
+            query2.prepare("SELECT * FROM ophaalpunten WHERE id = %1");
+            query = query2;
+            query.bindValue(":id", id);
+
             if(!query.exec())
             {
                 vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery;
-                exit(-1);
+                QMessageBox::information(this, tr("Fout bij verbinding met heruitvoeren query ").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+                return;
             }
         }
 

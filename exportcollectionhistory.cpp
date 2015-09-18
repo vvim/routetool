@@ -111,6 +111,9 @@ void ExportCollectionHistory::loadOphaalpunten()
             vvimDebug() << "unable to reconnect to DB, halting";
             exit(-1);
         }
+
+        vvimDebug() << "reconnected to DB, retry query:";
+        query = QSqlQuery(SQLquery);
         if(!query.exec())
         {
             vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery;
@@ -280,7 +283,14 @@ bool ExportCollectionHistory::saveToCSV()
                 db_problems = true;
             }
             else
-              db_problems = false;
+            {
+                vvimDebug() << "reconnected to DB, retry query:";
+                QSqlQuery ophaalpunt_temp;
+                ophaalpunt_temp.prepare("SELECT ophaalpunten.naam, ophaalpunten.straat, ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, soort_ophaalpunt.soort FROM ophaalpunten, soort_ophaalpunt WHERE ophaalpunten.id = :ophaalpuntid AND ophaalpunten.code = soort_ophaalpunt.code");
+                ophaalpunt = ophaalpunt_temp;
+                ophaalpunt.bindValue(":ophaalpuntid", ophaalpunt_id);
+                db_problems = false;
+            }
         }
 
         // so ugly... why not rethink this through?
@@ -329,16 +339,17 @@ bool ExportCollectionHistory::saveToCSV()
         {
             vvimDebug() << "FAILED: We could not execute the query SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = :ophaalpuntid AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id .";
             vvimDebug() << "show messagebox to user and return to Export Collection History Dialog Box";
-            QMessageBox::information(this, tr("Fout bij verbinding met de databank"), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
         }
         else
         {
-            // retry!
+            vvimDebug() << "TODO: te ingewikkelde opbouw van QSqlQuery. Beter om dit code-blok volledig te herschrijven. Voorlopig gewoon foutmelding laten zien aan gebruiker, zodat hij de functie opnieuw opstart (en dus ook een reconnectDatabase() bewerkstelligd.";
+
             if(!query.exec())
             {
                 vvimDebug() << "FAILED: We could not execute the query SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = :ophaalpuntid AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id .";
                 vvimDebug() << "show messagebox to user and return to Export Collection History Dialog Box";
-                QMessageBox::information(this, tr("Fout bij verbinding met de databank"), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+                QMessageBox::information(this, tr("Fout bij verbinding met heruitvoeren query ").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             }
         }
     }

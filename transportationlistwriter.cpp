@@ -248,6 +248,14 @@ void TransportationListWriter::print()
                     }
                     else
                     {
+                        QSqlQuery query2;
+                        query2.prepare("UPDATE aanmelding SET ophaalronde_datum = :date , volgorde = :counter "
+                                      "WHERE id = :aanmeldings_id ");
+                        query = query2;
+                        query.bindValue(":date",dateEdit->date());
+                        query.bindValue(":counter",counter);
+                        query.bindValue(":aanmeldings_id",m_markers[i]->ophaalpunt.aanmelding_id);
+
                         if(!query.exec())
                         {
                             vvimDebug() << "query failed after reconnecting to DB" << SQLquery << query.lastError();
@@ -328,6 +336,12 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
             else
             {
                 vvimDebug() << "reconnected to DB, try query again";
+                QSqlQuery query2;
+                query2.prepare("SELECT naam, straat, nr, bus, postcode, plaats, land, openingsuren, contactpersoon, telefoonnummer1, extra_informatie"
+                               " FROM   ophaalpunten WHERE id = :id ");
+                query = query2;
+                query.bindValue(":id",marker->ophaalpunt.ophaalpunt_id);
+
                 if(!query.exec())
                 {
                     vvimDebug() << "query failed after reconnecting to DB" << SQLquery << query.lastError();

@@ -112,6 +112,7 @@ int KiesGedaneOphaling::initialise()
             qCritical(QString(tr("Needed to reconnect to database, but this failed. SELECT DISTINCT ophaalronde_datum FROM aanmelding WHERE volgorde is not null ORDER BY ophaalronde_datum FAILED!").append(query.lastError().text())).toStdString().c_str());
             return -1;
         }
+        query = QSqlQuery(SQLquery);
         if(!query.exec())
         {
             vvimDebug() << "Reconnection to database was successfull, but query failed, returning -1";
@@ -184,8 +185,13 @@ void KiesGedaneOphaling::cancelRoute(QDate ophaalronde_datum)
             QMessageBox::critical(this,tr("Geen verbinding met databank, dus verwijderen ophaalronde niet gelukt"),
                                 query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
             qCritical(QString(tr("Verwijderen van ophaalronde %1 is niet gelukt! Kon geen verbinding met databank maken... UPDATE aanmelding SET ophaalronde_datum=NULL and volgorde=NULL where ophaalronde_datum = ... , error: ").arg(ophaalronde_datum.toString()).append(query.lastError().text())).toStdString().c_str());
-            return; // errorboodschap tonen???
+            return;
         }
+        QSqlQuery query2;
+        query2.prepare("UPDATE aanmelding SET ophaalronde_datum=NULL, volgorde=NULL where ophaalronde_datum = :ophaalrondedatum");
+        query = query2;
+        query.bindValue(":ophaalrondedatum",ophaalronde_datum);
+
         if(!query.exec())
         {
             QMessageBox::critical(this,tr("Verwijderen van ophaalronde niet gelukt"),

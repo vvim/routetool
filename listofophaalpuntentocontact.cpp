@@ -80,12 +80,23 @@ void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
         if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
         {
             vvimDebug() << "unable to reconnect to DB, halting";
-            exit(-1);
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
         }
         vvimDebug() << "reconnected to DB, will try query again";
+        QSqlQuery query2;
+        query2.prepare("SELECT ophalinghistoriek.ophalingsdatum, ophaalpunten.last_contact_date, ophaalpunten.contact_again_on, "
+                            " ophaalpunten.last_ophaling_date,  ophaalpunten.forecast_new_ophaling_date "
+                      " FROM `ophalinghistoriek`, ophaalpunten "
+                      " WHERE ophalinghistoriek.ophaalpunt = ophaalpunten.id AND ophalinghistoriek.ophaalpunt= :ophaal "
+                      " ORDER BY ophalinghistoriek.ophalingsdatum DESC;");
+        query = query2;
+        query.bindValue(":ophaal",ophaalpuntid);
         if(!query.exec())
         {
             vvimDebug() << "ophaalpuntid = " << ophaalpuntid << "-" << "something went wrong with checking for an existing aanmelding" << query.lastError();
+            QMessageBox::information(this, tr("Fout bij verbinding met heruitvoeren query ").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
         }
     }
 
@@ -175,12 +186,22 @@ void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
 
             if(!query_forecast.exec())
             {
+                /** Not showing any MessageBoxes here as this function is called 'en masse' at the start of the program. **/
+
                 if(!reConnectToDatabase(query_forecast.lastError(), query_forecast_in_string, QString("[%1]").arg(Q_FUNC_INFO)))
                 {
-                    vvimDebug()<< "..." << "unable to reconnect to DB, halting" << query_forecast_in_string;
+                    vvimDebug()<< "..." << "unable to reconnect to DB " << query_forecast_in_string;
                 }
                 else
                 {
+                    QSqlQuery query_forecast2;
+                    query_forecast2.prepare(" UPDATE ophaalpunten "
+                                           " SET last_ophaling_date = :last_ophaling, forecast_new_ophaling_date = :forecast "
+                                           " WHERE id = :id ");
+                    query_forecast = query_forecast2;
+                    query_forecast.bindValue(":last_ophaling",max_of_laatste_ophaling);
+                    query_forecast.bindValue(":forecast",qMax(ophaalpunt_ForecastNewOphalingDate_taken_from_Ophaalpunten, max_of_laatste_ophaling.addDays(gemiddelde)));
+                    query_forecast.bindValue(":id",ophaalpuntid);
                     if(!query_forecast.exec())
                     {
                         vvimDebug() << "..." << "reconnection to DB succesful, but " << query_forecast_in_string << "went WRONG:" << query_forecast.lastError();
@@ -232,12 +253,22 @@ void ListOfOphaalpuntenToContact::UpdateOphaalpunt(int ophaalpuntid)
 
                 if(!query_laatste_ophaling.exec())
                 {
+                    /** Not showing any MessageBoxes here as this function is called 'en masse' at the start of the program. **/
+
                     if(!reConnectToDatabase(query_laatste_ophaling.lastError(), query_laatste_ophaling_in_string, QString("[%1]").arg(Q_FUNC_INFO)))
                     {
                         vvimDebug()<< "..." << "unable to reconnect to DB, halting" << query_laatste_ophaling_in_string;
                     }
                     else
                     {
+                        QSqlQuery query_laatste_ophaling2;
+                        query_laatste_ophaling2.prepare(" UPDATE ophaalpunten "
+                                                        " SET last_ophaling_date = :last_ophaling "
+                                                        " WHERE id = :id ");
+                        query_laatste_ophaling = query_laatste_ophaling2;
+                        query_laatste_ophaling.bindValue(":last_ophaling",laatste_ophaling_taken_from_Ophaalhistoriek);
+                        query_laatste_ophaling.bindValue(":id",ophaalpuntid);
+
                         if(!query_laatste_ophaling.exec())
                         {
                             vvimDebug() << "..." << "reconnection to DB succesful, but " << query_laatste_ophaling_in_string << "went WRONG:" << query_laatste_ophaling.lastError();
@@ -273,6 +304,7 @@ void ListOfOphaalpuntenToContact::UpdateAllOphaalpunten()
             vvimDebug() << "unable to reconnect to DB, returning" << SQLquery;
             return;
         }
+        query = QSqlQuery(SQLquery);
         if(!query.exec())
         {
             vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery;
@@ -341,8 +373,10 @@ void ListOfOphaalpuntenToContact::initialise()
         if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
         {
             vvimDebug() << "unable to reconnect to DB, halting";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             exit(-1);
         }
+        query = QSqlQuery(SQLquery);
         if(!query.exec())
         {
             vvimDebug() << "FATAL:" << "Something went wrong, could not execute query:" << SQLquery;

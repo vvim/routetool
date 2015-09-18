@@ -43,6 +43,14 @@ OphaalHistoriekDialog::OphaalHistoriekDialog(int ophaalpunt_id, QWidget *parent)
         else
         {
             vvimDebug() << "Reconnection succesful, will try query again.";
+            QSqlQuery query2;
+            query2.prepare("SELECT * "
+                          " FROM ophalinghistoriek"
+                          " WHERE ophaalpunt = :ophaal "
+                          " ORDER BY ophalingsdatum DESC;");
+            query = query2;
+            query.bindValue(":ophaal",ophaalpunt_id);
+
             if(!query.exec())
             {
                 vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery << query.lastError();

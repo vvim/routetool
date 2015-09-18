@@ -358,6 +358,7 @@ void NieuweAanmelding::loadOphaalpunten()
         {
             vvimDebug() << "unable to reconnect to DB";
         }
+        query = QSqlQuery(SQLquery);
         if(!query.exec())
         {
             vvimDebug() << "query failed after reconnecting to DB" << SQLquery << query.lastError();

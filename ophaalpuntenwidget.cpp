@@ -90,6 +90,7 @@ void OphaalpuntenWidget::loadOphaalpunten()
         }
         else
         {
+            query = QSqlQuery(SQLquery);
             vvimDebug() << "reconnected to DB";
             if(!query.exec())
             {
