@@ -757,4 +757,72 @@ void Form::on_showOphaalpunten_clicked()
 
 
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
+
+
+#ifndef QT_NO_CURSOR
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+
+    QString SQLquery = "SELECT id, naam, postcode, last_contact_date, contact_again_on, last_ophaling_date, forecast_new_ophaling_date "
+                    "FROM ophaalpunten WHERE kurk > 0 or parafine > 0 "
+                    "ORDER BY postcode";
+
+    QSqlQuery query(SQLquery);
+
+
+    if(!query.exec())
+    {
+        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, halting";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
+        }
+        query = QSqlQuery(SQLquery);
+        if(!query.exec())
+        {
+            vvimDebug() << "FATAL:" << "Something went wrong, could not execute query:" << SQLquery;
+            qFatal(QString("Something went wrong, could not execute query: %1").arg(SQLquery).toStdString().c_str());
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
+        }
+    }
+
+   while (query.next())
+   {
+       bool aanmelding_running = false;
+
+       int ophaalpunt_id = query.value(0).toInt();
+       QString ophaalpunt_naam = query.value(1).toString();
+       ophaalpunt_naam.replace("\n"," ");
+       QString ophaalpunt_postcode = query.value(2).toString();
+       QDate last_contact_date = query.value(3).toDate();
+       QDate contact_again_on = query.value(4).toDate();
+       QDate last_ophaling_date = query.value(5).toDate();
+       QDate forecast_ophaling_date = query.value(6).toDate();
+
+
+       // it seems useless to me to recheck for a DB-connection as this query is right after the previous DB-connection-check
+       // also, if the connection would fail for this query, the worst thing that can happen, is that the TreeView is incorrect (no big deal)
+       QSqlQuery query2;
+       query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal AND ophaalronde_datum is NULL"); // and ophaalronde is NULL
+       query2.bindValue(":ophaal", ophaalpunt_id);
+
+       if(query2.exec())
+       {
+           if (query2.next())
+           {
+               aanmelding_running = true;
+               /** TOEVOEGEN AAN LIJST MET OPHAALPUNTEN DIE AANMELDINGEN GEDAAN HEBBEN **/
+               /** else: toevoegen aan lijst met ophaalpunten ZONDER aanmelding **/
+               /** hoe nu nog het verschil zien tussen ophaalpunten die al in de route zien? via SMarkering??? **/
+           }
+       }
+       else
+           vvimDebug() << "something went wrong with checking for an existing aanmelding";
+   }
+
+#ifndef QT_NO_CURSOR
+    QApplication::restoreOverrideCursor();
+#endif
 }
