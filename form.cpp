@@ -735,3 +735,26 @@ void Form::reloadCompleter()
 #endif
     vvimDebug() << "done, completer (re)loaded.";
 }
+
+void Form::on_showOphaalpunten_clicked()
+{
+    vvimDebug() << "toon bekende ophaalpunten!" << "inspiration: https://developers.google.com/maps/documentation/javascript/examples/marker-simple" << "and" << "https://developers.google.com/maps/documentation/javascript/markers";
+
+    /*  // voorbeeld uit Levering
+    QString str =
+            QString("var newLoc = new google.maps.LatLng(%1, %2); ").arg(north).arg(east) +
+            QString("map.setCenter(newLoc);") +
+            QString("map.setZoom(%1);").arg(ui->zoomSpinBox->value());
+    */
+
+    QString str = "var myLatLng = {lat: -25.363, lng: 131.044}; "
+        "var marker = new google.maps.Marker({ "
+        "        position: myLatLng, "
+        "  map: map, "
+        "  title: 'Hello World!', "
+        "  icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png' " // see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
+        "});";
+
+
+    ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
+}

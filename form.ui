@@ -198,6 +198,13 @@
      </item>
     </layout>
    </item>
+   <item row="3" column="1">
+    <widget class="QPushButton" name="showOphaalpunten">
+     <property name="text">
+      <string>Toon alle punten</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
