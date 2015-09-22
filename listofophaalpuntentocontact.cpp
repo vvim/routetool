@@ -374,14 +374,14 @@ void ListOfOphaalpuntenToContact::initialise()
         {
             vvimDebug() << "unable to reconnect to DB, halting";
             QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
-            exit(-1);
+            return;
         }
         query = QSqlQuery(SQLquery);
         if(!query.exec())
         {
             vvimDebug() << "FATAL:" << "Something went wrong, could not execute query:" << SQLquery;
             qFatal(QString("Something went wrong, could not execute query: %1").arg(SQLquery).toStdString().c_str());
-            exit(-1);
+            return;
         }
     }
 
