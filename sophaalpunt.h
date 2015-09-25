@@ -100,6 +100,13 @@ struct SOphaalpunt
         qDebug() << "... kaars: " << kg_kaarsresten << "kg, "<< zakken_kaarsresten << "zakken";
     }
 
+
+    int getOphaalpuntId()
+    {
+        return ophaalpunt_id;
+    }
+
+
     QString naam;
     double kg_kurk;
     double kg_kaarsresten;

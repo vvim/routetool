@@ -56,6 +56,15 @@ struct SMarker
         }
     };
 
+    int getOphaalpuntId()
+    {
+        if(!ophaling)
+        {
+            return -1;
+        }
+
+        return ophaalpunt.getOphaalpuntId();
+    }
 
     double east;
     double north;
