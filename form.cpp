@@ -740,24 +740,6 @@ void Form::on_showOphaalpunten_clicked()
 {
     vvimDebug() << "toon bekende ophaalpunten!" << "inspiration: https://developers.google.com/maps/documentation/javascript/examples/marker-simple" << "and" << "https://developers.google.com/maps/documentation/javascript/markers";
 
-    /*  // voorbeeld uit Levering
-    QString str =
-            QString("var newLoc = new google.maps.LatLng(%1, %2); ").arg(north).arg(east) +
-            QString("map.setCenter(newLoc);") +
-            QString("map.setZoom(%1);").arg(ui->zoomSpinBox->value());
-    */
-
-    QString str = "var myLatLng = {lat: -25.363, lng: 131.044}; "
-        "var marker = new google.maps.Marker({ "
-        "        position: myLatLng, "
-        "  map: map, "
-        "  title: 'Hello World!', "
-        "  icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png' " // see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
-        "});";
-
-
-    ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
-
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
@@ -805,6 +787,8 @@ void Form::on_showOphaalpunten_clicked()
     }
 
     QSet<int> ophaalpunten_met_aanmelding;
+    QSet<SOphaalpunt*> markers_met_aanmelding;
+    QSet<SOphaalpunt*> markers_zonder_aanmelding;
 
     while (query_all_aanmeldingen.next())
     {
@@ -817,6 +801,7 @@ void Form::on_showOphaalpunten_clicked()
     vvimDebug() << "step 2" << "get all ophaalpunten";
 
     QString SQLquery_all_ophaalpunten = "SELECT id, naam, postcode, last_contact_date, contact_again_on, last_ophaling_date, forecast_new_ophaling_date "
+                                        "       straat, nr, bus, plaats, land, extra_informatie "
                     "FROM ophaalpunten WHERE kurk > 0 or parafine > 0 "
                     "ORDER BY postcode";
 
@@ -859,6 +844,12 @@ void Form::on_showOphaalpunten_clicked()
            QDate contact_again_on = query_all_ophaalpunten.value(4).toDate();
            QDate last_ophaling_date = query_all_ophaalpunten.value(5).toDate();
            QDate forecast_ophaling_date = query_all_ophaalpunten.value(6).toDate();
+           QString ophaalpunt_straat = query_all_ophaalpunten.value(7).toString();
+           QString ophaalpunt_huisnr = query_all_ophaalpunten.value(8).toString();
+           QString ophaalpunt_busnr = query_all_ophaalpunten.value(9).toString();
+           QString ophaalpunt_plaats = query_all_ophaalpunten.value(10).toString();
+           QString ophaalpunt_land = query_all_ophaalpunten.value(11).toString();
+           QString ophaalpunt_opmerkingen = query_all_ophaalpunten.value(12).toString();
 
 /** TOEVOEGEN AAN LIJST MET OPHAALPUNTEN DIE AANMELDINGEN GEDAAN HEBBEN **/
 /** else: toevoegen aan lijst met ophaalpunten ZONDER aanmelding **/
@@ -866,14 +857,75 @@ void Form::on_showOphaalpunten_clicked()
 
            if(ophaalpunten_met_aanmelding.contains(ophaalpunt_id))
            {
-                ; //TOEVOEGEN AAN LIJST MET OPHAALPUNTEN DIE AANMELDINGEN GEDAAN HEBBEN
+               //TOEVOEGEN AAN LIJST MET OPHAALPUNTEN DIE AANMELDINGEN GEDAAN HEBBEN
+               SOphaalpunt* nieuw = new SOphaalpunt(ophaalpunt_naam, ophaalpunt_straat, ophaalpunt_huisnr, ophaalpunt_busnr,
+                                 ophaalpunt_postcode, ophaalpunt_plaats, ophaalpunt_land,
+                                 -1, -1, -1, -1, // woudl be nice to add information of the 'aanmelding' to ophaalpunten_met_aanmelding: kg kurg, kg parafine, aanmelding_id, ...
+                                 -1, ophaalpunt_id, ophaalpunt_opmerkingen
+                                 );
+               markers_met_aanmelding.insert(nieuw);
            }
            else
            {
-                ; //toevoegen aan lijst met ophaalpunten ZONDER aanmelding
+               //toevoegen aan lijst met ophaalpunten ZONDER aanmelding
+               SOphaalpunt* nieuw = new SOphaalpunt(ophaalpunt_naam, ophaalpunt_straat, ophaalpunt_huisnr, ophaalpunt_busnr,
+                                 ophaalpunt_postcode, ophaalpunt_plaats, ophaalpunt_land,
+                                 -1, -1, -1, -1, // woudl be nice to add information of the 'aanmelding' to ophaalpunten_met_aanmelding: kg kurg, kg parafine, aanmelding_id, ...
+                                 -1, ophaalpunt_id, ophaalpunt_opmerkingen
+                                 );
+               markers_zonder_aanmelding.insert(nieuw);
            }
        }
    }
+
+   /*  // voorbeeld uit Levering
+   QString str =
+           QString("var newLoc = new google.maps.LatLng(%1, %2); ").arg(north).arg(east) +
+           QString("map.setCenter(newLoc);") +
+           QString("map.setZoom(%1);").arg(ui->zoomSpinBox->value());
+   */
+
+   QString str = "var myLatLng = {lat: -25.363, lng: 131.044}; "
+       "var marker = new google.maps.Marker({ "
+       "        position: myLatLng, "
+       "  map: map, "
+       "  title: 'Hello World!', "
+       "  icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png' " // see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
+       "});";
+
+   QString markers_js = "";
+
+   QSet<SOphaalpunt*>::Iterator it = markers_met_aanmelding.begin();
+   while(it != markers_met_aanmelding.end())
+   {
+       //vvimDebug() << "ophaalpunt in route, id: " << (*it);
+       ++it;
+   }
+
+   it = markers_zonder_aanmelding.begin();
+      while(it != markers_zonder_aanmelding.end())
+      {
+          //vvimDebug() << "ophaalpunt in route, id: " << (*it);
+          ++it;
+      }
+
+   ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
+
+
+
+   vvimDebug() << "******************";
+   vvimDebug() << "*** < debug >  ***";
+   vvimDebug() << "******************";
+   vvimDebug() << "";
+   vvimDebug() << "markers met aanmelding:" << markers_met_aanmelding.size();
+   vvimDebug() << "markers zonder aanmelding:" << markers_zonder_aanmelding.size();
+   vvimDebug() << "ophaalpunten in route:" << ophaalpunten_in_route->size();
+   vvimDebug() << "totaal aantal:" << markers_met_aanmelding.size() + markers_zonder_aanmelding.size() + ophaalpunten_in_route->size();
+   vvimDebug() << "(130 is normaal in LOCALHOST-test)";
+   vvimDebug() << "";
+   vvimDebug() << "******************";
+   vvimDebug() << "*** </ debug > ***";
+   vvimDebug() << "******************";
 
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
