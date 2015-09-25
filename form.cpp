@@ -758,68 +758,121 @@ void Form::on_showOphaalpunten_clicked()
 
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
 
-
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
 
-    QString SQLquery = "SELECT id, naam, postcode, last_contact_date, contact_again_on, last_ophaling_date, forecast_new_ophaling_date "
-                    "FROM ophaalpunten WHERE kurk > 0 or parafine > 0 "
-                    "ORDER BY postcode";
+    /**
+      de al getoonde markers staan in QList <SMarker*> m_markers;
+      eerst een lijst maken van de bestaande markers? Die maken automatisch deel uit van de route, en mogen dus
+      genegeerd worden
+    **/
 
-    QSqlQuery query(SQLquery);
+    QSet<int> *ophaalpunten_in_route = getOphaalpuntIdFromRoute();
+    vvimDebug() << "aantal ophaalpunten in de huidige route:" << ophaalpunten_in_route->size();
+
+    // een qList kan je als volgt sorteren:
+    //      qSort(ophaalpunten_in_route->begin(), ophaalpunten_in_route->end()); // see http://stackoverflow.com/a/27228639/
+    //      qt5 version: std::sort(ophaalpunten_in_route->begin(), ophaalpunten_in_route->end());
+    // maar we hebben nu voor een QSet gekozen, dan is sorteren niet meer nodig
+
+    //QList::contains()
+    vvimDebug() << "does it contain 106?" << ophaalpunten_in_route->contains(106);
+    vvimDebug() << "does it contain 105?" << ophaalpunten_in_route->contains(105);
+
+    QString SQLquery_all_aanmeldingen = "SELECT ophaalpunt FROM aanmelding WHERE ophaalronde_datum is NULL ORDER by ophaalpunt;";
+
+    QSqlQuery query_all_aanmeldingen(SQLquery_all_aanmeldingen);
 
 
-    if(!query.exec())
+    vvimDebug() << "step 1" << "get all aanmeldingen";
+    if(!query_all_aanmeldingen.exec())
     {
-        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        if(!reConnectToDatabase(query_all_aanmeldingen.lastError(), SQLquery_all_aanmeldingen, QString("[%1]").arg(Q_FUNC_INFO)))
         {
             vvimDebug() << "unable to reconnect to DB, halting";
             QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             return;
         }
-        query = QSqlQuery(SQLquery);
-        if(!query.exec())
+        query_all_aanmeldingen = QSqlQuery(SQLquery_all_aanmeldingen);
+        if(!query_all_aanmeldingen.exec())
         {
-            vvimDebug() << "FATAL:" << "Something went wrong, could not execute query:" << SQLquery;
-            qFatal(QString("Something went wrong, could not execute query: %1").arg(SQLquery).toStdString().c_str());
+            vvimDebug() << "FATAL:" << "Something went wrong, could not execute query:" << SQLquery_all_aanmeldingen << query_all_aanmeldingen.lastError();
+            qFatal(QString("Something went wrong, could not execute query: %1").arg(SQLquery_all_aanmeldingen).toStdString().c_str());
             QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             return;
         }
     }
 
-   while (query.next())
+    QSet<int> ophaalpunten_met_aanmelding;
+
+    while (query_all_aanmeldingen.next())
+    {
+        ophaalpunten_met_aanmelding.insert(query_all_aanmeldingen.value(0).toInt());
+    }
+
+
+    vvimDebug() << "step 1" << "done" << ophaalpunten_met_aanmelding.size() << "in total";
+
+    vvimDebug() << "step 2" << "get all ophaalpunten";
+
+    QString SQLquery_all_ophaalpunten = "SELECT id, naam, postcode, last_contact_date, contact_again_on, last_ophaling_date, forecast_new_ophaling_date "
+                    "FROM ophaalpunten WHERE kurk > 0 or parafine > 0 "
+                    "ORDER BY postcode";
+
+    QSqlQuery query_all_ophaalpunten(SQLquery_all_ophaalpunten);
+
+
+    if(!query_all_ophaalpunten.exec())
+    {
+        if(!reConnectToDatabase(query_all_ophaalpunten.lastError(), SQLquery_all_ophaalpunten, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, halting";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
+        }
+        query_all_ophaalpunten = QSqlQuery(SQLquery_all_ophaalpunten);
+        if(!query_all_ophaalpunten.exec())
+        {
+            vvimDebug() << "FATAL:" << "Something went wrong, could not execute query:" << SQLquery_all_ophaalpunten << query_all_ophaalpunten.lastError();
+            qFatal(QString("Something went wrong, could not execute query: %1").arg(SQLquery_all_ophaalpunten).toStdString().c_str());
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
+        }
+    }
+
+   while (query_all_ophaalpunten.next())
    {
-       bool aanmelding_running = false;
 
-       int ophaalpunt_id = query.value(0).toInt();
-       QString ophaalpunt_naam = query.value(1).toString();
-       ophaalpunt_naam.replace("\n"," ");
-       QString ophaalpunt_postcode = query.value(2).toString();
-       QDate last_contact_date = query.value(3).toDate();
-       QDate contact_again_on = query.value(4).toDate();
-       QDate last_ophaling_date = query.value(5).toDate();
-       QDate forecast_ophaling_date = query.value(6).toDate();
-
-
-       // it seems useless to me to recheck for a DB-connection as this query is right after the previous DB-connection-check
-       // also, if the connection would fail for this query, the worst thing that can happen, is that the TreeView is incorrect (no big deal)
-       QSqlQuery query2;
-       query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal AND ophaalronde_datum is NULL"); // and ophaalronde is NULL
-       query2.bindValue(":ophaal", ophaalpunt_id);
-
-       if(query2.exec())
+       int ophaalpunt_id = query_all_ophaalpunten.value(0).toInt();
+       if(ophaalpunten_in_route->contains(ophaalpunt_id))
        {
-           if (query2.next())
-           {
-               aanmelding_running = true;
-               /** TOEVOEGEN AAN LIJST MET OPHAALPUNTEN DIE AANMELDINGEN GEDAAN HEBBEN **/
-               /** else: toevoegen aan lijst met ophaalpunten ZONDER aanmelding **/
-               /** hoe nu nog het verschil zien tussen ophaalpunten die al in de route zien? via SMarkering??? **/
-           }
+           // abort, this ophaalpunt is already in the route and does not have to be displayed again
+           ;
        }
        else
-           vvimDebug() << "something went wrong with checking for an existing aanmelding";
+       {
+           QString ophaalpunt_naam = query_all_ophaalpunten.value(1).toString();
+           ophaalpunt_naam.replace("\n"," ");
+           QString ophaalpunt_postcode = query_all_ophaalpunten.value(2).toString();
+           QDate last_contact_date = query_all_ophaalpunten.value(3).toDate();
+           QDate contact_again_on = query_all_ophaalpunten.value(4).toDate();
+           QDate last_ophaling_date = query_all_ophaalpunten.value(5).toDate();
+           QDate forecast_ophaling_date = query_all_ophaalpunten.value(6).toDate();
+
+/** TOEVOEGEN AAN LIJST MET OPHAALPUNTEN DIE AANMELDINGEN GEDAAN HEBBEN **/
+/** else: toevoegen aan lijst met ophaalpunten ZONDER aanmelding **/
+/** hoe nu nog het verschil zien tussen ophaalpunten die al in de route zien? via SMarkering??? **/
+
+           if(ophaalpunten_met_aanmelding.contains(ophaalpunt_id))
+           {
+                ; //TOEVOEGEN AAN LIJST MET OPHAALPUNTEN DIE AANMELDINGEN GEDAAN HEBBEN
+           }
+           else
+           {
+                ; //toevoegen aan lijst met ophaalpunten ZONDER aanmelding
+           }
+       }
    }
 
 #ifndef QT_NO_CURSOR
