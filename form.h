@@ -93,6 +93,8 @@ private:
 
     **/
 
+    QSet<int> *getOphaalpuntIdFromRoute();
+
     void buildTransportationList();
     void logOutputMarkers();
     void logOutputLwMarkers();

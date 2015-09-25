@@ -826,3 +826,31 @@ void Form::on_showOphaalpunten_clicked()
     QApplication::restoreOverrideCursor();
 #endif
 }
+
+QSet<int>* Form::getOphaalpuntIdFromRoute()
+{
+    QSet<int>* ophaalpunt_in_route = new QSet<int>();
+
+    QList<SMarker*>::Iterator it = m_markers.begin();
+    while(it != m_markers.end())
+    {
+        if((*it)->getOphaalpuntId() > -1)   // valid ophaalpunt
+        {
+            ophaalpunt_in_route->insert((*it)->getOphaalpuntId());
+        }
+        else
+            vvimDebug() << "non valid ophaalpunt" << (*it)->getOphaalpuntId() << (*it)->caption;
+        ++it;
+    }
+
+    // <debug>
+    QSet<int>::Iterator qq = ophaalpunt_in_route->begin();
+    while(qq != ophaalpunt_in_route->end())
+    {
+        vvimDebug() << "ophaalpunt in route, id: " << (*qq);
+        ++qq;
+    }
+    // </debug>
+
+    return ophaalpunt_in_route;
+}
