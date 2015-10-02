@@ -12,9 +12,11 @@ GeocodeDataManager::GeocodeDataManager(QObject *parent) :
 {
     m_pNetworkAccessManager = new QNetworkAccessManager(this);
     markersToBeDone = new QList<SOphaalpunt>(); // needed so that we can delete it at the first call of pushListOfMarkers() + for the empty()-check at giveNextMarker()
+    coordsToPutInDatabase = new QList<SOphaalpunt>(); // needed so that we can delete it at the first call of lookForCoordinatesToPutInDatabase() + for the empty()-check at lookupNextCoords()
     connect(m_pNetworkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
     connect(this, SIGNAL(coordinatesReady(double, double, QString)), this, SLOT(giveNextMarker()));
     connect(this, SIGNAL(coordinatesReady(double, double, SOphaalpunt)), this, SLOT(giveNextMarker()));
+    connect(this, SIGNAL(putCoordinatesInDatabase(double,double, int)), this, SLOT(lookupNextCoords()));
     marker_type = Adres;
 }
 
@@ -80,6 +82,11 @@ void GeocodeDataManager::replyFinished(QNetworkReply* reply)
         marker_type = Adres;
         emit coordinatesReady(locationOfResult["lng"].toDouble(), locationOfResult["lat"].toDouble(),leveringToBeDone);
     }
+    else if(marker_type == OnlyCoords)
+    {
+        marker_type = Adres;
+        emit putCoordinatesInDatabase(locationOfResult["lng"].toDouble(), locationOfResult["lat"].toDouble(), ophaalpunt_to_mark.ophaalpunt_id);
+    }
 }
 
 void GeocodeDataManager::pushLevering(SLevering levering)
@@ -118,6 +125,31 @@ GeocodeDataManager::~GeocodeDataManager()
 {
     vvimDebug() << "start to deconstruct GeocodeDataManager()";
     delete markersToBeDone;
+    delete coordsToPutInDatabase;
     delete m_pNetworkAccessManager;
     vvimDebug() << "GeocodeDataManager() deconstructed";
+}
+
+void GeocodeDataManager::lookForCoordinatesToPutInDatabase(QList<SOphaalpunt> *list_of_ophaalpunten)
+{
+    delete coordsToPutInDatabase;
+    coordsToPutInDatabase = list_of_ophaalpunten;
+
+    lookupNextCoords();
+}
+
+void GeocodeDataManager::lookupNextCoords()
+{
+    if(!coordsToPutInDatabase->empty()) // coordsToPutInDatabase: not declared yet???
+    {
+        vvimDebug() << "number of coords to put in database:" << coordsToPutInDatabase->size();
+        foreach(SOphaalpunt marker, *coordsToPutInDatabase)
+        {
+            vvimDebug() << marker.naam;
+        }
+
+        marker_type = OnlyCoords;
+        ophaalpunt_to_mark = coordsToPutInDatabase->takeFirst(); // Removes the first item in the list and returns it.
+        getCoordinates(ophaalpunt_to_mark.getNameAndAddress());
+    }
 }

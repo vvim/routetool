@@ -57,6 +57,7 @@ Form::Form(QWidget *parent) :
     connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,SOphaalpunt)), this, SLOT(showOphaalpunt(double,double,SOphaalpunt)));
     connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,SLevering)), this, SLOT(showLevering(double,double,SLevering)));
     connect(&m_geocodeDataManager, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
+    connect(&m_geocodeDataManager, SIGNAL(putCoordinatesInDatabase(double,double,int)), this, SLOT(putCoordinatesInDatabase(double,double,int)));
 
     connect(&m_distanceMatrix, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
     connect(&m_distanceMatrix, SIGNAL(new_order_smarkers(QList<int> *)), this, SLOT(process_result_distancematrix(QList<int> *)));
@@ -119,6 +120,44 @@ void Form::showOphaalpunt(double east, double north, SOphaalpunt ophaalpunt, boo
 
     if (saveMarker)
         setMarker(east, north, ophaalpunt);
+}
+
+void Form::putCoordinatesInDatabase(double east, double north, int ophaalpunt_id)
+{
+    /** this function is only to put the coordinates in the database, NOT to put a marker on the screen **/
+
+
+    vvimDebug() << "update db: lat / lng / ophaalpunt" << north << east << ophaalpunt_id;
+
+    QString SQLquery_update_coords = "UPDATE ophaalpunten SET lat = :lat, lng = :lng WHERE id = :ophaalpunt_id";
+
+    QSqlQuery query_update_coords;
+    query_update_coords.prepare(SQLquery_update_coords);
+    query_update_coords.bindValue(":lat", north);
+    query_update_coords.bindValue(":lng", east);
+    query_update_coords.bindValue(":ophaalpunt_id", ophaalpunt_id);
+
+    vvimDebug() << "step 1" << "update ophaalpunt with lat/lng";
+    if(!query_update_coords.exec())
+    {
+        if(!reConnectToDatabase(query_update_coords.lastError(), SQLquery_update_coords, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, halting";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
+        }
+        QSqlQuery query_temp;
+        query_temp.prepare(SQLquery_update_coords);
+        query_update_coords = query_temp;
+        query_update_coords = QSqlQuery(SQLquery_update_coords);
+        if(!query_update_coords.exec())
+        {
+            vvimDebug() << "FATAL:" << "Something went wrong, could not execute query:" << SQLquery_update_coords << query_update_coords.lastError();
+            qFatal(QString("Something went wrong, could not execute query: %1").arg(SQLquery_update_coords).toStdString().c_str());
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
+        }
+    }
 }
 
 
@@ -739,6 +778,44 @@ void Form::reloadCompleter()
 void Form::on_showOphaalpunten_clicked()
 {
     vvimDebug() << "toon bekende ophaalpunten!" << "inspiration: https://developers.google.com/maps/documentation/javascript/examples/marker-simple" << "and" << "https://developers.google.com/maps/documentation/javascript/markers";
+
+vvimDebug() << "update de eerste 15 ophaalpunten (fork here) - Google Maps API maximum = 15";
+QSqlQuery query_no_lat_lng("SELECT * FROM ophaalpunten WHERE lat is NULL or lng is NULL LIMIT 15");
+if(query_no_lat_lng.exec())
+    vvimDebug() << "query runs";
+else
+    vvimDebug() << "query error:" << query_no_lat_lng.lastError();
+QList<SOphaalpunt> * listOfOphaalpunten = new QList<SOphaalpunt>();
+vvimDebug() << "QList aangemaakt";
+while(query_no_lat_lng.next())
+{
+    vvimDebug() << "inside query";
+    vvimDebug() << "name of ophaalpunt:" << query_no_lat_lng.value(2).toString();
+    SOphaalpunt _ophaalpunt(
+                    query_no_lat_lng.value(2).toString(),                      //_naam
+                    query_no_lat_lng.value(7).toString(),                      //_street
+                    query_no_lat_lng.value(8).toString(),                      //_housenr
+                    query_no_lat_lng.value(9).toString(),                      //_busnr
+                    query_no_lat_lng.value(10).toString(),                      //_postalcode
+                    query_no_lat_lng.value(11).toString(),                      //_plaats
+                    query_no_lat_lng.value(12).toString(),                      //_country
+                    0,                      //_kg_kurk
+                    0,                      //_kg_kaarsresten
+                    0,                      //_zakken_kurk
+                    0,                      //_zakken_kaarsresten
+                    -1,                      //_aanmelding_id
+                    query_no_lat_lng.value(0).toInt(),                      //_ophaalpunt_id
+                    query_no_lat_lng.value(23).toString()                      //_opmerkingen
+                );
+    listOfOphaalpunten->append(_ophaalpunt);
+
+    _ophaalpunt.PrintInformation();
+}
+vvimDebug() << "done";
+
+m_geocodeDataManager.lookForCoordinatesToPutInDatabase(listOfOphaalpunten);
+return;
+
 
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));

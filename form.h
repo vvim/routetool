@@ -41,6 +41,7 @@ private slots:
     void showCoordinates(double east, double north, QString markername, bool saveMarker = true);
     void showOphaalpunt(double east, double north, SOphaalpunt ophaalpunt, bool saveMarker = true);
     void showLevering(double east, double north, SLevering levering, bool saveMarker = true);
+    void putCoordinatesInDatabase(double east, double north, int ophaalpunt_id);
     //set marker to map and save marker in markers list
     void setMarker(double east, double north, QString caption);
     void setMarker(double east, double north, SOphaalpunt ophaalpunt);
