@@ -779,42 +779,43 @@ void Form::on_showOphaalpunten_clicked()
 {
     vvimDebug() << "toon bekende ophaalpunten!" << "inspiration: https://developers.google.com/maps/documentation/javascript/examples/marker-simple" << "and" << "https://developers.google.com/maps/documentation/javascript/markers";
 
-vvimDebug() << "update the ophaalpunten without lat/lng - Google Maps API maximum = 15";
-QSqlQuery query_no_lat_lng("SELECT * FROM ophaalpunten WHERE lat is NULL or lng is NULL LIMIT 15");
-if(query_no_lat_lng.exec())
-    vvimDebug() << "query runs";
-else
-    vvimDebug() << "query error:" << query_no_lat_lng.lastError();
-QList<SOphaalpunt> * listOfOphaalpunten = new QList<SOphaalpunt>();
-vvimDebug() << "QList aangemaakt";
-while(query_no_lat_lng.next())
-{
-    vvimDebug() << "inside resultlist of ophaalpunten without lat/lng";
-    vvimDebug() << "name of ophaalpunt:" << query_no_lat_lng.value(2).toString();
-    SOphaalpunt _ophaalpunt(
-                    query_no_lat_lng.value(2).toString(),                      //_naam
-                    query_no_lat_lng.value(7).toString(),                      //_street
-                    query_no_lat_lng.value(8).toString(),                      //_housenr
-                    query_no_lat_lng.value(9).toString(),                      //_busnr
-                    query_no_lat_lng.value(10).toString(),                      //_postalcode
-                    query_no_lat_lng.value(11).toString(),                      //_plaats
-                    query_no_lat_lng.value(12).toString(),                      //_country
-                    0,                      //_kg_kurk
-                    0,                      //_kg_kaarsresten
-                    0,                      //_zakken_kurk
-                    0,                      //_zakken_kaarsresten
-                    -1,                      //_aanmelding_id
-                    query_no_lat_lng.value(0).toInt(),                      //_ophaalpunt_id
-                    query_no_lat_lng.value(23).toString()                      //_opmerkingen
-                );
-    listOfOphaalpunten->append(_ophaalpunt);
+    vvimDebug() << "** [A] ** update the ophaalpunten without lat/lng - Google Maps API maximum = 15";
+    QSqlQuery query_no_lat_lng("SELECT * FROM ophaalpunten WHERE lat is NULL or lng is NULL LIMIT 15");
+    if(query_no_lat_lng.exec())
+        vvimDebug() << "query runs";
+    else
+        vvimDebug() << "query error:" << query_no_lat_lng.lastError();
+    QList<SOphaalpunt> * listOfOphaalpunten = new QList<SOphaalpunt>();
+    vvimDebug() << "QList aangemaakt";
+    while(query_no_lat_lng.next())
+    {
+        vvimDebug() << "inside resultlist of ophaalpunten without lat/lng";
+        vvimDebug() << "name of ophaalpunt:" << query_no_lat_lng.value(2).toString();
+        SOphaalpunt _ophaalpunt(
+                        query_no_lat_lng.value(2).toString(),                      //_naam
+                        query_no_lat_lng.value(7).toString(),                      //_street
+                        query_no_lat_lng.value(8).toString(),                      //_housenr
+                        query_no_lat_lng.value(9).toString(),                      //_busnr
+                        query_no_lat_lng.value(10).toString(),                      //_postalcode
+                        query_no_lat_lng.value(11).toString(),                      //_plaats
+                        query_no_lat_lng.value(12).toString(),                      //_country
+                        0,                      //_kg_kurk
+                        0,                      //_kg_kaarsresten
+                        0,                      //_zakken_kurk
+                        0,                      //_zakken_kaarsresten
+                        -1,                      //_aanmelding_id
+                        query_no_lat_lng.value(0).toInt(),                      //_ophaalpunt_id
+                        query_no_lat_lng.value(23).toString()                      //_opmerkingen
+                    );
+        listOfOphaalpunten->append(_ophaalpunt);
 
-    _ophaalpunt.PrintInformation();
-}
-vvimDebug() << "done";
+        _ophaalpunt.PrintInformation();
+    }
 
-m_geocodeDataManager.lookForCoordinatesToPutInDatabase(listOfOphaalpunten);
-return;
+    m_geocodeDataManager.lookForCoordinatesToPutInDatabase(listOfOphaalpunten);
+
+    vvimDebug() << "** [A] ** done";
+
 
 
 #ifndef QT_NO_CURSOR
@@ -827,6 +828,8 @@ return;
       genegeerd worden
     **/
 
+    vvimDebug() << "** [B] ** lijst maken van bestaande markers om 'doubles' te voorkomen";
+
     QSet<int> *ophaalpunten_in_route = getOphaalpuntIdFromRoute();
     vvimDebug() << "aantal ophaalpunten in de huidige route:" << ophaalpunten_in_route->size();
 
@@ -835,7 +838,6 @@ return;
     //      qt5 version: std::sort(ophaalpunten_in_route->begin(), ophaalpunten_in_route->end());
     // maar we hebben nu voor een QSet gekozen, dan is sorteren niet meer nodig
 
-    //QList::contains()
     vvimDebug() << "does it contain 106?" << ophaalpunten_in_route->contains(106);
     vvimDebug() << "does it contain 105?" << ophaalpunten_in_route->contains(105);
 
@@ -873,12 +875,12 @@ return;
     }
 
 
-    vvimDebug() << "step 1" << "done" << ophaalpunten_met_aanmelding.size() << "in total";
+    vvimDebug() << "step 1" << "done" << ophaalpunten_met_aanmelding.size() << "ophaalpunten have an 'aanmelding' (so we should mark them with a different color)";
 
     vvimDebug() << "step 2" << "get all ophaalpunten";
 
-    QString SQLquery_all_ophaalpunten = "SELECT id, naam, postcode, last_contact_date, contact_again_on, last_ophaling_date, forecast_new_ophaling_date "
-                                        "       straat, nr, bus, plaats, land, extra_informatie "
+    QString SQLquery_all_ophaalpunten = "SELECT id, naam, postcode, "
+                                        "       straat, nr, bus, plaats, land, extra_informatie, lat, lng "
                     "FROM ophaalpunten WHERE kurk > 0 or parafine > 0 "
                     "ORDER BY postcode";
 
@@ -903,8 +905,9 @@ return;
         }
     }
 
-   while (query_all_ophaalpunten.next())
-   {
+    vvimDebug() << "step 3" << "get all ophaalpunten and filter those who are already marked or have an 'aanmelding'";
+    while (query_all_ophaalpunten.next())
+    {
 
        int ophaalpunt_id = query_all_ophaalpunten.value(0).toInt();
        if(ophaalpunten_in_route->contains(ophaalpunt_id))
@@ -914,81 +917,68 @@ return;
        }
        else
        {
+           // ophaalpunt not in route => display. Only question is: does it have an aanmelding or not? (see if-test)
+
            QString ophaalpunt_naam = query_all_ophaalpunten.value(1).toString();
            ophaalpunt_naam.replace("\n"," ");
            QString ophaalpunt_postcode = query_all_ophaalpunten.value(2).toString();
-           QDate last_contact_date = query_all_ophaalpunten.value(3).toDate();
-           QDate contact_again_on = query_all_ophaalpunten.value(4).toDate();
-           QDate last_ophaling_date = query_all_ophaalpunten.value(5).toDate();
-           QDate forecast_ophaling_date = query_all_ophaalpunten.value(6).toDate();
-           QString ophaalpunt_straat = query_all_ophaalpunten.value(7).toString();
-           QString ophaalpunt_huisnr = query_all_ophaalpunten.value(8).toString();
-           QString ophaalpunt_busnr = query_all_ophaalpunten.value(9).toString();
-           QString ophaalpunt_plaats = query_all_ophaalpunten.value(10).toString();
-           QString ophaalpunt_land = query_all_ophaalpunten.value(11).toString();
-           QString ophaalpunt_opmerkingen = query_all_ophaalpunten.value(12).toString();
 
-/** TOEVOEGEN AAN LIJST MET OPHAALPUNTEN DIE AANMELDINGEN GEDAAN HEBBEN **/
-/** else: toevoegen aan lijst met ophaalpunten ZONDER aanmelding **/
-/** hoe nu nog het verschil zien tussen ophaalpunten die al in de route zien? via SMarkering??? **/
+           QString ophaalpunt_straat = query_all_ophaalpunten.value(3).toString();
+           QString ophaalpunt_huisnr = query_all_ophaalpunten.value(4).toString();
+           QString ophaalpunt_busnr = query_all_ophaalpunten.value(5).toString();
+           QString ophaalpunt_plaats = query_all_ophaalpunten.value(6).toString();
+           QString ophaalpunt_land = query_all_ophaalpunten.value(7).toString();
+           QString ophaalpunt_opmerkingen = query_all_ophaalpunten.value(8).toString();
+           double ophaalpunt_latitude = query_all_ophaalpunten.value(9).toDouble();
+           double ophaalpunt_longitude = query_all_ophaalpunten.value(10).toDouble();
+
+           SOphaalpunt* nieuw = new SOphaalpunt(ophaalpunt_naam, ophaalpunt_straat, ophaalpunt_huisnr, ophaalpunt_busnr,
+                             ophaalpunt_postcode, ophaalpunt_plaats, ophaalpunt_land,
+                             -1, -1, -1, -1, // woudl be nice to add information of the 'aanmelding' to ophaalpunten_met_aanmelding: kg kurg, kg parafine, aanmelding_id, ...
+                             -1, ophaalpunt_id, ophaalpunt_opmerkingen,
+                             ophaalpunt_latitude, ophaalpunt_longitude
+                             );
 
            if(ophaalpunten_met_aanmelding.contains(ophaalpunt_id))
            {
                //TOEVOEGEN AAN LIJST MET OPHAALPUNTEN DIE AANMELDINGEN GEDAAN HEBBEN
-               SOphaalpunt* nieuw = new SOphaalpunt(ophaalpunt_naam, ophaalpunt_straat, ophaalpunt_huisnr, ophaalpunt_busnr,
-                                 ophaalpunt_postcode, ophaalpunt_plaats, ophaalpunt_land,
-                                 -1, -1, -1, -1, // woudl be nice to add information of the 'aanmelding' to ophaalpunten_met_aanmelding: kg kurg, kg parafine, aanmelding_id, ...
-                                 -1, ophaalpunt_id, ophaalpunt_opmerkingen
-                                 );
                markers_met_aanmelding.insert(nieuw);
            }
            else
            {
                //toevoegen aan lijst met ophaalpunten ZONDER aanmelding
-               SOphaalpunt* nieuw = new SOphaalpunt(ophaalpunt_naam, ophaalpunt_straat, ophaalpunt_huisnr, ophaalpunt_busnr,
-                                 ophaalpunt_postcode, ophaalpunt_plaats, ophaalpunt_land,
-                                 -1, -1, -1, -1, // woudl be nice to add information of the 'aanmelding' to ophaalpunten_met_aanmelding: kg kurg, kg parafine, aanmelding_id, ...
-                                 -1, ophaalpunt_id, ophaalpunt_opmerkingen
-                                 );
                markers_zonder_aanmelding.insert(nieuw);
            }
        }
    }
 
-   /*  // voorbeeld uit Levering
-   QString str =
-           QString("var newLoc = new google.maps.LatLng(%1, %2); ").arg(north).arg(east) +
-           QString("map.setCenter(newLoc);") +
-           QString("map.setZoom(%1);").arg(ui->zoomSpinBox->value());
-   */
-
-   QString str = "var myLatLng = {lat: -25.363, lng: 131.044}; "
+   QString str = "var myLatLng = {lat: %1, lng: %2}; "
        "var marker = new google.maps.Marker({ "
        "        position: myLatLng, "
        "  map: map, "
-       "  title: 'Hello World!', "
-       "  icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png' " // see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
-       "});";
+       "  title: '%3', "
+       "  icon: 'http://maps.google.com/mapfiles/ms/icons/%4-dot.png' " // see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
+       "}); ";
 
    QString markers_js = "";
 
    QSet<SOphaalpunt*>::Iterator it = markers_met_aanmelding.begin();
-   while(it != markers_met_aanmelding.end())
-   {
-       //vvimDebug() << "ophaalpunt in route, id: " << (*it);
+    while(it != markers_met_aanmelding.end())
+    {
+       //showing locations with aanmelding in blue
+       markers_js = str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("'","\\'")).arg("blue");
+       ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
        ++it;
-   }
+    }
 
    it = markers_zonder_aanmelding.begin();
-      while(it != markers_zonder_aanmelding.end())
-      {
-          //vvimDebug() << "ophaalpunt in route, id: " << (*it);
-          ++it;
-      }
-
-   ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
-
-
+    while(it != markers_zonder_aanmelding.end())
+    {
+      //showing locations without aanmelding in yellow
+      markers_js = str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("'","\\'")).arg("yellow");
+      ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
+      ++it;
+    }
 
    vvimDebug() << "******************";
    vvimDebug() << "*** < debug >  ***";
@@ -998,7 +988,6 @@ return;
    vvimDebug() << "markers zonder aanmelding:" << markers_zonder_aanmelding.size();
    vvimDebug() << "ophaalpunten in route:" << ophaalpunten_in_route->size();
    vvimDebug() << "totaal aantal:" << markers_met_aanmelding.size() + markers_zonder_aanmelding.size() + ophaalpunten_in_route->size();
-   vvimDebug() << "(130 is normaal in LOCALHOST-test)";
    vvimDebug() << "";
    vvimDebug() << "******************";
    vvimDebug() << "*** </ debug > ***";
