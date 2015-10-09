@@ -779,7 +779,7 @@ void Form::on_showOphaalpunten_clicked()
 {
     vvimDebug() << "toon bekende ophaalpunten!" << "inspiration: https://developers.google.com/maps/documentation/javascript/examples/marker-simple" << "and" << "https://developers.google.com/maps/documentation/javascript/markers";
 
-vvimDebug() << "update de eerste 15 ophaalpunten (fork here) - Google Maps API maximum = 15";
+vvimDebug() << "update the ophaalpunten without lat/lng - Google Maps API maximum = 15";
 QSqlQuery query_no_lat_lng("SELECT * FROM ophaalpunten WHERE lat is NULL or lng is NULL LIMIT 15");
 if(query_no_lat_lng.exec())
     vvimDebug() << "query runs";
@@ -789,7 +789,7 @@ QList<SOphaalpunt> * listOfOphaalpunten = new QList<SOphaalpunt>();
 vvimDebug() << "QList aangemaakt";
 while(query_no_lat_lng.next())
 {
-    vvimDebug() << "inside query";
+    vvimDebug() << "inside resultlist of ophaalpunten without lat/lng";
     vvimDebug() << "name of ophaalpunt:" << query_no_lat_lng.value(2).toString();
     SOphaalpunt _ophaalpunt(
                     query_no_lat_lng.value(2).toString(),                      //_naam
