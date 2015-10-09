@@ -920,7 +920,6 @@ void Form::on_showOphaalpunten_clicked()
            // ophaalpunt not in route => display. Only question is: does it have an aanmelding or not? (see if-test)
 
            QString ophaalpunt_naam = query_all_ophaalpunten.value(1).toString();
-           ophaalpunt_naam.replace("\n"," ");
            QString ophaalpunt_postcode = query_all_ophaalpunten.value(2).toString();
 
            QString ophaalpunt_straat = query_all_ophaalpunten.value(3).toString();
@@ -966,7 +965,7 @@ void Form::on_showOphaalpunten_clicked()
     while(it != markers_met_aanmelding.end())
     {
        //showing locations with aanmelding in blue
-       markers_js = str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("'","\\'")).arg("blue");
+       markers_js = str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("blue");
        ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
        ++it;
     }
@@ -975,7 +974,7 @@ void Form::on_showOphaalpunten_clicked()
     while(it != markers_zonder_aanmelding.end())
     {
       //showing locations without aanmelding in yellow
-      markers_js = str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("'","\\'")).arg("yellow");
+      markers_js = str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("yellow");
       ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
       ++it;
     }
