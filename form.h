@@ -36,6 +36,9 @@ public:
     explicit Form(QWidget *parent = 0);
     ~Form();
 
+public slots:
+    void showOphaalpunt(int ophaalpunt_id);
+
 private slots:
     void goClicked();
     void showCoordinates(double east, double north, QString markername, bool saveMarker = true);
@@ -64,6 +67,9 @@ private slots:
     void reloadCompleter();
 
     void on_showOphaalpunten_clicked();
+
+    void on_testing_clicked();
+    void populateJavaScriptWindowObject();
 
 private:
     /**    I believe this member is a copy/paste accident, must try out.
