@@ -18,6 +18,7 @@ public:
     explicit GeocodeDataManager(QObject *parent = 0);
     ~GeocodeDataManager();
 
+    void getCoordinates(const QString& address, const QString &name_and_address);
     void getCoordinates(const QString& address);
     void pushListOfMarkers(QList<SOphaalpunt> *);
     void pushLevering(SLevering);
