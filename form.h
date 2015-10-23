@@ -36,8 +36,11 @@ public:
     explicit Form(QWidget *parent = 0);
     ~Form();
 
+signals:
+    void showOphaalpuntInfo(int ophaalpunt_id);
+
 public slots:
-    void showOphaalpunt(int ophaalpunt_id);
+    void askMainProgramToShowOphaalpuntInfo(int ophaalpunt_id);
 
 private slots:
     void goClicked();

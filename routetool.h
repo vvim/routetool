@@ -51,6 +51,7 @@ private slots:
     void showEffectiefOpgehaaldeHoeveelheden();
     void showAnnuleerIngegevenOphaalronde();
     void showExportCollectionHistory();
+    void showOphaalpuntInfo(int ophaalpunt_id);
 };
 
 #endif // ROUTETOOL_H

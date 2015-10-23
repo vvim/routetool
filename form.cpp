@@ -952,18 +952,13 @@ void Form::on_showOphaalpunten_clicked()
    }
 
    QString str = "var myLatLng = {lat: %1, lng: %2}; "
-       "var marker%5 = new google.maps.Marker({ "
+       "var marker = new google.maps.Marker({ "
        "        position: myLatLng, "
        "  map: map, "
        "  title: '%3', "
        "  icon: 'http://maps.google.com/mapfiles/ms/icons/%4-dot.png' " // see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
-       "}); ";
-           //"marker.addListener('dblclick', VlaspitRoutetool.showOphaalpunt(%5) );";
-
-   str += " marker%5.addListener('click', function() { "
-           " map.setZoom(8); "
-       " map.setCenter(marker.getPosition()); "
-           "  }); ";
+       "}); "
+       "marker.addListener('dblclick', function() { VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(%5); } );";
 
    // help: http://stackoverflow.com/questions/6611634/google-maps-api-v3-add-event-listener-to-all-markers
    // anders eerst eens probleem met een simpele addlistener?
@@ -973,17 +968,18 @@ void Form::on_showOphaalpunten_clicked()
    QSet<SOphaalpunt*>::Iterator it = markers_met_aanmelding.begin();
     while(it != markers_met_aanmelding.end())
     {
-       //showing locations with aanmelding in blue
+        //showing locations with aanmelding in blue
         markers_js = str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("blue").arg((*it)->getOphaalpuntId());
        ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
        ++it;
     }
 
-   it = markers_zonder_aanmelding.begin();
+
+    it = markers_zonder_aanmelding.begin();
     while(it != markers_zonder_aanmelding.end())
     {
       //showing locations without aanmelding in yellow
-      markers_js = str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("yellow");
+      markers_js = str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("yellow").arg((*it)->getOphaalpuntId());
       ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
       ++it;
     }
@@ -1036,6 +1032,7 @@ QSet<int>* Form::getOphaalpuntIdFromRoute()
 
 void Form::on_testing_clicked()
 {
+/*
     QString html = "";
 
     html += "<!DOCTYPE html>";
@@ -1072,7 +1069,7 @@ void Form::on_testing_clicked()
     html += "    map: map,";
     html += "    title: 'Hello World!'";
     html += "  });";
-    html += " marker.addListener('dblclick', function() { VlaspitRoutetool.showOphaalpunt(10); } ); ";
+    html += " marker.addListener('dblclick', function() { VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(10); } ); ";
     html += "}";
     html += "";
     html += "    </script>";
@@ -1086,20 +1083,20 @@ void Form::on_testing_clicked()
 
     vvimDebug() << "\n\n\n" << ui->webView->page()->currentFrame()->toHtml();
     return;
-
+*/
     QString str = "var myLatLng = {lat: %1, lng: %2}; "
         "var marker = new google.maps.Marker({ "
         "        position: myLatLng, "
         "  map: map, "
         "  title: '%3', "
         "  icon: 'http://maps.google.com/mapfiles/ms/icons/%4-dot.png' " // see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
-        "}); ";
-            //"marker.addListener('dblclick', VlaspitRoutetool.showOphaalpunt(%5) );";
-
+        "}); "
+        "marker.addListener('dblclick', function() {VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(%5);} );";
+/*
     str += " marker.addListener('click', function() { "
             " map.setZoom(8); "
         " map.setCenter(marker.getPosition()); "
-            "  }); ";
+            "  }); ";*/
 
     QString markers_js = "";
 
@@ -1117,7 +1114,8 @@ void Form::populateJavaScriptWindowObject()
     ui->webView->page()->mainFrame()->addToJavaScriptWindowObject("VlaspitRoutetool", this);
 }
 
-void Form::showOphaalpunt(int ophaalpunt_id)
+void Form::askMainProgramToShowOphaalpuntInfo(int ophaalpunt_id)
 {
-    vvimDebug() << "clicked on marker, show ophaalpunt " << ophaalpunt_id;
+    vvimDebug() << "double clicked on marker, show info ophaalpunt" << ophaalpunt_id;
+    emit showOphaalpuntInfo(ophaalpunt_id);
 }
