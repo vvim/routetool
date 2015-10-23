@@ -1036,7 +1036,79 @@ QSet<int>* Form::getOphaalpuntIdFromRoute()
 
 void Form::on_testing_clicked()
 {
-    ;
+    QString html = "";
+
+    html += "<!DOCTYPE html>";
+    html += "<html>";
+    html += "  <head>";
+    html += "    <meta name=\"viewport\" content=\"initial-scale=1.0, user-scalable=no\">";
+    html += "    <meta charset=\"utf-8\">";
+    html += "    <title>Simple markers</title>";
+    html += "    <style>";
+    html += "      html, body {";
+    html += "        height: 100%;";
+    html += "        margin: 0;";
+    html += "        padding: 0;";
+    html += "      }";
+    html += "      #map {";
+    html += "        height: 100%;";
+    html += "      }";
+    html += "    </style>";
+    html += "  </head>";
+    html += "  <body>";
+    html += "    <div id=\"map\"></div>";
+    html += "    <script>";
+    html += "";
+    html += "function initMap() {";
+    html += "  var myLatLng = {lat: -25.363, lng: 131.044};";
+    html += "";
+    html += "  var map = new google.maps.Map(document.getElementById('map'), {";
+    html += "    zoom: 4,";
+    html += "    center: myLatLng";
+    html += "  });";
+    html += "";
+    html += "  var marker = new google.maps.Marker({";
+    html += "    position: myLatLng,";
+    html += "    map: map,";
+    html += "    title: 'Hello World!'";
+    html += "  });";
+    html += " marker.addListener('dblclick', VlaspitRoutetool.showOphaalpunt(10) ); ";
+    html += "}";
+    html += "";
+    html += "    </script>";
+    html += "    <script async defer";
+    html += "        src=\"https://maps.googleapis.com/maps/api/js?key="+settings.value("apiKey").toString()+"&callback=initMap\"></script>";
+    html += "  </body>";
+    html += "</html>";
+
+    ui->webView->page()->currentFrame()->setHtml(html);
+
+
+    vvimDebug() << "\n\n\n" << ui->webView->page()->currentFrame()->toHtml();
+    return;
+
+    QString str = "var myLatLng = {lat: %1, lng: %2}; "
+        "var marker = new google.maps.Marker({ "
+        "        position: myLatLng, "
+        "  map: map, "
+        "  title: '%3', "
+        "  icon: 'http://maps.google.com/mapfiles/ms/icons/%4-dot.png' " // see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
+        "}); ";
+            //"marker.addListener('dblclick', VlaspitRoutetool.showOphaalpunt(%5) );";
+
+    str += " marker.addListener('click', function() { "
+            " map.setZoom(8); "
+        " map.setCenter(marker.getPosition()); "
+            "  }); ";
+
+    QString markers_js = "";
+
+    QString latitude = "50.979561";
+    QString longitude = "4.960019";
+    QString name = "marker om mee te testen";
+    int ophaalpunt_id = 7;
+    markers_js = str.arg(latitude).arg(longitude).arg(name).arg("purple").arg(ophaalpunt_id);
+    ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
 }
 
 void Form::populateJavaScriptWindowObject()
@@ -1047,5 +1119,5 @@ void Form::populateJavaScriptWindowObject()
 
 void Form::showOphaalpunt(int ophaalpunt_id)
 {
-    qDebug() << "clicked on marker, show ophaalpunt " << ophaalpunt_id;
+    vvimDebug() << "clicked on marker, show ophaalpunt " << ophaalpunt_id;
 }
