@@ -51,24 +51,6 @@ vvimDebug() << "<vvim>" << "would the distance matrix work if we would only put 
     m_pNetworkAccessManager->get(QNetworkRequest(QUrl(url)));
 }
 
-void GeocodeDataManager::getCoordinates(const QString& address, const QString& name_and_address)
-{
-    name_of_marker = name_and_address;
-    name_of_marker.replace("&","+");
-    name_of_marker.replace("\n",",");
-
-    QString address_encoded = address;
-    address_encoded.replace("&","+");
-    address_encoded.replace("\n",",");
-    address_encoded.replace(" ","+");
-    QString url = QString("https://maps.googleapis.com/maps/api/geocode/json?address=%1&key=%2&oe=utf8&sensor=false").arg(address_encoded).arg(settings.value("apiKey").toString());
-
-    vvimDebug() << "issue #20, check:" << url;
-vvimDebug() << "<vvim>" << "would the distance matrix work if we would only put the NAME of the ophaalpunt here, and NOT the address? based on the coordinates???";
-    m_pNetworkAccessManager->get(QNetworkRequest(QUrl(url)));
-}
-
-
 void GeocodeDataManager::replyFinished(QNetworkReply* reply)
 {
     QString json = reply->readAll();
