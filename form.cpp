@@ -1072,7 +1072,7 @@ void Form::on_testing_clicked()
     html += "    map: map,";
     html += "    title: 'Hello World!'";
     html += "  });";
-    html += " marker.addListener('dblclick', VlaspitRoutetool.showOphaalpunt(10) ); ";
+    html += " marker.addListener('dblclick', function() { VlaspitRoutetool.showOphaalpunt(10); } ); ";
     html += "}";
     html += "";
     html += "    </script>";
