@@ -965,6 +965,7 @@ void Form::on_showOphaalpunten_clicked()
 
    QString markers_js = "";
 
+   vvimDebug() << "\n\nSTART TIME" << QTime::currentTime().toString();
    QSet<SOphaalpunt*>::Iterator it = markers_met_aanmelding.begin();
     while(it != markers_met_aanmelding.end())
     {
@@ -974,15 +975,18 @@ void Form::on_showOphaalpunten_clicked()
        ++it;
     }
 
-
+    vvimDebug() << "\n\nAfter Blue" << QTime::currentTime().toString();
+int i = 0;
     it = markers_zonder_aanmelding.begin();
     while(it != markers_zonder_aanmelding.end())
     {
+vvimDebug() << "yellow" << ++i;
       //showing locations without aanmelding in yellow
       markers_js = str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("yellow").arg((*it)->getOphaalpuntId());
       ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
       ++it;
     }
+    vvimDebug() << "\n\nEND TIME" << QTime::currentTime().toString();
 
    vvimDebug() << "******************";
    vvimDebug() << "*** < debug >  ***";
