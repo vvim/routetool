@@ -951,55 +951,72 @@ void Form::on_showOphaalpunten_clicked()
        }
    }
 
-   QString str = "var myLatLng = {lat: %1, lng: %2}; "
-       "var marker = new google.maps.Marker({ "
-       "        position: myLatLng, "
-       "  map: map, "
-       "  title: '%3', "
-       "  icon: 'http://maps.google.com/mapfiles/ms/icons/%4-dot.png' " // see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
-       "}); "
-       "marker.addListener('dblclick', function() { VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(%5); } );";
+    //                [id, lat, lng, 'title', icon, zIndex],  // icon: see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
+    QString str = "\n\t[%5, %1, %2,   '%3', 'http://maps.google.com/mapfiles/ms/icons/%4-dot.png', %6, function() { VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(%5); }],";
 
-   // help: http://stackoverflow.com/questions/6611634/google-maps-api-v3-add-event-listener-to-all-markers
-   // anders eerst eens probleem met een simpele addlistener?
+   QString markers_js = "var ophaalpunten = [ ";
 
-   QString markers_js = "";
-
+   int i = 0;
    vvimDebug() << "\n\nSTART TIME" << QTime::currentTime().toString();
    QSet<SOphaalpunt*>::Iterator it = markers_met_aanmelding.begin();
     while(it != markers_met_aanmelding.end())
     {
         //showing locations with aanmelding in blue
-        markers_js = str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("blue").arg((*it)->getOphaalpuntId());
-       ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
+        markers_js.append(str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("blue").arg((*it)->getOphaalpuntId()).arg(++i));
        ++it;
     }
 
     vvimDebug() << "\n\nAfter Blue" << QTime::currentTime().toString();
-int i = 0;
+
     it = markers_zonder_aanmelding.begin();
     while(it != markers_zonder_aanmelding.end())
     {
-vvimDebug() << "yellow" << ++i;
       //showing locations without aanmelding in yellow
-      markers_js = str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("yellow").arg((*it)->getOphaalpuntId());
-      ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
+      markers_js.append(str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("yellow").arg((*it)->getOphaalpuntId()).arg(++i));
       ++it;
     }
-    vvimDebug() << "\n\nEND TIME" << QTime::currentTime().toString();
+    vvimDebug() << "\n\nAfter Yellow" << QTime::currentTime().toString();
 
-   vvimDebug() << "******************";
-   vvimDebug() << "*** < debug >  ***";
-   vvimDebug() << "******************";
-   vvimDebug() << "";
-   vvimDebug() << "markers met aanmelding:" << markers_met_aanmelding.size();
-   vvimDebug() << "markers zonder aanmelding:" << markers_zonder_aanmelding.size();
-   vvimDebug() << "ophaalpunten in route:" << ophaalpunten_in_route->size();
-   vvimDebug() << "totaal aantal:" << markers_met_aanmelding.size() + markers_zonder_aanmelding.size() + ophaalpunten_in_route->size();
-   vvimDebug() << "";
-   vvimDebug() << "******************";
-   vvimDebug() << "*** </ debug > ***";
-   vvimDebug() << "******************";
+    if(i == 0)
+    {
+        vvimDebug() << "no ophaalpunten found to be marked, returning";
+
+        vvimDebug() << "******************";
+        vvimDebug() << "*** < debug >  ***";
+        vvimDebug() << "******************";
+        vvimDebug() << "";
+        vvimDebug() << "markers met aanmelding:" << markers_met_aanmelding.size();
+        vvimDebug() << "markers zonder aanmelding:" << markers_zonder_aanmelding.size();
+        vvimDebug() << "ophaalpunten in route:" << ophaalpunten_in_route->size();
+        vvimDebug() << "totaal aantal:" << markers_met_aanmelding.size() + markers_zonder_aanmelding.size() + ophaalpunten_in_route->size();
+        vvimDebug() << "";
+        vvimDebug() << "******************";
+        vvimDebug() << "*** </ debug > ***";
+        vvimDebug() << "******************";
+        return;
+    }
+
+    // chop last ',' from markers_js
+    markers_js.chop(1);
+
+    str = "\n];\n"
+          "for (var i = 0; i < ophaalpunten.length; i++) { \n"
+          "      var ophaalpunt = ophaalpunten[i]; \n"
+          "      var marker = new google.maps.Marker({ \n"
+          "          position: {lat: ophaalpunt[1], lng: ophaalpunt[2]}, \n"
+          "          map: map, \n"
+          "          title: ophaalpunt[3], \n"
+          "          icon: ophaalpunt[4], \n"
+          "          zIndex: ophaalpunt[5] \n"
+          "          }); \n"
+          "          marker.addListener('dblclick', ophaalpunt[6] ); \n"
+///          "          marker.addListener('dblclick', function() { VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(ophaalpunt[0]); } ); \n"
+///          "          marker.addListener('dblclick', function() { VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(ophaalpunt[0]); } ); \n"
+          "  }\n";
+    markers_js.append(str);
+    ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
+    vvimDebug() << "\n\nEND TIME" << QTime::currentTime().toString();
+    vvimDebug() << "\n\nJavascript:" << markers_js << "\n\n";
 
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
