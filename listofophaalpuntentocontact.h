@@ -4,7 +4,6 @@
 #include "infoophaalpunt.h"
 #include "nieuweaanmelding.h"
 #include "listofophaalpuntentocontactsortfilterproxymodel.h"
-#include <QTreeWidget>
 #include <QTreeView>
 
 extern QSettings settings;

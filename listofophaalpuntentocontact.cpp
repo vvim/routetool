@@ -36,7 +36,6 @@ ListOfOphaalpuntenToContact::ListOfOphaalpuntenToContact(QWidget *parent) :
 
     connect(buttonBox,SIGNAL(accepted()),this,SLOT(ok_button_pushed()));
     connect(info,SIGNAL(nieuweAanmelding(int)),nieuweaanmeldingWidget,SLOT(aanmeldingVoorOphaalpunt(int)));
-    connect(contactTreeView,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(showOphaalpunt(QTreeWidgetItem*)));
     connect(contactTreeView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(showOphaalpunt(QModelIndex)));
 
     vvimDebug() << "<vvim> TODO: should we call UptodateAllOphaalpunten() everytime we initialise the contactTree?";
