@@ -62,6 +62,7 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(&nieuwOphaalpuntWidget, SIGNAL(infoChanged()), &leveringWidget, SLOT(loadOphaalpunten()));
 
     connect(m_pForm, SIGNAL(showOphaalpuntInfo(int)), this, SLOT(showOphaalpuntInfo(int)));
+    connect(&nieuwOphaalpuntWidget,SIGNAL(nieuweAanmelding(int)),&nieuweAanmeldingWidget,SLOT(aanmeldingVoorOphaalpunt(int)));
 
 }
 
@@ -184,5 +185,6 @@ void RouteTool::showExportCollectionHistory()
 
 void RouteTool::showOphaalpuntInfo(int ophaalpunt_id)
 {
+    nieuwOphaalpuntWidget.showAanmeldingAndHistoriekButton(true);
     nieuwOphaalpuntWidget.showOphaalpunt(ophaalpunt_id);
 }
