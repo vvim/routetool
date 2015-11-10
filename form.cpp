@@ -950,16 +950,15 @@ void Form::on_showOphaalpunten_clicked()
     vvimDebug() << "inspiration: voor effectieve interactie tussen marker en javascript function" << "http://stackoverflow.com/questions/3059044/google-maps-js-api-v3-simple-multiple-marker-example" << "en" << "http://stackoverflow.com/a/23322162";
 
     //                [id, lat, lng, 'title', icon, zIndex],  // icon: see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
-    QString str = "\n\t[%5, %1, %2,   '%3', 'http://maps.google.com/mapfiles/ms/icons/%4-dot.png', %6, function() { VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(%5); }],";
+    QString str = "\n\t[%5, %1, %2,   '%3', 'http://maps.google.com/mapfiles/ms/icons/%4-dot.png'],";
 
    QString markers_js = "var ophaalpunten = [ ";
 
-   int i = 0;
    QSet<SOphaalpunt*>::Iterator it = markers_met_aanmelding.begin();
     while(it != markers_met_aanmelding.end())
     {
         //showing locations with aanmelding in blue
-        markers_js.append(str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("blue").arg((*it)->getOphaalpuntId()).arg(++i));
+        markers_js.append(str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("blue").arg((*it)->getOphaalpuntId()));
        ++it;
     }
 
@@ -967,11 +966,15 @@ void Form::on_showOphaalpunten_clicked()
     while(it != markers_zonder_aanmelding.end())
     {
       //showing locations without aanmelding in yellow
-      markers_js.append(str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("yellow").arg((*it)->getOphaalpuntId()).arg(++i));
+      markers_js.append(str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("yellow").arg((*it)->getOphaalpuntId()));
       ++it;
     }
 
-    if(i == 0)
+#ifndef QT_NO_CURSOR
+    QApplication::restoreOverrideCursor();
+#endif
+
+    if(markers_js.length() < 25) // length "var ophaalpunten = [ " < 25 => no ophaalpunten to be marked
     {
         vvimDebug() << "no ophaalpunten found to be marked, returning";
 
@@ -987,6 +990,7 @@ void Form::on_showOphaalpunten_clicked()
         vvimDebug() << "******************";
         vvimDebug() << "*** </ debug > ***";
         vvimDebug() << "******************";
+        vvimDebug() << "\n\nJavascript:" << markers_js << "\n\n";
         return;
     }
 
@@ -1001,17 +1005,17 @@ void Form::on_showOphaalpunten_clicked()
           "          map: map, \n"
           "          title: ophaalpunt[3], \n"
           "          icon: ophaalpunt[4], \n"
-          "          zIndex: ophaalpunt[5] \n"
+          "          zIndex: i \n"          /// a marker with zIndex 0 , does it get shown?
           "          }); \n"
-          "          marker.addListener('dblclick', ophaalpunt[6] ); \n"
+          "      google.maps.event.addListener(marker, 'dblclick', (function(marker, i) {\n"
+          "          return function() {\n"
+          "            VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(ophaalpunten[i][0]);\n"
+          "      }\n"
+          " })(marker, i));\n"
           "  }\n";
     markers_js.append(str);
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
     vvimDebug() << "\n\nJavascript:" << markers_js << "\n\n";
-
-#ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
-#endif
 }
 
 QSet<int>* Form::getOphaalpuntIdFromRoute()
