@@ -54,9 +54,8 @@ vvimDebug() << "<vvim>" << "would the distance matrix work if we would only put 
 void GeocodeDataManager::replyFinished(QNetworkReply* reply)
 {
     QString json = reply->readAll();
-    //vvimDebug() << "Reply = " << json;
     vvimDebug() << "URL = " << reply->url();
-    QString strUrl = reply->url().toString();
+    //QString strUrl = reply->url().toString();
 
     QJson::Parser parser;
 

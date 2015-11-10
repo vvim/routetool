@@ -778,9 +778,13 @@ void Form::reloadCompleter()
 
 void Form::on_showOphaalpunten_clicked()
 {
+#ifndef QT_NO_CURSOR
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+
     vvimDebug() << "toon bekende ophaalpunten!" << "inspiration: https://developers.google.com/maps/documentation/javascript/examples/marker-simple" << "and" << "https://developers.google.com/maps/documentation/javascript/markers";
 
-    vvimDebug() << "** [A] ** update the ophaalpunten without lat/lng - Google Maps API maximum = 15";
+    vvimDebug() << "** [A] ** update the ophaalpunten without lat/lng - Google Maps API doesn't allow more than 15 queries in one go, maximum = 15";
     QSqlQuery query_no_lat_lng("SELECT * FROM ophaalpunten WHERE lat is NULL or lng is NULL LIMIT 15");
     if(query_no_lat_lng.exec())
         vvimDebug() << "query runs";
@@ -818,9 +822,6 @@ void Form::on_showOphaalpunten_clicked()
 
 
 
-#ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-#endif
 
     /**
       de al getoonde markers staan in QList <SMarker*> m_markers;
@@ -833,20 +834,12 @@ void Form::on_showOphaalpunten_clicked()
     QSet<int> *ophaalpunten_in_route = getOphaalpuntIdFromRoute();
     vvimDebug() << "aantal ophaalpunten in de huidige route:" << ophaalpunten_in_route->size();
 
-    // een qList kan je als volgt sorteren:
-    //      qSort(ophaalpunten_in_route->begin(), ophaalpunten_in_route->end()); // see http://stackoverflow.com/a/27228639/
-    //      qt5 version: std::sort(ophaalpunten_in_route->begin(), ophaalpunten_in_route->end());
-    // maar we hebben nu voor een QSet gekozen, dan is sorteren niet meer nodig
-
-    vvimDebug() << "does it contain 106?" << ophaalpunten_in_route->contains(106);
-    vvimDebug() << "does it contain 105?" << ophaalpunten_in_route->contains(105);
-
     QString SQLquery_all_aanmeldingen = "SELECT ophaalpunt FROM aanmelding WHERE ophaalronde_datum is NULL ORDER by ophaalpunt;";
 
     QSqlQuery query_all_aanmeldingen(SQLquery_all_aanmeldingen);
 
 
-    vvimDebug() << "step 1" << "get all aanmeldingen";
+    vvimDebug() << "++++ step 1" << "get all aanmeldingen";
     if(!query_all_aanmeldingen.exec())
     {
         if(!reConnectToDatabase(query_all_aanmeldingen.lastError(), SQLquery_all_aanmeldingen, QString("[%1]").arg(Q_FUNC_INFO)))
@@ -875,9 +868,9 @@ void Form::on_showOphaalpunten_clicked()
     }
 
 
-    vvimDebug() << "step 1" << "done" << ophaalpunten_met_aanmelding.size() << "ophaalpunten have an 'aanmelding' (so we should mark them with a different color)";
+    vvimDebug() << "++++ step 1" << "done" << ophaalpunten_met_aanmelding.size() << "ophaalpunten have an 'aanmelding' (so we should mark them with a different color)";
 
-    vvimDebug() << "step 2" << "get all ophaalpunten";
+    vvimDebug() << "++++ step 2" << "get all ophaalpunten";
 
     QString SQLquery_all_ophaalpunten = "SELECT id, naam, postcode, "
                                         "       straat, nr, bus, plaats, land, extra_informatie, lat, lng "
@@ -905,7 +898,7 @@ void Form::on_showOphaalpunten_clicked()
         }
     }
 
-    vvimDebug() << "step 3" << "get all ophaalpunten and filter those who are already marked or have an 'aanmelding'";
+    vvimDebug() << "++++ step 3" << "get all ophaalpunten and filter those who are already marked or have an 'aanmelding'";
     while (query_all_ophaalpunten.next())
     {
 
@@ -951,13 +944,17 @@ void Form::on_showOphaalpunten_clicked()
        }
    }
 
+
+/// could be done better, see example at http://stackoverflow.com/a/3059129 with extra argument for the addListener
+    vvimDebug() << "++++ step 4" << "form javascript with all ophaalpunten and put them as clickable markers on the map" << "see http://stackoverflow.com/questions/3059044/";
+    vvimDebug() << "inspiration: voor effectieve interactie tussen marker en javascript function" << "http://stackoverflow.com/questions/3059044/google-maps-js-api-v3-simple-multiple-marker-example" << "en" << "http://stackoverflow.com/a/23322162";
+
     //                [id, lat, lng, 'title', icon, zIndex],  // icon: see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
     QString str = "\n\t[%5, %1, %2,   '%3', 'http://maps.google.com/mapfiles/ms/icons/%4-dot.png', %6, function() { VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(%5); }],";
 
    QString markers_js = "var ophaalpunten = [ ";
 
    int i = 0;
-   vvimDebug() << "\n\nSTART TIME" << QTime::currentTime().toString();
    QSet<SOphaalpunt*>::Iterator it = markers_met_aanmelding.begin();
     while(it != markers_met_aanmelding.end())
     {
@@ -966,8 +963,6 @@ void Form::on_showOphaalpunten_clicked()
        ++it;
     }
 
-    vvimDebug() << "\n\nAfter Blue" << QTime::currentTime().toString();
-
     it = markers_zonder_aanmelding.begin();
     while(it != markers_zonder_aanmelding.end())
     {
@@ -975,7 +970,6 @@ void Form::on_showOphaalpunten_clicked()
       markers_js.append(str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("yellow").arg((*it)->getOphaalpuntId()).arg(++i));
       ++it;
     }
-    vvimDebug() << "\n\nAfter Yellow" << QTime::currentTime().toString();
 
     if(i == 0)
     {
@@ -1010,12 +1004,9 @@ void Form::on_showOphaalpunten_clicked()
           "          zIndex: ophaalpunt[5] \n"
           "          }); \n"
           "          marker.addListener('dblclick', ophaalpunt[6] ); \n"
-///          "          marker.addListener('dblclick', function() { VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(ophaalpunt[0]); } ); \n"
-///          "          marker.addListener('dblclick', function() { VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(ophaalpunt[0]); } ); \n"
           "  }\n";
     markers_js.append(str);
     ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
-    vvimDebug() << "\n\nEND TIME" << QTime::currentTime().toString();
     vvimDebug() << "\n\nJavascript:" << markers_js << "\n\n";
 
 #ifndef QT_NO_CURSOR
@@ -1049,84 +1040,6 @@ QSet<int>* Form::getOphaalpuntIdFromRoute()
     // </debug>
 
     return ophaalpunt_in_route;
-}
-
-void Form::on_testing_clicked()
-{
-/*
-    QString html = "";
-
-    html += "<!DOCTYPE html>";
-    html += "<html>";
-    html += "  <head>";
-    html += "    <meta name=\"viewport\" content=\"initial-scale=1.0, user-scalable=no\">";
-    html += "    <meta charset=\"utf-8\">";
-    html += "    <title>Simple markers</title>";
-    html += "    <style>";
-    html += "      html, body {";
-    html += "        height: 100%;";
-    html += "        margin: 0;";
-    html += "        padding: 0;";
-    html += "      }";
-    html += "      #map {";
-    html += "        height: 100%;";
-    html += "      }";
-    html += "    </style>";
-    html += "  </head>";
-    html += "  <body>";
-    html += "    <div id=\"map\"></div>";
-    html += "    <script>";
-    html += "";
-    html += "function initMap() {";
-    html += "  var myLatLng = {lat: -25.363, lng: 131.044};";
-    html += "";
-    html += "  var map = new google.maps.Map(document.getElementById('map'), {";
-    html += "    zoom: 4,";
-    html += "    center: myLatLng";
-    html += "  });";
-    html += "";
-    html += "  var marker = new google.maps.Marker({";
-    html += "    position: myLatLng,";
-    html += "    map: map,";
-    html += "    title: 'Hello World!'";
-    html += "  });";
-    html += " marker.addListener('dblclick', function() { VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(10); } ); ";
-    html += "}";
-    html += "";
-    html += "    </script>";
-    html += "    <script async defer";
-    html += "        src=\"https://maps.googleapis.com/maps/api/js?key="+settings.value("apiKey").toString()+"&callback=initMap\"></script>";
-    html += "  </body>";
-    html += "</html>";
-
-    ui->webView->page()->currentFrame()->setHtml(html);
-
-
-    vvimDebug() << "\n\n\n" << ui->webView->page()->currentFrame()->toHtml();
-    return;
-*/
-    QString str = "var myLatLng = {lat: %1, lng: %2}; "
-        "var marker = new google.maps.Marker({ "
-        "        position: myLatLng, "
-        "  map: map, "
-        "  title: '%3', "
-        "  icon: 'http://maps.google.com/mapfiles/ms/icons/%4-dot.png' " // see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
-        "}); "
-        "marker.addListener('dblclick', function() {VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(%5);} );";
-/*
-    str += " marker.addListener('click', function() { "
-            " map.setZoom(8); "
-        " map.setCenter(marker.getPosition()); "
-            "  }); ";*/
-
-    QString markers_js = "";
-
-    QString latitude = "50.979561";
-    QString longitude = "4.960019";
-    QString name = "marker om mee te testen";
-    int ophaalpunt_id = 7;
-    markers_js = str.arg(latitude).arg(longitude).arg(name).arg("purple").arg(ophaalpunt_id);
-    ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
 }
 
 void Form::populateJavaScriptWindowObject()

@@ -104,9 +104,3 @@ FORMS    += routetool.ui \
     form.ui \
     ophaalhistoriekdialog.ui
 
-OTHER_FILES += \
-    testing.html
-
-RESOURCES += \
-    testing.qrc
-

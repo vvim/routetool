@@ -70,14 +70,9 @@ private slots:
     void reloadCompleter();
 
     void on_showOphaalpunten_clicked();
-
-    void on_testing_clicked();
     void populateJavaScriptWindowObject();
 
 private:
-    /**    I believe this member is a copy/paste accident, must try out.
-        void getCoordinates(const QString& address);
-    **/
     int **distance_matrix_in_meters;
     int **distance_matrix_in_seconds;
     int matrix_dimensions;
@@ -96,12 +91,6 @@ private:
     QList <SMarker*> m_markers;
 
     MyCompleter *completer;
-
-    /**    I believe this member is a copy/paste accident, must try out. Was already included in version 20140519
-
-    QAbstractItemModel *modelFromFile(const QString& fileName);
-
-    **/
 
     QSet<int> *getOphaalpuntIdFromRoute();
 
