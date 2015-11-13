@@ -22,7 +22,8 @@ namespace Ui {
 class myWebPage : public QWebPage
 {
     virtual QString userAgentForUrl(const QUrl& url) const {
-        return "Chrome/1.0";
+        // return "Chrome/1.0"; // see https://wiki.qt.io/How_to_set_user_agent_in_Qt_application
+        return "Mozilla/5.0 (X11; Linux i686; rv:40.0) Gecko/20100101 Firefox/40.0";
     }
 };
 
@@ -35,11 +36,18 @@ public:
     explicit Form(QWidget *parent = 0);
     ~Form();
 
+signals:
+    void showOphaalpuntInfo(int ophaalpunt_id);
+
+public slots:
+    void askMainProgramToShowOphaalpuntInfo(int ophaalpunt_id);
+
 private slots:
     void goClicked();
     void showCoordinates(double east, double north, QString markername, bool saveMarker = true);
     void showOphaalpunt(double east, double north, SOphaalpunt ophaalpunt, bool saveMarker = true);
     void showLevering(double east, double north, SLevering levering, bool saveMarker = true);
+    void putCoordinatesInDatabase(double east, double north, int ophaalpunt_id);
     //set marker to map and save marker in markers list
     void setMarker(double east, double north, QString caption);
     void setMarker(double east, double north, SOphaalpunt ophaalpunt);
@@ -61,10 +69,10 @@ private slots:
     void setTotalWeightTotalVolume();
     void reloadCompleter();
 
+    void on_showOphaalpunten_clicked();
+    void populateJavaScriptWindowObject();
+
 private:
-    /**    I believe this member is a copy/paste accident, must try out.
-        void getCoordinates(const QString& address);
-    **/
     int **distance_matrix_in_meters;
     int **distance_matrix_in_seconds;
     int matrix_dimensions;
@@ -84,11 +92,7 @@ private:
 
     MyCompleter *completer;
 
-    /**    I believe this member is a copy/paste accident, must try out. Was already included in version 20140519
-
-    QAbstractItemModel *modelFromFile(const QString& fileName);
-
-    **/
+    QSet<int> *getOphaalpuntIdFromRoute();
 
     void buildTransportationList();
     void logOutputMarkers();

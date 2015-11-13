@@ -12,9 +12,11 @@ GeocodeDataManager::GeocodeDataManager(QObject *parent) :
 {
     m_pNetworkAccessManager = new QNetworkAccessManager(this);
     markersToBeDone = new QList<SOphaalpunt>(); // needed so that we can delete it at the first call of pushListOfMarkers() + for the empty()-check at giveNextMarker()
+    coordsToPutInDatabase = new QList<SOphaalpunt>(); // needed so that we can delete it at the first call of lookForCoordinatesToPutInDatabase() + for the empty()-check at lookupNextCoords()
     connect(m_pNetworkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
     connect(this, SIGNAL(coordinatesReady(double, double, QString)), this, SLOT(giveNextMarker()));
     connect(this, SIGNAL(coordinatesReady(double, double, SOphaalpunt)), this, SLOT(giveNextMarker()));
+    connect(this, SIGNAL(putCoordinatesInDatabase(double,double, int)), this, SLOT(lookupNextCoords()));
     marker_type = Adres;
 }
 
@@ -32,13 +34,28 @@ vvimDebug() << "<vvim>" << "would the distance matrix work if we would only put 
     m_pNetworkAccessManager->get(QNetworkRequest(QUrl(url)));
 }
 
+void GeocodeDataManager::getCoordinates(const QString& address, const QString& name_and_address)
+{
+    name_of_marker = name_and_address;
+    name_of_marker.replace("&","+");
+    name_of_marker.replace("\n",",");
+
+    QString address_encoded = address;
+    address_encoded.replace("&","+");
+    address_encoded.replace("\n",",");
+    address_encoded.replace(" ","+");
+    QString url = QString("https://maps.googleapis.com/maps/api/geocode/json?address=%1&key=%2&oe=utf8&sensor=false").arg(address_encoded).arg(settings.value("apiKey").toString());
+
+    vvimDebug() << "issue #20, check:" << url;
+vvimDebug() << "<vvim>" << "would the distance matrix work if we would only put the NAME of the ophaalpunt here, and NOT the address? based on the coordinates???";
+    m_pNetworkAccessManager->get(QNetworkRequest(QUrl(url)));
+}
 
 void GeocodeDataManager::replyFinished(QNetworkReply* reply)
 {
     QString json = reply->readAll();
-    //vvimDebug() << "Reply = " << json;
     vvimDebug() << "URL = " << reply->url();
-    QString strUrl = reply->url().toString();
+    //QString strUrl = reply->url().toString();
 
     QJson::Parser parser;
 
@@ -80,13 +97,18 @@ void GeocodeDataManager::replyFinished(QNetworkReply* reply)
         marker_type = Adres;
         emit coordinatesReady(locationOfResult["lng"].toDouble(), locationOfResult["lat"].toDouble(),leveringToBeDone);
     }
+    else if(marker_type == OnlyCoords)
+    {
+        marker_type = Adres;
+        emit putCoordinatesInDatabase(locationOfResult["lng"].toDouble(), locationOfResult["lat"].toDouble(), ophaalpunt_to_mark.ophaalpunt_id);
+    }
 }
 
 void GeocodeDataManager::pushLevering(SLevering levering)
 {
     marker_type = Levering;
     leveringToBeDone = levering;
-    getCoordinates(leveringToBeDone.getAddress()); // getAddress() should be enough, while the marker will be named with getNameAndAddress()
+    getCoordinates(ophaalpunt_to_mark.getAddress(), ophaalpunt_to_mark.getNameAndAddress());
 }
 
 void GeocodeDataManager::pushListOfMarkers(QList<SOphaalpunt> *list_of_markers)
@@ -110,7 +132,7 @@ void GeocodeDataManager::giveNextMarker()
         marker_type = Ophaalpunt;
         vvimDebug() << "<vvim>: hier een korte pauze inlassen zodat de naam van de marker correct blijft?";
         ophaalpunt_to_mark = markersToBeDone->takeFirst(); // Removes the first item in the list and returns it.
-        getCoordinates(ophaalpunt_to_mark.getNameAndAddress());
+        getCoordinates(ophaalpunt_to_mark.getAddress(), ophaalpunt_to_mark.getNameAndAddress());
     }
 }
 
@@ -118,6 +140,31 @@ GeocodeDataManager::~GeocodeDataManager()
 {
     vvimDebug() << "start to deconstruct GeocodeDataManager()";
     delete markersToBeDone;
+    delete coordsToPutInDatabase;
     delete m_pNetworkAccessManager;
     vvimDebug() << "GeocodeDataManager() deconstructed";
+}
+
+void GeocodeDataManager::lookForCoordinatesToPutInDatabase(QList<SOphaalpunt> *list_of_ophaalpunten)
+{
+    delete coordsToPutInDatabase;
+    coordsToPutInDatabase = list_of_ophaalpunten;
+
+    lookupNextCoords();
+}
+
+void GeocodeDataManager::lookupNextCoords()
+{
+    if(!coordsToPutInDatabase->empty()) // coordsToPutInDatabase: not declared yet???
+    {
+        vvimDebug() << "number of coords to put in database:" << coordsToPutInDatabase->size();
+        foreach(SOphaalpunt marker, *coordsToPutInDatabase)
+        {
+            vvimDebug() << marker.naam;
+        }
+
+        marker_type = OnlyCoords;
+        ophaalpunt_to_mark = coordsToPutInDatabase->takeFirst(); // Removes the first item in the list and returns it.
+        getCoordinates(ophaalpunt_to_mark.getAddress(), ophaalpunt_to_mark.getNameAndAddress());
+    }
 }

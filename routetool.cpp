@@ -60,6 +60,10 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(&ophaalpuntenWidget, SIGNAL(contentsOfDatabaseChanged()), &leveringWidget, SLOT(loadOphaalpunten()));
     connect(&contactListWidget, SIGNAL(contentsOfDatabaseChanged()), &leveringWidget, SLOT(loadOphaalpunten()));
     connect(&nieuwOphaalpuntWidget, SIGNAL(infoChanged()), &leveringWidget, SLOT(loadOphaalpunten()));
+
+    connect(m_pForm, SIGNAL(showOphaalpuntInfo(int)), this, SLOT(showOphaalpuntInfo(int)));
+    connect(&nieuwOphaalpuntWidget,SIGNAL(nieuweAanmelding(int)),&nieuweAanmeldingWidget,SLOT(aanmeldingVoorOphaalpunt(int)));
+
 }
 
 RouteTool::~RouteTool()
@@ -177,4 +181,10 @@ void RouteTool::showExportCollectionHistory()
 {
     ExportCollectionHistory *dialogboxToExportHistoryOfCollectedQuantities = new ExportCollectionHistory();
     dialogboxToExportHistoryOfCollectedQuantities->show();
+}
+
+void RouteTool::showOphaalpuntInfo(int ophaalpunt_id)
+{
+    nieuwOphaalpuntWidget.showAanmeldingAndHistoriekButton(true);
+    nieuwOphaalpuntWidget.showOphaalpunt(ophaalpunt_id);
 }

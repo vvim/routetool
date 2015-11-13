@@ -26,9 +26,11 @@ struct SOphaalpunt
         aanmelding_id = -1;
         ophaalpunt_id = -1;
         opmerkingen = "";
+        lat = 0.0;
+        lng = 0.0;
     };
 
-    SOphaalpunt(QString _naam, QString _street, QString _housenr, QString _busnr, QString _postalcode, QString _plaats, QString _country, double _kg_kurk, double _kg_kaarsresten, double _zakken_kurk, double _zakken_kaarsresten, int _aanmelding_id, int _ophaalpunt_id, QString _opmerkingen)
+    SOphaalpunt(QString _naam, QString _street, QString _housenr, QString _busnr, QString _postalcode, QString _plaats, QString _country, double _kg_kurk, double _kg_kaarsresten, double _zakken_kurk, double _zakken_kaarsresten, int _aanmelding_id, int _ophaalpunt_id, QString _opmerkingen, double _lat = 0.0, double _lng = 0.0)
     {
         naam = _naam;
         kg_kurk = _kg_kurk;
@@ -44,6 +46,8 @@ struct SOphaalpunt
         aanmelding_id = _aanmelding_id;
         ophaalpunt_id = _ophaalpunt_id;
         opmerkingen = _opmerkingen;
+        lat = _lat;
+        lng = _lng;
     };
 
     double getVolume()
@@ -100,6 +104,22 @@ struct SOphaalpunt
         qDebug() << "... kaars: " << kg_kaarsresten << "kg, "<< zakken_kaarsresten << "zakken";
     }
 
+
+    int getOphaalpuntId()
+    {
+        return ophaalpunt_id;
+    }
+
+    double getLatitude()
+    {
+        return lat;
+    }
+
+    double getLongitude()
+    {
+        return lng;
+    }
+
     QString naam;
     double kg_kurk;
     double kg_kaarsresten;
@@ -114,6 +134,8 @@ struct SOphaalpunt
     int aanmelding_id;
     int ophaalpunt_id;
     QString opmerkingen;
+    double lat;
+    double lng;
 };
 
 #endif // SOPHAALPUNT_H

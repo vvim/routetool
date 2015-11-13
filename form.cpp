@@ -57,10 +57,12 @@ Form::Form(QWidget *parent) :
     connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,SOphaalpunt)), this, SLOT(showOphaalpunt(double,double,SOphaalpunt)));
     connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,SLevering)), this, SLOT(showLevering(double,double,SLevering)));
     connect(&m_geocodeDataManager, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
+    connect(&m_geocodeDataManager, SIGNAL(putCoordinatesInDatabase(double,double,int)), this, SLOT(putCoordinatesInDatabase(double,double,int)));
 
     connect(&m_distanceMatrix, SIGNAL(errorOccured(QString)), this, SLOT(errorOccured(QString)));
     connect(&m_distanceMatrix, SIGNAL(new_order_smarkers(QList<int> *)), this, SLOT(process_result_distancematrix(QList<int> *)));
     connect(&m_distanceMatrix, SIGNAL(new_distance_matrices(int**, int**)), this, SLOT(reload_distancematrix(int**, int**)));
+    connect(ui->webView->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(populateJavaScriptWindowObject()));
 
     QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled, true);
     ui->lePostalAddress->setText("");
@@ -119,6 +121,44 @@ void Form::showOphaalpunt(double east, double north, SOphaalpunt ophaalpunt, boo
 
     if (saveMarker)
         setMarker(east, north, ophaalpunt);
+}
+
+void Form::putCoordinatesInDatabase(double east, double north, int ophaalpunt_id)
+{
+    /** this function is only to put the coordinates in the database, NOT to put a marker on the screen **/
+
+
+    vvimDebug() << "update db: lat / lng / ophaalpunt" << north << east << ophaalpunt_id;
+
+    QString SQLquery_update_coords = "UPDATE ophaalpunten SET lat = :lat, lng = :lng WHERE id = :ophaalpunt_id";
+
+    QSqlQuery query_update_coords;
+    query_update_coords.prepare(SQLquery_update_coords);
+    query_update_coords.bindValue(":lat", north);
+    query_update_coords.bindValue(":lng", east);
+    query_update_coords.bindValue(":ophaalpunt_id", ophaalpunt_id);
+
+    vvimDebug() << "step 1" << "update ophaalpunt with lat/lng";
+    if(!query_update_coords.exec())
+    {
+        if(!reConnectToDatabase(query_update_coords.lastError(), SQLquery_update_coords, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, halting";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
+        }
+        QSqlQuery query_temp;
+        query_temp.prepare(SQLquery_update_coords);
+        query_update_coords = query_temp;
+        query_update_coords = QSqlQuery(SQLquery_update_coords);
+        if(!query_update_coords.exec())
+        {
+            vvimDebug() << "FATAL:" << "Something went wrong, could not execute query:" << SQLquery_update_coords << query_update_coords.lastError();
+            qFatal(QString("Something went wrong, could not execute query: %1").arg(SQLquery_update_coords).toStdString().c_str());
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
+        }
+    }
 }
 
 
@@ -734,4 +774,286 @@ void Form::reloadCompleter()
     QApplication::restoreOverrideCursor();
 #endif
     vvimDebug() << "done, completer (re)loaded.";
+}
+
+void Form::on_showOphaalpunten_clicked()
+{
+#ifndef QT_NO_CURSOR
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+
+    vvimDebug() << "toon bekende ophaalpunten!" << "inspiration: https://developers.google.com/maps/documentation/javascript/examples/marker-simple" << "and" << "https://developers.google.com/maps/documentation/javascript/markers";
+
+    vvimDebug() << "** [A] ** update the ophaalpunten without lat/lng - Google Maps API doesn't allow more than 15 queries in one go, maximum = 15";
+    QSqlQuery query_no_lat_lng("SELECT * FROM ophaalpunten WHERE lat is NULL or lng is NULL LIMIT 15");
+    if(query_no_lat_lng.exec())
+        vvimDebug() << "query runs";
+    else
+        vvimDebug() << "query error:" << query_no_lat_lng.lastError();
+    QList<SOphaalpunt> * listOfOphaalpunten = new QList<SOphaalpunt>();
+    vvimDebug() << "QList aangemaakt";
+    while(query_no_lat_lng.next())
+    {
+        vvimDebug() << "inside resultlist of ophaalpunten without lat/lng";
+        vvimDebug() << "name of ophaalpunt:" << query_no_lat_lng.value(2).toString();
+        SOphaalpunt _ophaalpunt(
+                        query_no_lat_lng.value(2).toString(),                      //_naam
+                        query_no_lat_lng.value(7).toString(),                      //_street
+                        query_no_lat_lng.value(8).toString(),                      //_housenr
+                        query_no_lat_lng.value(9).toString(),                      //_busnr
+                        query_no_lat_lng.value(10).toString(),                      //_postalcode
+                        query_no_lat_lng.value(11).toString(),                      //_plaats
+                        query_no_lat_lng.value(12).toString(),                      //_country
+                        0,                      //_kg_kurk
+                        0,                      //_kg_kaarsresten
+                        0,                      //_zakken_kurk
+                        0,                      //_zakken_kaarsresten
+                        -1,                      //_aanmelding_id
+                        query_no_lat_lng.value(0).toInt(),                      //_ophaalpunt_id
+                        query_no_lat_lng.value(23).toString()                      //_opmerkingen
+                    );
+        listOfOphaalpunten->append(_ophaalpunt);
+
+        _ophaalpunt.PrintInformation();
+    }
+
+    m_geocodeDataManager.lookForCoordinatesToPutInDatabase(listOfOphaalpunten);
+    vvimDebug() << "** [A] ** done";
+
+
+
+
+    /**
+      de al getoonde markers staan in QList <SMarker*> m_markers;
+      eerst een lijst maken van de bestaande markers? Die maken automatisch deel uit van de route, en mogen dus
+      genegeerd worden
+    **/
+
+    vvimDebug() << "** [B] ** lijst maken van bestaande markers om 'doubles' te voorkomen";
+
+    QSet<int> *ophaalpunten_in_route = getOphaalpuntIdFromRoute();
+    vvimDebug() << "aantal ophaalpunten in de huidige route:" << ophaalpunten_in_route->size();
+
+    QString SQLquery_all_aanmeldingen = "SELECT ophaalpunt FROM aanmelding WHERE ophaalronde_datum is NULL ORDER by ophaalpunt;";
+
+    QSqlQuery query_all_aanmeldingen(SQLquery_all_aanmeldingen);
+
+
+    vvimDebug() << "++++ step 1" << "get all aanmeldingen";
+    if(!query_all_aanmeldingen.exec())
+    {
+        if(!reConnectToDatabase(query_all_aanmeldingen.lastError(), SQLquery_all_aanmeldingen, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, halting";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
+        }
+        query_all_aanmeldingen = QSqlQuery(SQLquery_all_aanmeldingen);
+        if(!query_all_aanmeldingen.exec())
+        {
+            vvimDebug() << "FATAL:" << "Something went wrong, could not execute query:" << SQLquery_all_aanmeldingen << query_all_aanmeldingen.lastError();
+            qFatal(QString("Something went wrong, could not execute query: %1").arg(SQLquery_all_aanmeldingen).toStdString().c_str());
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
+        }
+    }
+
+    QSet<int> ophaalpunten_met_aanmelding;
+    QSet<SOphaalpunt*> markers_met_aanmelding;
+    QSet<SOphaalpunt*> markers_zonder_aanmelding;
+
+    while (query_all_aanmeldingen.next())
+    {
+        ophaalpunten_met_aanmelding.insert(query_all_aanmeldingen.value(0).toInt());
+    }
+
+
+    vvimDebug() << "++++ step 1" << "done" << ophaalpunten_met_aanmelding.size() << "ophaalpunten have an 'aanmelding' (so we should mark them with a different color)";
+
+    vvimDebug() << "++++ step 2" << "get all ophaalpunten";
+
+    QString SQLquery_all_ophaalpunten = "SELECT id, naam, postcode, "
+                                        "       straat, nr, bus, plaats, land, extra_informatie, lat, lng "
+                    "FROM ophaalpunten WHERE kurk > 0 or parafine > 0 "
+                    "ORDER BY postcode";
+
+    QSqlQuery query_all_ophaalpunten(SQLquery_all_ophaalpunten);
+
+
+    if(!query_all_ophaalpunten.exec())
+    {
+        if(!reConnectToDatabase(query_all_ophaalpunten.lastError(), SQLquery_all_ophaalpunten, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, halting";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
+        }
+        query_all_ophaalpunten = QSqlQuery(SQLquery_all_ophaalpunten);
+        if(!query_all_ophaalpunten.exec())
+        {
+            vvimDebug() << "FATAL:" << "Something went wrong, could not execute query:" << SQLquery_all_ophaalpunten << query_all_ophaalpunten.lastError();
+            qFatal(QString("Something went wrong, could not execute query: %1").arg(SQLquery_all_ophaalpunten).toStdString().c_str());
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return;
+        }
+    }
+
+    vvimDebug() << "++++ step 3" << "get all ophaalpunten and filter those who are already marked or have an 'aanmelding'";
+    while (query_all_ophaalpunten.next())
+    {
+
+       int ophaalpunt_id = query_all_ophaalpunten.value(0).toInt();
+       if(ophaalpunten_in_route->contains(ophaalpunt_id))
+       {
+           // abort, this ophaalpunt is already in the route and does not have to be displayed again
+           ;
+       }
+       else
+       {
+           // ophaalpunt not in route => display. Only question is: does it have an aanmelding or not? (see if-test)
+
+           QString ophaalpunt_naam = query_all_ophaalpunten.value(1).toString();
+           QString ophaalpunt_postcode = query_all_ophaalpunten.value(2).toString();
+
+           QString ophaalpunt_straat = query_all_ophaalpunten.value(3).toString();
+           QString ophaalpunt_huisnr = query_all_ophaalpunten.value(4).toString();
+           QString ophaalpunt_busnr = query_all_ophaalpunten.value(5).toString();
+           QString ophaalpunt_plaats = query_all_ophaalpunten.value(6).toString();
+           QString ophaalpunt_land = query_all_ophaalpunten.value(7).toString();
+           QString ophaalpunt_opmerkingen = query_all_ophaalpunten.value(8).toString();
+           double ophaalpunt_latitude = query_all_ophaalpunten.value(9).toDouble();
+           double ophaalpunt_longitude = query_all_ophaalpunten.value(10).toDouble();
+
+           SOphaalpunt* nieuw = new SOphaalpunt(ophaalpunt_naam, ophaalpunt_straat, ophaalpunt_huisnr, ophaalpunt_busnr,
+                             ophaalpunt_postcode, ophaalpunt_plaats, ophaalpunt_land,
+                             -1, -1, -1, -1, // woudl be nice to add information of the 'aanmelding' to ophaalpunten_met_aanmelding: kg kurg, kg parafine, aanmelding_id, ...
+                             -1, ophaalpunt_id, ophaalpunt_opmerkingen,
+                             ophaalpunt_latitude, ophaalpunt_longitude
+                             );
+
+           if(ophaalpunten_met_aanmelding.contains(ophaalpunt_id))
+           {
+               //TOEVOEGEN AAN LIJST MET OPHAALPUNTEN DIE AANMELDINGEN GEDAAN HEBBEN
+               markers_met_aanmelding.insert(nieuw);
+           }
+           else
+           {
+               //toevoegen aan lijst met ophaalpunten ZONDER aanmelding
+               markers_zonder_aanmelding.insert(nieuw);
+           }
+       }
+   }
+
+
+/// could be done better, see example at http://stackoverflow.com/a/3059129 with extra argument for the addListener
+    vvimDebug() << "++++ step 4" << "form javascript with all ophaalpunten and put them as clickable markers on the map" << "see http://stackoverflow.com/questions/3059044/";
+    vvimDebug() << "inspiration: voor effectieve interactie tussen marker en javascript function" << "http://stackoverflow.com/questions/3059044/google-maps-js-api-v3-simple-multiple-marker-example" << "en" << "http://stackoverflow.com/a/23322162";
+
+    //                [id, lat, lng, 'title', icon, zIndex],  // icon: see http://stackoverflow.com/questions/7095574/google-maps-api-3-custom-marker-color-for-default-dot-marker/18623391#18623391
+    QString str = "\n\t[%5, %1, %2,   '%3', 'http://maps.google.com/mapfiles/ms/icons/%4-dot.png'],";
+
+   QString markers_js = "var ophaalpunten = [ ";
+
+   QSet<SOphaalpunt*>::Iterator it = markers_met_aanmelding.begin();
+    while(it != markers_met_aanmelding.end())
+    {
+        //showing locations with aanmelding in blue
+        markers_js.append(str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("blue").arg((*it)->getOphaalpuntId()));
+       ++it;
+    }
+
+    it = markers_zonder_aanmelding.begin();
+    while(it != markers_zonder_aanmelding.end())
+    {
+      //showing locations without aanmelding in yellow
+      markers_js.append(str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("yellow").arg((*it)->getOphaalpuntId()));
+      ++it;
+    }
+
+#ifndef QT_NO_CURSOR
+    QApplication::restoreOverrideCursor();
+#endif
+
+    if(markers_js.length() < 25) // length "var ophaalpunten = [ " < 25 => no ophaalpunten to be marked
+    {
+        vvimDebug() << "no ophaalpunten found to be marked, returning";
+
+        vvimDebug() << "******************";
+        vvimDebug() << "*** < debug >  ***";
+        vvimDebug() << "******************";
+        vvimDebug() << "";
+        vvimDebug() << "markers met aanmelding:" << markers_met_aanmelding.size();
+        vvimDebug() << "markers zonder aanmelding:" << markers_zonder_aanmelding.size();
+        vvimDebug() << "ophaalpunten in route:" << ophaalpunten_in_route->size();
+        vvimDebug() << "totaal aantal:" << markers_met_aanmelding.size() + markers_zonder_aanmelding.size() + ophaalpunten_in_route->size();
+        vvimDebug() << "";
+        vvimDebug() << "******************";
+        vvimDebug() << "*** </ debug > ***";
+        vvimDebug() << "******************";
+        vvimDebug() << "\n\nJavascript:" << markers_js << "\n\n";
+        return;
+    }
+
+    // chop last ',' from markers_js
+    markers_js.chop(1);
+
+    str = "\n];\n"
+          "for (var i = 0; i < ophaalpunten.length; i++) { \n"
+          "      var ophaalpunt = ophaalpunten[i]; \n"
+          "      var marker = new google.maps.Marker({ \n"
+          "          position: {lat: ophaalpunt[1], lng: ophaalpunt[2]}, \n"
+          "          map: map, \n"
+          "          title: ophaalpunt[3], \n"
+          "          icon: ophaalpunt[4], \n"
+          "          zIndex: i \n"          /// a marker with zIndex 0 , does it get shown?
+          "          }); \n"
+          "      google.maps.event.addListener(marker, 'dblclick', (function(marker, i) {\n"
+          "          return function() {\n"
+          "            VlaspitRoutetool.askMainProgramToShowOphaalpuntInfo(ophaalpunten[i][0]);\n"
+          "      }\n"
+          " })(marker, i));\n"
+          "  }\n";
+    markers_js.append(str);
+    ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(markers_js);
+    vvimDebug() << "\n\nJavascript:" << markers_js << "\n\n";
+}
+
+QSet<int>* Form::getOphaalpuntIdFromRoute()
+{
+    QSet<int>* ophaalpunt_in_route = new QSet<int>();
+
+    QList<SMarker*>::Iterator it = m_markers.begin();
+    while(it != m_markers.end())
+    {
+        if((*it)->getOphaalpuntId() > -1)   // valid ophaalpunt
+        {
+            ophaalpunt_in_route->insert((*it)->getOphaalpuntId());
+        }
+        else
+            vvimDebug() << "non valid ophaalpunt" << (*it)->getOphaalpuntId() << (*it)->caption;
+        ++it;
+    }
+
+    // <debug>
+    QSet<int>::Iterator qq = ophaalpunt_in_route->begin();
+    while(qq != ophaalpunt_in_route->end())
+    {
+        vvimDebug() << "ophaalpunt in route, id: " << (*qq);
+        ++qq;
+    }
+    // </debug>
+
+    return ophaalpunt_in_route;
+}
+
+void Form::populateJavaScriptWindowObject()
+{
+    qDebug() << "Populate";
+    ui->webView->page()->mainFrame()->addToJavaScriptWindowObject("VlaspitRoutetool", this);
+}
+
+void Form::askMainProgramToShowOphaalpuntInfo(int ophaalpunt_id)
+{
+    vvimDebug() << "double clicked on marker, show info ophaalpunt" << ophaalpunt_id;
+    emit showOphaalpuntInfo(ophaalpunt_id);
 }

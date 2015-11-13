@@ -801,8 +801,8 @@ void InfoOphaalpunt::toggleFrequentie(int attest)
 
 void InfoOphaalpunt::nieuweAanmeldingButtonPressed()
 {
-    vvimDebug() << "[InfoOphaalpunt::nieuweAanmelding()]" << "button 'Nieuwe Aanmelding' pressed";
-    vvimDebug() << "[InfoOphaalpunt::nieuweAanmelding()]" << "nieuwe aanmelding, ophaalpunt_id" << id;
+    vvimDebug() << "button 'Nieuwe Aanmelding' pressed";
+    vvimDebug() << "nieuwe aanmelding, ophaalpunt_id" << id;
     if(id > 0)
         emit nieuweAanmelding(id);
 }
