@@ -5,6 +5,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QMessageBox>
+#include <math.h>
 
 
 // [0] define global variables: configuration-file 'settings' and logfile 'debuglogfile'
@@ -123,4 +124,24 @@ bool reConnectToDatabase(QSqlError lasterror, QString SQLquery, QString callingf
         vvimDebug() << callingfunction << QObject::tr("Reconnection successful!");
         return true;
     }
+}
+
+
+QString seconds_human_readable(int totalseconds)
+{
+    QString human_readable = "";
+    int hours = floor(totalseconds/3600.0);
+    int minutes = floor(fmod(totalseconds,3600.0)/60.0);
+    int seconds = fmod(totalseconds,60.0);
+
+    /* // check for calculation error:
+    int secondscheck = (((((0*24)+hours)*60) + minutes)*60) + seconds;
+    if (secondscheck == totalseconds)
+        vvimDebug() << "OK";
+    else
+        vvimDebug() << "[error]";
+    */
+
+    human_readable.sprintf("%01du %02dm %02ds", hours, minutes, seconds);
+    return human_readable;
 }

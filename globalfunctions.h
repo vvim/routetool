@@ -46,4 +46,6 @@ bool connectToDatabase();
 
 bool reConnectToDatabase(QSqlError lasterror, QString SQLquery, QString callingfunction);
 
+QString seconds_human_readable(int totalseconds);
+
 #endif // GLOBALFUNCTIONS_H

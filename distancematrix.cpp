@@ -10,7 +10,6 @@
 
 #include <QApplication>
 #include <QJson/Parser>
-#include <math.h>
 #include <QDebug>
 #include <QMessageBox>
 #include <QTime>
@@ -861,26 +860,6 @@ void DistanceMatrix::tsp(QList<int>* path, int totale_kost, QList<int>* remainin
 
     //vvimDebug() << "\n";
 }
-
-QString DistanceMatrix::seconds_human_readable(int totalseconds)
-{
-    QString human_readable = "";
-    int hours = floor(totalseconds/3600.0);
-    int minutes = floor(fmod(totalseconds,3600.0)/60.0);
-    int seconds = fmod(totalseconds,60.0);
-
-    /* // check for calculation error:
-    int secondscheck = (((((0*24)+hours)*60) + minutes)*60) + seconds;
-    if (secondscheck == totalseconds)
-        vvimDebug() << "OK";
-    else
-        vvimDebug() << "[error]";
-    */
-
-    human_readable.sprintf("%01du %02dm %02ds", hours, minutes, seconds);
-    return human_readable;
-}
-
 
 void DistanceMatrix::logOutputCitynamesDistanceMatrices()
 {
