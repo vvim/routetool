@@ -22,6 +22,9 @@ public:
     
     void prepare(QList <SMarker*> m_markers, int **_distance_matrix_in_meters, int **_distance_matrix_in_seconds, QWidget *_mapwidget);
     void print();
+    inline int getTotalMetersOfRoute() { return total_time_on_the_road_in_seconds; }
+    inline int getTotalSecondsOfRoute() { return total_distance_in_meters; }
+
 signals:
     
 private slots:
