@@ -133,7 +133,7 @@ void TransportationListWriter::prepare(QList<SMarker *> _m_markers, int **_dista
     // read each SMarker, in order shown, and add its information to the Transportation List
     for(int i = 0; i < m_markers.length(); i++)
     {
-        vvimDebug() << "[TransportationListWriter::prepare()]" << "reading marker" << i << "of" << m_markers.length();
+        vvimDebug() << "reading marker" << i << "of" << m_markers.length();
         int current_distance_matrix_i = m_markers[i]->distancematrixindex;
         if(previous_distance_matrix_i > -1)
         {
@@ -145,9 +145,9 @@ void TransportationListWriter::prepare(QList<SMarker *> _m_markers, int **_dista
 
     if(m_markers.length() > 1)
     {
-        vvimDebug() << "[TransportationListWriter::prepare()]" << "adding startpoint to end at" << previous_distance_matrix_i << 0;
+        vvimDebug() << "adding startpoint to end at" << previous_distance_matrix_i << 0;
         populateWithSmarker(m_markers[0],previous_distance_matrix_i, 0);
-        vvimDebug() << "[TransportationListWriter::prepare()]" << "adding startpoint is done";
+        vvimDebug() << "adding startpoint is done";
 
     }
 
@@ -159,7 +159,7 @@ void TransportationListWriter::prepare(QList<SMarker *> _m_markers, int **_dista
     mapwidget = _mapwidget;
     ready = true;
 
-    vvimDebug() << "[TransportationListWriter::prepare()]" << "Done";
+    vvimDebug() << "Done";
 
 }
 
@@ -207,7 +207,7 @@ void TransportationListWriter::print()
 
     for(int i = 0; i < m_markers.length(); i++)
     {
-        vvimDebug() << "[TransportationListWriter::print()]" << "write information of marker nr" << i << "of in total" << m_markers.length();
+        vvimDebug() << "write information of marker nr" << i << "of in total" << m_markers.length();
         int current_distance_matrix_i = m_markers[i]->distancematrixindex;
         if(previous_distance_matrix_i > -1)
         {
@@ -273,9 +273,9 @@ void TransportationListWriter::print()
     if(m_markers.length() > 1)
     {
         char kaart_nr = 'A' + counter;
-        vvimDebug() << "[TransportationListWriter::print()]" << "adding startpoint to end at" << previous_distance_matrix_i << 0 << counter;
+        vvimDebug() << "adding startpoint to end at" << previous_distance_matrix_i << 0 << counter;
         writeInformation(m_markers[0],previous_distance_matrix_i, 0, counter, kaart_nr);
-        vvimDebug() << "[TransportationListWriter::print()]" << "adding startpoint is done";
+        vvimDebug() << "adding startpoint is done";
 
     }
 
@@ -496,7 +496,7 @@ void TransportationListWriter::editExpectedArrivalTime(QTime arrival)
 
 void TransportationListWriter::populateWithSmarker(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i)
 {
-    vvimDebug() << "[TransportationListWriter::populateWithSmarker()]" << previous_distance_matrix_i << current_distance_matrix_i;
+    vvimDebug() << previous_distance_matrix_i << current_distance_matrix_i;
 
     total_distance_in_meters += distance_matrix_in_meters[previous_distance_matrix_i][current_distance_matrix_i];
     total_time_on_the_road_in_seconds += distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
@@ -504,7 +504,7 @@ void TransportationListWriter::populateWithSmarker(SMarker* marker, int previous
 
     if(marker->ophaling)
     {
-        vvimDebug() << "[TransportationListWriter::populateWithSmarker()]" << "marker is een ophaling, ophaalpunt" << marker->ophaalpunt.ophaalpunt_id;
+        vvimDebug() << "marker is een ophaling, ophaalpunt" << marker->ophaalpunt.ophaalpunt_id;
         // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SOphaalpunt) => marker->ophaalpunt
         seconds_needed_to_complete_transport += STANDAARD_OPHAALTIJD_IN_SECONDEN;
         empty_bags_of_kurk_needed += marker->ophaalpunt.zakken_kurk;
@@ -512,18 +512,16 @@ void TransportationListWriter::populateWithSmarker(SMarker* marker, int previous
     }
     if(marker->levering)
     {
-        vvimDebug() << "[TransportationListWriter::populateWithSmarker()]" << "marker is een levering";
+        vvimDebug() << "marker is een levering";
         // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SLevering) => marker->levering
         seconds_needed_to_complete_transport += marker->leveringspunt.minutes_needed * 60;
     }
     if((!marker->ophaling)&&(!marker->levering))
     {
-        vvimDebug() << "[TransportationListWriter::populateWithSmarker()]" << "marker is een adres";
+        vvimDebug() << "marker is een adres";
         // dit zou een aparte functie kunnen zijn binnen DocumentWriter(SMarker) => marker
         ;
     }
-//            vvimDebug() << "[Vervoerslijst]" << "departure time:" << seconds_needed_to_complete_transport; // make human readable
-
 }
 
 void TransportationListWriter::reject()
@@ -564,22 +562,22 @@ void TransportationListWriter::setOriginalValues()
 
 void TransportationListWriter::deleteTheMatrices()
 {
-    vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "start";
+    vvimDebug() << "start";
     int nr_of_cities = m_markers.length();
-    vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "markers length" << nr_of_cities;
+    vvimDebug() << "markers length" << nr_of_cities;
 
     if(nr_of_cities > 0)
     {
-        vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "..starting for loop";
+        vvimDebug() << "..starting for loop";
         for(int i = 0; i < nr_of_cities; i++) {
             delete [] distance_matrix_in_meters[i];
-            vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "....loop-a";
+            vvimDebug() << "....loop-a";
             delete [] distance_matrix_in_seconds[i];
-            vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "....loop-b";
+            vvimDebug() << "....loop-b";
         }
-        vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "..ending for loop";
+        vvimDebug() << "..ending for loop";
         delete [] distance_matrix_in_meters;
         delete [] distance_matrix_in_seconds;
     }
-    vvimDebug() << "[TransportationListWriter::deleteTheMatrices()]" << "done";
+    vvimDebug() << "done";
 }
