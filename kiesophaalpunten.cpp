@@ -32,6 +32,7 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
 {
     model = NULL;
     legeAanmeldingenModel = NULL;
+    info = new InfoOphaalpunt();
 
     normal = new QPalette();
     normal->setColor(QPalette::Text,Qt::AutoColor);
@@ -83,6 +84,7 @@ KiesOphaalpunten::KiesOphaalpunten(QWidget *parent) :
     connect(resetButton, SIGNAL(pressed()), this, SLOT(uncheckAll()));
     connect(allButton, SIGNAL(pressed()), this, SLOT(checkAll()));
     connect(deleteButton, SIGNAL(pressed()), this, SLOT(deleteSelected()));
+    connect(legeAanmeldingenTreeView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(showOphaalpunt(QModelIndex)));
 
     //why does this one not work???
     connect(legeAanmeldingenModel, SIGNAL(checkChanges()), this, SLOT(setTotalWeightTotalVolume()));
@@ -330,6 +332,7 @@ KiesOphaalpunten::~KiesOphaalpunten()
     delete model;
     delete legeAanmeldingenModel;
     delete legeAanmeldingenTreeView;
+    delete info;
     vvimDebug() << "KiesOphaalpunten() deconstructed";
 }
 
@@ -498,4 +501,14 @@ void KiesOphaalpunten::deleteSelected()
     vvimDebug() << prepare_query << "DONE";
 
     initialise();
+}
+
+void KiesOphaalpunten::showOphaalpunt(QModelIndex index)
+{
+    int row = index.row();
+    int ophaalpunt_id = legeAanmeldingenModel->data(legeAanmeldingenModel->index(row, OPHAALPUNT_ID)).toInt();
+    vvimDebug() << "get ophaalpunt id from row " << row << "is" << ophaalpunt_id;
+    info->showAanmeldingAndHistoriekButton(true); // issue #24 !!
+    info->setWindowTitle(tr("info over ophaalpunt"));
+    info->showOphaalpunt(ophaalpunt_id);
 }

@@ -12,6 +12,7 @@
 #include "sophaalpunt.h"
 #include "mysortfilterproxymodel.h"
 #include "globalfunctions.h"
+#include "infoophaalpunt.h"
 
 
 class KiesOphaalpunten : public QWidget
@@ -27,8 +28,8 @@ public:
 signals:
     void aanmelding_for_route(QList<SOphaalpunt> *);
     
-public slots:
 private:
+    InfoOphaalpunt *info;
     QTreeView *legeAanmeldingenTreeView;
     MySortFilterProxyModel *legeAanmeldingenModel;
     QStandardItemModel *model;
@@ -55,6 +56,7 @@ private slots:
     void accept();
     void reject();
     void setTotalWeightTotalVolume();
+    void showOphaalpunt(QModelIndex);
 };
 
 #endif // KIESOPHAALPUNTEN_H
