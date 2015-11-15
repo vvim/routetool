@@ -82,6 +82,7 @@ Form::Form(QWidget *parent) :
     goClicked();
 
     setTotalWeightTotalVolume();
+    setTotalDistanceAndTotalTime();
 }
 
 Form::~Form()
@@ -211,6 +212,7 @@ void Form::setMarker(double east, double north, QString caption)
     ui->lwMarkers->addItem(caption);
     link_lwMarkers_mmarkers[caption] = _marker;
     matrices_up_to_date = false;
+    setTotalDistanceAndTotalTime();
 }
 
 void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
@@ -247,8 +249,10 @@ void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
     //adding capton to ListWidget
     ui->lwMarkers->addItem(caption);
     link_lwMarkers_mmarkers[caption] = _marker;
+
     matrices_up_to_date = false;
 
+    setTotalDistanceAndTotalTime();
     setTotalWeightTotalVolume();
 }
 
@@ -288,6 +292,7 @@ void Form::setMarker(double east, double north, SLevering levering)
     link_lwMarkers_mmarkers[caption] = _marker;
     matrices_up_to_date = false;
 
+    setTotalDistanceAndTotalTime();
     setTotalWeightTotalVolume();
     // anders bij levering dan bij ophaling, neen??? Levering wordt eerst gedaan, daarna is de camion leeg, dan de ophaling
 }
@@ -332,6 +337,7 @@ void Form::on_pbRemoveMarker_clicked()
     }
 
     matrices_up_to_date = false;
+    setTotalDistanceAndTotalTime(); // not necessary because 'drawRoute()' will be called, but in case future changes remove that call, this line is for avoiding bugs
 
     // after a Drag and Drop, the order might have changed
     reorderMarkers();
@@ -381,6 +387,7 @@ void Form::on_pbOptimizeRoute_clicked()
         after_calculating_distance_matrix_continue_to_tsp = false;
         after_calculating_distance_matrix_continue_to_transportationlist = false;
         m_distanceMatrix.calculateOptimalRoute();
+        setTotalDistanceAndTotalTime();
     }
     else
     {
@@ -513,6 +520,8 @@ void Form::keyPressEvent( QKeyEvent *k )
 
 void Form::drawRoute()
 {
+    setTotalDistanceAndTotalTime();
+
     // this only makes sense when there is more than 1 marker in m_markers
     // (as the first marker is the STARTING POINT and DESTINATION POINT of the route)
     if(m_markers.length() > 1)
@@ -659,21 +668,28 @@ void Form::setTotalWeightTotalVolume()
 
 }
 
-void Form::setTotalDistanceAndTotalTime(int total_distance_in_meters, int total_time_on_the_road_in_seconds)
+void Form::setTotalDistanceAndTotalTime()
 {
-    vvimDebug() << "set total # kilometers and # time";
-    vvimDebug() << total_time_on_the_road_in_seconds << " seconds is " << seconds_human_readable(total_time_on_the_road_in_seconds);
-    ui->totalTimeEdit->setText(tr("%1").arg(seconds_human_readable(total_time_on_the_road_in_seconds)));
-    double kilometers = (double) total_distance_in_meters / 1000;
-    vvimDebug() << total_distance_in_meters << " meters is " << kilometers;
-    ui->totalKilometersEdit->setText(tr("%1 km").arg(kilometers));
-}
-
-void Form::resetTotalDistanceAndTotalTime()
-{
-    vvimDebug() << "reset MainForm: total # kilometers and # time is unknown unless 'Route Optimalisation' is pressed.";
-    ui->totalTimeEdit->setText(tr("onbekend"));
-    ui->totalKilometersEdit->setText(tr("onbekend"));
+    vvimDebug() << "is transportationlist ready?" << transportationlistWriter.getReady();
+    if(matrices_up_to_date)
+    {
+        int total_distance_in_meters, total_time_on_the_road_in_seconds;
+        total_distance_in_meters = transportationlistWriter.getTotalMetersOfRoute();
+        total_time_on_the_road_in_seconds = transportationlistWriter.getTotalSecondsOfRoute();
+        vvimDebug() << "matrices are up to date" << matrices_up_to_date << "=> set total # kilometers and # time";
+        vvimDebug() << total_time_on_the_road_in_seconds << " seconds is " << seconds_human_readable(total_time_on_the_road_in_seconds);
+        ui->totalTimeEdit->setText(tr("%1").arg(seconds_human_readable(total_time_on_the_road_in_seconds)));
+        double kilometers = (double) total_distance_in_meters / 1000;
+        vvimDebug() << total_distance_in_meters << " meters is " << kilometers;
+        ui->totalKilometersEdit->setText(tr("%1 km").arg(kilometers));
+    }
+    else
+    {
+        vvimDebug() << "matrices are up to date (no)" << matrices_up_to_date << "=> RESET";
+        vvimDebug() << "reset MainForm: total # kilometers and # time is unknown unless 'Route Optimalisation' is pressed.";
+        ui->totalTimeEdit->setText(tr("onbekend"));
+        ui->totalKilometersEdit->setText(tr("onbekend"));
+    }
 }
 
 void Form::on_pbTransportationList_clicked()
@@ -705,6 +721,7 @@ void Form::buildTransportationList()
 {
     // 3. distance matrices should be filled in correctly
     transportationlistWriter.prepare(m_markers, distance_matrix_in_meters, distance_matrix_in_seconds, ui->webView);
+    setTotalDistanceAndTotalTime();
     transportationlistWriter.show();
     return;
 }
