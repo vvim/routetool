@@ -31,9 +31,15 @@ Form::Form(QWidget *parent) :
     warning = new QPalette();
     warning->setColor(QPalette::Text,Qt::red);
 
-
     ui->setupUi(this);
     ui->webView->setPage(new myWebPage());
+
+    ui->totalWeightEdit->setPalette(*normal);
+    ui->totalVolumeEdit->setPalette(*normal);
+    ui->totalBagsKurkEdit->setPalette(*normal);
+    ui->totalBagsParafineEdit->setPalette(*normal);
+    ui->totalKilometersEdit->setPalette(*normal);
+    ui->totalTimeEdit->setPalette(*normal);
 
     connect(ui->goButton, SIGNAL(clicked()), this, SLOT(goClicked()));
     connect(ui->lePostalAddress, SIGNAL(returnPressed()), this, SLOT(goClicked()));
@@ -81,7 +87,7 @@ Form::Form(QWidget *parent) :
 Form::~Form()
 {
     vvimDebug() << "start to deconstruct Form()";
-    delete ui;
+    delete ui; // does this delete everything? Also the QPalettes ?
     if(completer)
         delete completer;
     vvimDebug() << "<vvim> ~Form() deconstructor: no need to delete distance_matrix_in_meters and distance_matrix_in_seconds, this has been done by the class DistanceMatrix";
