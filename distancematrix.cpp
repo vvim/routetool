@@ -913,6 +913,7 @@ void DistanceMatrix::logOutputCitynamesDistanceMatrices()
           vvimDebug() << glob;
           fprintf(matrixlogfile, "\n%s", glob.toStdString().c_str());
       }
+      fprintf(matrixlogfile, "\n\n");
       fclose(matrixlogfile);
 }
 
