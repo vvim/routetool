@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_1">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="adresLabel">
        <property name="text">
         <string>Adres</string>
        </property>
@@ -134,8 +134,8 @@
      </item>
     </layout>
    </item>
-   <item row="4" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+   <item row="6" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QLabel" name="totalWeightLabel">
        <property name="text">
@@ -166,8 +166,8 @@
      </item>
     </layout>
    </item>
-   <item row="5" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
+   <item row="7" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
       <widget class="QLabel" name="totalBagsKurkLabel">
        <property name="text">
@@ -204,6 +204,38 @@
       <string>Toon alle punten</string>
      </property>
     </widget>
+   </item>
+   <item row="5" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="totalKilometersLabel">
+       <property name="text">
+        <string>Totaal aantal kilometers:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="totalKilometersEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="totalTimeLabel">
+       <property name="text">
+        <string>Tijdsduur:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="totalTimeEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
