@@ -313,8 +313,7 @@ void TransportationListWriter::writeInformation(SMarker* marker, int previous_di
     total_time_on_the_road_in_seconds += distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
     seconds_needed_to_complete_transport += distance_matrix_in_seconds[previous_distance_matrix_i][current_distance_matrix_i];
 
-    vvimDebug() << "Verwachtte aankomsttijd:" << QLocale().toString(startTimeEdit->time().addSecs(seconds_needed_to_complete_transport));
-    // .trim(4) ?   // .truncate(4) ?
+    vvimDebug() << "Verwachte aankomsttijd:" << QLocale().toString(startTimeEdit->time().addSecs(seconds_needed_to_complete_transport));
 
     if(marker->ophaling)
     {
