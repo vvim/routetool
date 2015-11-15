@@ -653,6 +653,23 @@ void Form::setTotalWeightTotalVolume()
 
 }
 
+void Form::setTotalDistanceAndTotalTime(int total_distance_in_meters, int total_time_on_the_road_in_seconds)
+{
+    vvimDebug() << "set total # kilometers and # time";
+    vvimDebug() << total_time_on_the_road_in_seconds << " seconds is " << seconds_human_readable(total_time_on_the_road_in_seconds);
+    ui->totalTimeEdit->setText(tr("%1").arg(seconds_human_readable(total_time_on_the_road_in_seconds)));
+    double kilometers = (double) total_distance_in_meters / 1000;
+    vvimDebug() << total_distance_in_meters << " meters is " << kilometers;
+    ui->totalKilometersEdit->setText(tr("%1 km").arg(kilometers));
+}
+
+void Form::resetTotalDistanceAndTotalTime()
+{
+    vvimDebug() << "reset MainForm: total # kilometers and # time is unknown unless 'Route Optimalisation' is pressed.";
+    ui->totalTimeEdit->setText(tr("onbekend"));
+    ui->totalKilometersEdit->setText(tr("onbekend"));
+}
+
 void Form::on_pbTransportationList_clicked()
 {
     vvimDebug() << "Form::on_pbTransportationList_clicked()";

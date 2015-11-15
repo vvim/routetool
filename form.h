@@ -41,6 +41,7 @@ signals:
 
 public slots:
     void askMainProgramToShowOphaalpuntInfo(int ophaalpunt_id);
+    void resetTotalDistanceAndTotalTime();
 
 private slots:
     void goClicked();
@@ -97,6 +98,7 @@ private:
     void buildTransportationList();
     void logOutputMarkers();
     void logOutputLwMarkers();
+    void setTotalDistanceAndTotalTime(int total_distance_in_meters, int total_time_on_the_road_in_seconds);
 
 };
 
