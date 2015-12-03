@@ -418,13 +418,18 @@ void Form::reload_distancematrix(int** matrix_in_meters, int ** matrix_in_second
         m_distanceMatrix.calculateOptimalRoute();
     }
     else
+        /*  github 96a8b5577056d3108c6ac36ea4ec78ebf5cbd181
+            after calculating the distance matrices, we also have to show which
+            marker corresponds to which index of those matrices. Even if the order
+            is the same (fixed)
+        */
     {
-        QList<int> *test = new QList<int>();
+        QList<int> *refreshindex = new QList<int>();
         for(int i = 0 ; i < m_markers.length() ; i++)
         {
-            test->push_back(i);
+            refreshindex->push_back(i);
         }
-        process_result_distancematrix(test);
+        process_result_distancematrix(refreshindex);
     }
 
     if(after_calculating_distance_matrix_continue_to_transportationlist)
