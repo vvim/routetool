@@ -699,7 +699,6 @@ void Form::setTotalDistanceAndTotalTime()
 
 void Form::on_pbTransportationList_clicked()
 {
-    vvimDebug() << "Form::on_pbTransportationList_clicked()";
     vvimDebug() << "This is where we should work on making the Transportation List (using distance matrices and Document Writer)";
     // for the map: see http://qt-project.org/doc/qt-4.8/desktop-screenshot.html
     //              see http://stackoverflow.com/questions/681148/how-to-print-a-qt-dialog-or-window
