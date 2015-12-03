@@ -166,9 +166,6 @@ void DistanceMatrix::getDistances(QList <SMarker*> markers)
 
     vvimDebug() << "<vvim> TODO: mag dit, of moeten we een nieuwe m_markers creëren en deze laten invullen met 'markers'???";
 
-    // <vvim> TODO: maak dat de eerste SMarker altijd Vlaspit is!!!! En voeg deze automatisch toe bij het opstarten
-    vvimDebug() << "<vvim> TODO: maak dat de eerste SMarker altijd Vlaspit is!!!! En voeg deze automatisch toe bij het opstarten aub";
-
     // HIER ENKEL DE EERSTE (10) PAKKEN  ( -->  MAX_NR_OF_CITIES)
     vvimDebug() << "<vvim> TODO: check whether markers.length()" << markers.length() << " > " << MAX_NR_OF_CITIES << (markers.length() > MAX_NR_OF_CITIES);
     vvimDebug() << "<vvim> TODO:  + check whether m_markers.length()" << m_markers.length() << " > " << MAX_NR_OF_CITIES << (m_markers.length() > MAX_NR_OF_CITIES);
