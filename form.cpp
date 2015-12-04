@@ -82,9 +82,7 @@ Form::Form(QWidget *parent) :
     goClicked();
 
     setTotalWeightTotalVolume();
-    //setTotalDistanceAndTotalTime();
-    ui->totalTimeEdit->setText(tr("onbekend"));
-    ui->totalKilometersEdit->setText(tr("onbekend"));
+    resetTotalDistanceAndTotalTime()
 }
 
 Form::~Form()
@@ -673,6 +671,12 @@ void Form::setTotalWeightTotalVolume()
     else
         ui->totalVolumeEdit->setPalette(*normal);
 
+}
+
+void Form::resetTotalDistanceAndTotalTime()
+{
+    ui->totalTimeEdit->setText(tr("onbekend"));
+    ui->totalKilometersEdit->setText(tr("onbekend"));
 }
 
 void Form::setTotalDistanceAndTotalTime()

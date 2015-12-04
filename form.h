@@ -98,6 +98,7 @@ private:
     void logOutputMarkers();
     void logOutputLwMarkers();
     void setTotalDistanceAndTotalTime();
+    void resetTotalDistanceAndTotalTime();
 
 };
 
