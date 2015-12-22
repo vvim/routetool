@@ -692,9 +692,30 @@ void Form::resetTotalDistanceAndTotalTime()
 
 void Form::setTotalDistanceAndTotalTime()
 {
-    vvimDebug() << "is transportationlist ready?" << transportationlistWriter.getReady();
-    if(matrices_up_to_date)
+    vvimDebug() << "is transportationlist ready?" << "\n\ntransportationlistWriter.getReady()?\n\n";
+
+    vvimDebug() << "\n\nNAKIJKEN:";
+
+    vvimDebug() << " 1.   nog iets doen met reorderMarkers() ?? of met DrawRoute() in het algemeen??";
+    vvimDebug() << " 2.   kunnen we de distance_matrices wel berekenen als er GEEN ophaalpunten zijn??";
+
+
+    // 1. check if we need to recalculate the distance matrices
+    if(!matrices_up_to_date)
     {
+        // first fill in the distance matrices, then go to build the transportation list
+        after_calculating_distance_matrix_continue_to_tsp = false;
+        after_calculating_distance_matrix_continue_to_transportationlist = false;
+        after_calculating_distance_matrix_continue_to_setTotalDistanceAndTotalTime = true;
+        m_distanceMatrix.getDistances(m_markers);
+        vvimDebug() << "reset MainForm: total # kilometers and # time is unknown unless distancematrices are updated";
+        resetTotalDistanceAndTotalTime();
+    }
+    else
+    {
+        transportationlistWriter.prepare(m_markers, distance_matrix_in_meters, distance_matrix_in_seconds, ui->webView);
+
+
         int total_distance_in_meters, total_time_on_the_road_in_seconds;
         total_distance_in_meters = transportationlistWriter.getTotalMetersOfRoute();
         total_time_on_the_road_in_seconds = transportationlistWriter.getTotalSecondsOfRoute();
@@ -705,13 +726,6 @@ void Form::setTotalDistanceAndTotalTime()
         vvimDebug() << total_distance_in_meters << " meters is " << kilometers;
         ui->totalKilometersEdit->setText(tr("%1 km").arg(kilometers));
     }
-    else
-    {
-        vvimDebug() << "matrices are up to date (no)" << matrices_up_to_date << "=> RESET";
-        vvimDebug() << "reset MainForm: total # kilometers and # time is unknown unless 'Route Optimalisation' is pressed.";
-        ui->totalTimeEdit->setText(tr("onbekend"));
-        ui->totalKilometersEdit->setText(tr("onbekend"));
-    }
 }
 
 void Form::on_pbTransportationList_clicked()
@@ -719,7 +733,6 @@ void Form::on_pbTransportationList_clicked()
     vvimDebug() << "This is where we should work on making the Transportation List (using distance matrices and Document Writer)";
     // for the map: see http://qt-project.org/doc/qt-4.8/desktop-screenshot.html
     //              see http://stackoverflow.com/questions/681148/how-to-print-a-qt-dialog-or-window
-
 
     // 1. prepare the Maps for a screenshot
     drawRoute();
