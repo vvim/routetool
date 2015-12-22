@@ -81,6 +81,7 @@ private:
     bool matrices_up_to_date;
     bool after_calculating_distance_matrix_continue_to_tsp;
     bool after_calculating_distance_matrix_continue_to_transportationlist;
+    bool after_calculating_distance_matrix_continue_to_setTotalDistanceAndTotalTime;
 
     QMap<QString, SMarker*> link_lwMarkers_mmarkers;
     QPalette *warning, *normal;

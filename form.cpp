@@ -24,6 +24,7 @@ Form::Form(QWidget *parent) :
     matrices_up_to_date = false;
     after_calculating_distance_matrix_continue_to_tsp = false;
     after_calculating_distance_matrix_continue_to_transportationlist = false;
+    after_calculating_distance_matrix_continue_to_setTotalDistanceAndTotalTime = false;
 
     normal = new QPalette();
     normal->setColor(QPalette::Text,Qt::AutoColor);
@@ -386,6 +387,7 @@ void Form::on_pbOptimizeRoute_clicked()
         // no need to recalculate the distance matrices, just go straight to TSP:
         after_calculating_distance_matrix_continue_to_tsp = false;
         after_calculating_distance_matrix_continue_to_transportationlist = false;
+        after_calculating_distance_matrix_continue_to_setTotalDistanceAndTotalTime = false;
         m_distanceMatrix.calculateOptimalRoute();
         setTotalDistanceAndTotalTime();
     }
@@ -394,6 +396,7 @@ void Form::on_pbOptimizeRoute_clicked()
         // we need to first calculate the distance matrices
         after_calculating_distance_matrix_continue_to_tsp = true;
         after_calculating_distance_matrix_continue_to_transportationlist = false;
+        after_calculating_distance_matrix_continue_to_setTotalDistanceAndTotalTime = false;
         m_distanceMatrix.getDistances(m_markers);
     }
 
@@ -437,6 +440,14 @@ void Form::reload_distancematrix(int** matrix_in_meters, int ** matrix_in_second
         // continue to Transportation List:
         after_calculating_distance_matrix_continue_to_transportationlist = false;
         buildTransportationList();
+    }
+
+    if(after_calculating_distance_matrix_continue_to_setTotalDistanceAndTotalTime)
+    {
+        vvimDebug() << "set total distance and total time";
+        // continue to display the total distance and time of the route:
+        after_calculating_distance_matrix_continue_to_setTotalDistanceAndTotalTime = false;
+        setTotalDistanceAndTotalTime();
     }
 }
 
@@ -721,6 +732,7 @@ void Form::on_pbTransportationList_clicked()
         // first fill in the distance matrices, then go to build the transportation list
         after_calculating_distance_matrix_continue_to_tsp = false;
         after_calculating_distance_matrix_continue_to_transportationlist = true;
+        after_calculating_distance_matrix_continue_to_setTotalDistanceAndTotalTime = false;
         m_distanceMatrix.getDistances(m_markers);
     }
     else
