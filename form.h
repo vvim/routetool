@@ -72,6 +72,8 @@ private slots:
     void on_showOphaalpunten_clicked();
     void populateJavaScriptWindowObject();
 
+    void on_pbShowTotalDistanceAndTotalTime_clicked();
+
 private:
     int **distance_matrix_in_meters;
     int **distance_matrix_in_seconds;

@@ -1107,3 +1107,8 @@ void Form::askMainProgramToShowOphaalpuntInfo(int ophaalpunt_id)
     vvimDebug() << "double clicked on marker, show info ophaalpunt" << ophaalpunt_id;
     emit showOphaalpuntInfo(ophaalpunt_id);
 }
+
+void Form::on_pbShowTotalDistanceAndTotalTime_clicked()
+{
+    setTotalDistanceAndTotalTime();
+}

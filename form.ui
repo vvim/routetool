@@ -237,6 +237,13 @@
      </item>
     </layout>
    </item>
+   <item row="5" column="1">
+    <widget class="QPushButton" name="pbShowTotalDistanceAndTotalTime">
+     <property name="text">
+      <string>Bereken afstand en tijd</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
