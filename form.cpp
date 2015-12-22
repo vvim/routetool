@@ -212,7 +212,7 @@ void Form::setMarker(double east, double north, QString caption)
     ui->lwMarkers->addItem(caption);
     link_lwMarkers_mmarkers[caption] = _marker;
     matrices_up_to_date = false;
-    setTotalDistanceAndTotalTime();
+    resetTotalDistanceAndTotalTime();
 }
 
 void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
@@ -252,7 +252,7 @@ void Form::setMarker(double east, double north, SOphaalpunt ophaalpunt)
 
     matrices_up_to_date = false;
 
-    setTotalDistanceAndTotalTime();
+    resetTotalDistanceAndTotalTime();
     setTotalWeightTotalVolume();
 }
 
@@ -292,7 +292,7 @@ void Form::setMarker(double east, double north, SLevering levering)
     link_lwMarkers_mmarkers[caption] = _marker;
     matrices_up_to_date = false;
 
-    setTotalDistanceAndTotalTime();
+    resetTotalDistanceAndTotalTime();
     setTotalWeightTotalVolume();
     // anders bij levering dan bij ophaling, neen??? Levering wordt eerst gedaan, daarna is de camion leeg, dan de ophaling
 }
@@ -337,7 +337,7 @@ void Form::on_pbRemoveMarker_clicked()
     }
 
     matrices_up_to_date = false;
-    setTotalDistanceAndTotalTime(); // not necessary because 'drawRoute()' will be called, but in case future changes remove that call, this line is for avoiding bugs
+    resetTotalDistanceAndTotalTime(); // not necessary because 'drawRoute()' will be called, but in case future changes remove that call, this line is for avoiding bugs
 
     // after a Drag and Drop, the order might have changed
     reorderMarkers();
@@ -525,7 +525,7 @@ void Form::keyPressEvent( QKeyEvent *k )
 
 void Form::drawRoute()
 {
-    setTotalDistanceAndTotalTime();
+    resetTotalDistanceAndTotalTime();
 
     // this only makes sense when there is more than 1 marker in m_markers
     // (as the first marker is the STARTING POINT and DESTINATION POINT of the route)
