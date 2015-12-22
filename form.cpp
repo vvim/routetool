@@ -82,7 +82,7 @@ Form::Form(QWidget *parent) :
     goClicked();
 
     setTotalWeightTotalVolume();
-    resetTotalDistanceAndTotalTime()
+    resetTotalDistanceAndTotalTime();
 }
 
 Form::~Form()

@@ -101,7 +101,6 @@ private:
     void logOutputLwMarkers();
     void setTotalDistanceAndTotalTime();
     void resetTotalDistanceAndTotalTime();
-
 };
 
 #endif // FORM_H
