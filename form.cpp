@@ -52,12 +52,6 @@ Form::Form(QWidget *parent) :
     ui->pbTransportationList->setEnabled(true);
     ui->pbRouteOmdraaien->setEnabled(true);
 
-    /*
-    connect(ui->lwMarkers, SIGNAL(itemPressed(QListWidgetItem*)), this, SLOT(reorderMarkers()));
-        can only be used to identify the START of a drag/drop from ui->lwMarkers:
-        it cannot SIGNAL the drop itself.
-    */
-
     connect(ui->pbShowRouteAsDefined, SIGNAL(clicked()), this, SLOT(drawRoute()));
 
     connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,QString)), this, SLOT(showCoordinates(double,double,QString)));
@@ -340,20 +334,8 @@ void Form::on_pbRemoveMarker_clicked()
     matrices_up_to_date = false;
     resetTotalDistanceAndTotalTime(); // not necessary because 'drawRoute()' will be called, but in case future changes remove that call, this line is for avoiding bugs
 
-    // after a Drag and Drop, the order might have changed
+    //reorder Markers: in case of Drag/Drop vanuit QListWidget
     reorderMarkers();
-
-    /*
-        because of the Drag and Drop in lwMarkers,
-        the order of the markers[] array in JavaScript can be incorrect
-        therefore we do not use these lines anymore
-
-    QString str =
-            QString("markers[%1].setMap(null); markers.splice(%1, 1);").arg(ui->lwMarkers->currentRow());
-    vvimDebug() << str;
-    ui->webView->page()->currentFrame()->documentElement().evaluateJavaScript(str);
-
-    */
 
     //deleteing caption from markers list
     /** THIS LINE GIVES THE TROUBLE, some sort of interaction with lwMarkers? **/
@@ -376,10 +358,7 @@ void Form::on_zoomSpinBox_valueChanged(int arg1)
 
 void Form::on_pbOptimizeRoute_clicked()
 {
-    //reorder Markers:: see BUG
-          // <vvim> BUG: er is geen SIGNAL voor Drag/Drop vanuit QListWidget. Het programma weet dus niet
-          //             of er markers van plaats zijn veranderd. Zeer vervelend.
-          //             Bestaat er een extensie voor Qt die deze SIGNAL wel heeft?
+    //reorder Markers: in case of Drag/Drop vanuit QListWidget
     // reorderMarkers(); -> not necessary, the order will be changed any way
 
     if(matrices_up_to_date)
@@ -542,10 +521,7 @@ void Form::drawRoute()
     // (as the first marker is the STARTING POINT and DESTINATION POINT of the route)
     if(m_markers.length() > 1)
     {
-        //reorder Markers:: see BUG
-              // <vvim> BUG: er is geen SIGNAL voor Drag/Drop vanuit QListWidget. Het programma weet dus niet
-              //             of er markers van plaats zijn veranderd. Zeer vervelend.
-              //             Bestaat er een extensie voor Qt die deze SIGNAL wel heeft?
+        //reorder Markers: in case of Drag/Drop vanuit QListWidget
         reorderMarkers();
 
         /**  ***********************************************  **
@@ -578,10 +554,7 @@ void Form::drawRoute()
 
 void Form::on_pbRouteOmdraaien_clicked()
 {
-    //reorder Markers:: see BUG
-          // <vvim> BUG: er is geen SIGNAL voor Drag/Drop vanuit QListWidget. Het programma weet dus niet
-          //             of er markers van plaats zijn veranderd. Zeer vervelend.
-          //             Bestaat er een extensie voor Qt die deze SIGNAL wel heeft?
+    //reorder Markers: in case of Drag/Drop vanuit QListWidget
     reorderMarkers();
 
     if(m_markers.length() > 0) // has no use without markers, right?
@@ -612,9 +585,10 @@ void Form::on_pbRouteOmdraaien_clicked()
 
 void Form::reorderMarkers()
 {
+    vvimDebug() << "function was called";
     QList<SMarker*> temp;
-    /**/vvimDebug() << "write out of m_markers BEFORE the reordering";
-    /**/logOutputMarkers();
+    //vvimDebug() << "write out of m_markers BEFORE the reordering";
+    //logOutputMarkers();
 
     for(int i = 0; i < ui->lwMarkers->count(); i++)
     {
@@ -624,8 +598,8 @@ void Form::reorderMarkers()
     m_markers = temp; // does this leave garbage in memory? should I delete something??
                       // TODO <vvim> ask StackOverflow
 
-    /**/vvimDebug() << "write out of m_markers AFTER the reordering";
-    /**/logOutputMarkers();
+    //vvimDebug() << "write out of m_markers AFTER the reordering";
+    //logOutputMarkers();
 }
 
 void Form::logOutputMarkers()
