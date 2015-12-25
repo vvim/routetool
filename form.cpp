@@ -1135,5 +1135,37 @@ void Form::askMainProgramToShowOphaalpuntInfo(int ophaalpunt_id)
 
 void Form::on_pbShowTotalDistanceAndTotalTime_clicked()
 {
+    if(testIfLWMarkersHasChanged())
+    {
+        vvimDebug() << "testIfLWMarkersHasChanged()?" << "TRUE";
+        reorderMarkers();
+        matrices_up_to_date = false;
+    }
+    else
+        vvimDebug() << "testIfLWMarkersHasChanged()?" << "false";
+
+
     setTotalDistanceAndTotalTime();
+}
+
+bool Form::testIfLWMarkersHasChanged()
+{
+    if (m_markers.size() != ui->lwMarkers->count())
+        return true;
+
+    for(int i = 0; i < ui->lwMarkers->count(); ++i)
+    {
+        if(m_markers[i]->caption != ui->lwMarkers->item(i)->text())
+        {
+            vvimDebug() << "DIFFERENT:" << m_markers[i]->caption << "VS" << ui->lwMarkers->item(i)->text();
+            return true;
+        }
+        else
+        {
+            vvimDebug() << "same:" << m_markers[i]->caption << "VS" << ui->lwMarkers->item(i)->text();
+        }
+    }
+
+    return false;
+
 }
