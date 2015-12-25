@@ -1137,6 +1137,10 @@ void Form::on_pbShowTotalDistanceAndTotalTime_clicked()
 
 bool Form::testIfLWMarkersHasChanged()
 {
+    /**
+    we kunnen deze functie ook gebruiken als test of er een DragDrop is gebeurd. => ReOrderMarkers? (is er dan automatisch een matrix_up_to_date == false??)
+    **/
+
     if (m_markers.size() != ui->lwMarkers->count())
         return true;
 
