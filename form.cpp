@@ -585,7 +585,14 @@ void Form::on_pbRouteOmdraaien_clicked()
 
 void Form::reorderMarkers()
 {
-    vvimDebug() << "function was called";
+    vvimDebug() << "function was called" << "was it needed?" << testIfLWMarkersHasChanged();
+
+  /** in the future we could change this function to
+
+  if(testIfLWMarkersHasChanged())
+  {
+  **/
+
     QList<SMarker*> temp;
     //vvimDebug() << "write out of m_markers BEFORE the reordering";
     //logOutputMarkers();
@@ -600,6 +607,12 @@ void Form::reorderMarkers()
 
     //vvimDebug() << "write out of m_markers AFTER the reordering";
     //logOutputMarkers();
+
+  /**
+  }
+
+  no need to change m_markers when there has been no Drag/Drop action.
+  **/
 }
 
 void Form::logOutputMarkers()
