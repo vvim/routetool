@@ -515,7 +515,7 @@ void Form::keyPressEvent( QKeyEvent *k )
 
 void Form::drawRoute()
 {
-    resetTotalDistanceAndTotalTime();
+    vvimDebug() << "function called";
 
     // this only makes sense when there is more than 1 marker in m_markers
     // (as the first marker is the STARTING POINT and DESTINATION POINT of the route)
@@ -550,6 +550,13 @@ void Form::drawRoute()
         vvimDebug() << "complete HTML:" << html_top+html_bottom;
         ui->webView->setHtml(html_top+html_bottom);
     }
+
+    if(!after_calculating_distance_matrix_continue_to_setTotalDistanceAndTotalTime)
+    {
+        vvimDebug() << "calling setTotalDistanceAndTotalTime() with matrices_up_to_date =" << matrices_up_to_date;
+        setTotalDistanceAndTotalTime();
+    }
+    //else : function will be called anyway, no use to do it twice
 }
 
 void Form::on_pbRouteOmdraaien_clicked()
