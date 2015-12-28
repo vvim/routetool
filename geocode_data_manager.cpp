@@ -22,6 +22,8 @@ GeocodeDataManager::GeocodeDataManager(QObject *parent) :
 
 void GeocodeDataManager::getCoordinates(const QString& address)
 {
+    vvimDebug() << "exclusively to look up Addresses! Else, something went wrong...";
+    marker_type = Adres;
     name_of_marker = address;
     name_of_marker.replace("&","+");
     name_of_marker.replace("\n",",");
