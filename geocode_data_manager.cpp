@@ -132,7 +132,6 @@ void GeocodeDataManager::giveNextMarker()
         }
 
         marker_type = Ophaalpunt;
-        vvimDebug() << "<vvim>: hier een korte pauze inlassen zodat de naam van de marker correct blijft?";
         ophaalpunt_to_mark = markersToBeDone->takeFirst(); // Removes the first item in the list and returns it.
         getCoordinates(ophaalpunt_to_mark.getAddress(), ophaalpunt_to_mark.getNameAndAddress());
     }
