@@ -112,7 +112,8 @@ void GeocodeDataManager::pushLevering(SLevering levering)
 {
     marker_type = Levering;
     leveringToBeDone = levering;
-    getCoordinates(ophaalpunt_to_mark.getAddress(), ophaalpunt_to_mark.getNameAndAddress());
+    vvimDebug() << "getcoordinates:" << leveringToBeDone.getAddress() << "AND" << leveringToBeDone.getNameAndAddress();
+    getCoordinates(leveringToBeDone.getAddress(), leveringToBeDone.getNameAndAddress());
 }
 
 void GeocodeDataManager::pushListOfMarkers(QList<SOphaalpunt> *list_of_markers)
