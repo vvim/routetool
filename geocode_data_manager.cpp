@@ -65,12 +65,14 @@ void GeocodeDataManager::replyFinished(QNetworkReply* reply)
     QVariant result = parser.parse (json.toLatin1(), &ok);
     if(!ok)
     {
+        vvimDebug() << "error occured, cannot convert to QJson object: %1" << json;
         emit errorOccured(QString("Cannot convert to QJson object: %1").arg(json));
         return;
     }
 
     if(result.toMap()["status"].toString() != "OK")
     {
+        vvimDebug() << "error occured, status was wrong. Code of request is: %1" << result.toMap()["status"].toString();
         emit errorOccured(QString("Code of request is: %1").arg(result.toMap()["status"].toString()));
         return;
     }
