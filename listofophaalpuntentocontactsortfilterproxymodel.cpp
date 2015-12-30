@@ -36,7 +36,7 @@ bool ListOfOphaalpuntenToContactSortFilterProxyModel::lessThan(const QModelIndex
 
 QVariant ListOfOphaalpuntenToContactSortFilterProxyModel::data(const QModelIndex &index, int role) const
 {
-    int row = index.row();
+    //int row = index.row();
     int col = index.column();
     QDate date_to_display;
 
@@ -86,10 +86,4 @@ QVariant ListOfOphaalpuntenToContactSortFilterProxyModel::data(const QModelIndex
     }
 
     return QSortFilterProxyModel::data(index,role);
-}
-
-bool ListOfOphaalpuntenToContactSortFilterProxyModel::setData(const QModelIndex & index, const QVariant & value, int role)
-{
-    bool result = QSortFilterProxyModel::setData(index, value, role);
-    return result;
 }

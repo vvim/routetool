@@ -55,9 +55,3 @@ QVariant OphaalpuntenWidgetSortFilterProxyModel::data(const QModelIndex &index, 
 
     return QSortFilterProxyModel::data(index,role);
 }
-
-bool OphaalpuntenWidgetSortFilterProxyModel::setData(const QModelIndex & index, const QVariant & value, int role)
-{
-    bool result = QSortFilterProxyModel::setData(index, value, role);
-    return result;
-}

@@ -25,7 +25,6 @@ public:
 
 protected:
     bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
-    bool setData(const QModelIndex & index, const QVariant & value, int role);
 };
 
 #endif // ListOfOphaalpuntenToContactSortFilterProxyModel_H
