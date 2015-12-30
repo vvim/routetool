@@ -72,7 +72,8 @@ SOURCES += main.cpp\
     exportcollectionhistory.cpp \
     ophaalhistoriekdialogsortfilterproxymodel.cpp \
     listofophaalpuntentocontactsortfilterproxymodel.cpp \
-    globalfunctions.cpp
+    globalfunctions.cpp \
+    ophaalpuntenwidgetsortfilterproxymodel.cpp
 
 HEADERS  += routetool.h \
     form.h \
@@ -98,7 +99,8 @@ HEADERS  += routetool.h \
     exportcollectionhistory.h \
     ophaalhistoriekdialogsortfilterproxymodel.h \
     listofophaalpuntentocontactsortfilterproxymodel.h \
-    globalfunctions.h
+    globalfunctions.h \
+    ophaalpuntenwidgetsortfilterproxymodel.h
 
 FORMS    += routetool.ui \
     form.ui \

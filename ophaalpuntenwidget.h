@@ -3,9 +3,11 @@
 
 #include <QWidget>
 #include <QApplication>
+#include <QTreeView>
 #include "mylineedit.h"
 #include "infoophaalpunt.h"
 #include "nieuweaanmelding.h"
+#include "ophaalpuntenwidgetsortfilterproxymodel.h"
 
 class OphaalpuntenWidget : public QWidget
 {
@@ -24,6 +26,7 @@ private slots:
     void toonOphaalpuntInformatie();
     void databaseBeenUpdated();
     void loadOphaalpunten();
+    void toonOphaalpuntInformatie(QModelIndex index);
 
 private:
     QLabel *ophaalpuntLabel;
@@ -33,7 +36,14 @@ private:
     QPushButton* toonOphaalpunt;
     NieuweAanmelding* nieuweaanmeldingWidget;
 
+    QStandardItemModel *model;
+    OphaalpuntenWidgetSortFilterProxyModel *listOfLocationsModel;
+    QTreeView *contactTreeView;
+
     QMap<QString, int> ophaalpunten;
+
+    void addToTreeView(int ophaalpuntId, QString naamOphaalpunt, QString straat, QString huisnummer, QString busnummer, QString postcode, QString plaats, QString land, bool color_item = false);
+    void initModel();
 };
 
 #endif // OPHAALPUNTENWIDGET_H

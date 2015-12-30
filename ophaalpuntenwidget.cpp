@@ -30,12 +30,25 @@ OphaalpuntenWidget::OphaalpuntenWidget(QWidget *parent) :
     layout->addWidget(ophaalpuntEdit);
     layout->addWidget(toonOphaalpunt);
 
-    /* in case we want to add a buttonBox or so:
     QVBoxLayout *mainlayout = new QVBoxLayout();
     mainlayout->addLayout(layout);
-    */
 
-    setLayout(layout);
+    // add list of all ophaalpunten:
+    contactTreeView = new QTreeView();
+    contactTreeView->setRootIsDecorated(false);
+    contactTreeView->setAlternatingRowColors(true);
+    contactTreeView->setSortingEnabled(true);
+    contactTreeView->sortByColumn(1, Qt::AscendingOrder);
+    contactTreeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    model = NULL;
+    listOfLocationsModel = NULL;
+
+    connect(contactTreeView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(toonOphaalpuntInformatie(QModelIndex)));
+
+    mainlayout->addWidget(contactTreeView);
+
+    setLayout(mainlayout);
 
     ophaalpuntEdit->setFocus(); // always setFocus() as last action: http://stackoverflow.com/questions/526761/set-qlineedit-focus-in-qt
 
@@ -49,6 +62,9 @@ OphaalpuntenWidget::~OphaalpuntenWidget()
     delete ophaalpuntLabel;
     delete ophaalpuntEdit;
     delete info;
+    delete contactTreeView;
+    delete model;
+    delete listOfLocationsModel;
     delete nieuweaanmeldingWidget;
     delete toonOphaalpunt;
     if(completer)
@@ -61,9 +77,43 @@ OphaalpuntenWidget::~OphaalpuntenWidget()
     vvimDebug() << "OphaalpuntenWidget() deconstructed";
 }
 
+void OphaalpuntenWidget::initModel()
+{
+    vvimDebug() << "[ListOfOphaalpuntenToContact::initModel]" << "start";
+    delete model;
+    delete listOfLocationsModel;
+
+    QStringList labels;
+    labels << tr("id") << tr("Ophaalpunt") << tr("Straat") << tr("Huisnummer") << tr("Busnummer") << tr("Postcode") << tr("Plaats") << tr("Land") << tr("Aanmelding_present");
+
+    model = new QStandardItemModel(0, labels.count());
+
+    listOfLocationsModel = new OphaalpuntenWidgetSortFilterProxyModel(this);
+    listOfLocationsModel->setDynamicSortFilter(true);
+    listOfLocationsModel->setSourceModel(model);
+
+    for(int i = 0; i < labels.count(); i++)
+    {
+       model->setHeaderData(i,Qt::Horizontal, labels[i]);  // why does 'tr()' not work? -> QString& instead of QString...
+    }
+
+    contactTreeView->setModel(listOfLocationsModel);
+
+    contactTreeView->hideColumn(OPHAALPUNTQTREEVIEW_OPHAALPUNT_ID);
+    contactTreeView->hideColumn(OPHAALPUNTQTREEVIEW_AANMELDING_PRESENT);
+
+    // possible enhancement: add checkbox "show street / housenumber / busnumber"
+    contactTreeView->hideColumn(OPHAALPUNTQTREEVIEW_OPHAALPUNT_HUISNR);
+    contactTreeView->hideColumn(OPHAALPUNTQTREEVIEW_OPHAALPUNT_BUSNR);
+}
+
+
 void OphaalpuntenWidget::loadOphaalpunten()
 {
     vvimDebug() << "database has been changed, so we should reload the Completer";
+    // reinit TreeWidget
+    initModel();
+
     // autocompletion for locationEdit:
     // telkens aanroepen na aanmaken / wijzigen van een ophaalpunt?
     QStringList words; // "don't come easy, to me, la la la laaa la la"
@@ -101,6 +151,7 @@ void OphaalpuntenWidget::loadOphaalpunten()
 
 
     while (query.next()) {
+        bool aanmelding_running = false;
         QString naam	= query.value(0).toString();
         QString straat	= query.value(1).toString();
         QString nr	    = query.value(2).toString();
@@ -109,15 +160,39 @@ void OphaalpuntenWidget::loadOphaalpunten()
         QString plaats	= query.value(5).toString();
         QString land	= query.value(6).toString();
 
-        int id = query.value(7).toInt();
+        // 1. add ophaalpunt to QTextEdit Completer
+        int ophaalpunt_id = query.value(7).toInt();
 
         QString ophaalpunt = naam;
         ophaalpunt.append(QString(", %1 %2, %3 %4, %5").arg(straat).arg(nr).arg(postcode).arg(plaats).arg(land));
 
-        ophaalpunten[ophaalpunt] = id;
+        ophaalpunten[ophaalpunt] = ophaalpunt_id;
 
         words << ophaalpunt;
+
+        // 2. [A] to add ophaalpunt to QTreeView, we first have to check if it has a running Aanmelding or not
+
+        // it seems useless to me to recheck for a DB-connection as this query is right after the previous DB-connection-check
+        // also, if the connection would fail for this query, the worst thing that can happen, is that the TreeView is incorrect (no big deal)
+        QSqlQuery query2;
+        query2.prepare("SELECT * FROM aanmelding WHERE ophaalpunt = :ophaal AND ophaalronde_datum is NULL"); // and ophaalronde is NULL
+        query2.bindValue(":ophaal", ophaalpunt_id);
+
+        if(query2.exec())
+        {
+            if (query2.next())
+            {
+                aanmelding_running = true;
+            }
+        }
+        else
+            vvimDebug() << "something went wrong with checking for an existing aanmelding";
+
+        // 2. [B] add ophaalpunt to QTreeView
+        addToTreeView(ophaalpunt_id, naam, straat, nr, bus, postcode, plaats, land, aanmelding_running);
     }
+
+    vvimDebug() << "TOTAL of ophaalpunten loaded in \"OphaalpuntQTreeView\" :" << model->rowCount();
 
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
@@ -133,11 +208,37 @@ void OphaalpuntenWidget::loadOphaalpunten()
     vvimDebug() << "done, completer (re)loaded.";
 }
 
+void OphaalpuntenWidget::addToTreeView(int ophaalpuntId, QString naamOphaalpunt, QString straat, QString huisnummer, QString busnummer, QString postcode, QString plaats, QString land, bool color_item)
+{
+    model->insertRow(0);
+    model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_ID), ophaalpuntId);
+    model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_NAAM), naamOphaalpunt);
+    model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_STRAAT), straat);
+    model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_HUISNR), huisnummer);
+    model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_BUSNR), busnummer);
+    model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_POSTCODE), postcode);
+    model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_PLAATS), plaats);
+    model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_LAND), land);
+    model->setData(model->index(0,OPHAALPUNTQTREEVIEW_AANMELDING_PRESENT), color_item);
+}
+
 void OphaalpuntenWidget::toonOphaalpuntInformatie()
 {
     info->setWindowTitle("info over ophaalpunt");
+    info->showAanmeldingAndHistoriekButton(true);
     info->showOphaalpunt(ophaalpunten[ophaalpuntEdit->text()]);
 }
+
+void OphaalpuntenWidget::toonOphaalpuntInformatie(QModelIndex index)
+{
+    int row = index.row();
+    int ophaalpunt_id = listOfLocationsModel->data(listOfLocationsModel->index(row, OPHAALPUNTQTREEVIEW_OPHAALPUNT_ID)).toInt();
+    vvimDebug() << "get ophaalpunt id from row " << row << "is" << ophaalpunt_id;
+    info->showAanmeldingAndHistoriekButton(true);
+    info->setWindowTitle(tr("info over ophaalpunt"));
+    info->showOphaalpunt(ophaalpunt_id);
+}
+
 
 void OphaalpuntenWidget::ophaalpuntTextChanged()
 {
