@@ -59,9 +59,5 @@ QVariant OphaalpuntenWidgetSortFilterProxyModel::data(const QModelIndex &index, 
 bool OphaalpuntenWidgetSortFilterProxyModel::setData(const QModelIndex & index, const QVariant & value, int role)
 {
     bool result = QSortFilterProxyModel::setData(index, value, role);
-    if (role == Qt::CheckStateRole)
-    {
-        emit checkChanges();
-    }
     return result;
 }

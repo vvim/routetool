@@ -25,9 +25,6 @@ public:
     OphaalpuntenWidgetSortFilterProxyModel(QObject *parent = 0);
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
-signals:
-    void checkChanges();
-
 protected:
     bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
     bool setData(const QModelIndex & index, const QVariant & value, int role);

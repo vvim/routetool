@@ -91,9 +91,5 @@ QVariant ListOfOphaalpuntenToContactSortFilterProxyModel::data(const QModelIndex
 bool ListOfOphaalpuntenToContactSortFilterProxyModel::setData(const QModelIndex & index, const QVariant & value, int role)
 {
     bool result = QSortFilterProxyModel::setData(index, value, role);
-    if (role == Qt::CheckStateRole)
-    {
-        emit checkChanges();
-    }
     return result;
 }
