@@ -185,7 +185,7 @@ void RouteTool::showExportCollectionHistory()
 
 void RouteTool::showOphaalpuntInfo(int ophaalpunt_id)
 {
+    nieuwOphaalpuntWidget.showOphaalpunt(ophaalpunt_id);
     nieuwOphaalpuntWidget.showAanmeldingAndHistoriekButton(true);
     nieuwOphaalpuntWidget.setWindowTitle("info over ophaalpunt");
-    nieuwOphaalpuntWidget.showOphaalpunt(ophaalpunt_id);
 }
