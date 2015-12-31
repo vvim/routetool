@@ -610,7 +610,7 @@ void InfoOphaalpunt::reject()
 
 void InfoOphaalpunt::showAanmeldingAndHistoriekButton(bool show_button)
 {
-    vvimDebug() << "[InfoOphaalpunt::showAanmeldingButton(bool show_button)]" << "show_button" << show_button << "id" << id;
+    vvimDebug() << "show_button" << show_button << "id" << id;
     aanmeldingButton->setVisible(show_button);
     showHistoriekButton->setVisible(show_button);
 }
@@ -809,8 +809,8 @@ void InfoOphaalpunt::nieuweAanmeldingButtonPressed()
 
 void InfoOphaalpunt::showHistoriekButtonPressed()
 {
-    vvimDebug() << "[InfoOphaalpunt::showHistoriek()]" << "button 'Show Historiek' pressed";
-    vvimDebug() << "[InfoOphaalpunt::showHistoriek()]" << "show historiek, ophaalpunt_id" << id;
+    vvimDebug() << "button 'Show Historiek' pressed";
+    vvimDebug() << "show historiek, ophaalpunt_id" << id;
 
     if(id > 0) // else it has no use of course :-)
     {
