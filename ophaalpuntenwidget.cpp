@@ -234,9 +234,9 @@ void OphaalpuntenWidget::toonOphaalpuntInformatie(QModelIndex index)
     int row = index.row();
     int ophaalpunt_id = listOfLocationsModel->data(listOfLocationsModel->index(row, OPHAALPUNTQTREEVIEW_OPHAALPUNT_ID)).toInt();
     vvimDebug() << "get ophaalpunt id from row " << row << "is" << ophaalpunt_id;
+    info->showOphaalpunt(ophaalpunt_id);
     info->showAanmeldingAndHistoriekButton(true);
     info->setWindowTitle(tr("info over ophaalpunt"));
-    info->showOphaalpunt(ophaalpunt_id);
 }
 
 
