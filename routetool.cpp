@@ -184,6 +184,22 @@ void RouteTool::showExportCollectionHistory()
 
 void RouteTool::showOphaalpuntInfo(int ophaalpunt_id)
 {
+    /** signal gets emited from Form::askMainProgramToShowOphaalpuntInfo(int ophaalpunt_id)
+        reason for being: when the user clicks on "on_showOphaalpunten_clicked()", the map
+        displays all known locations on the map (except those who were already in the route).
+
+        The locations with a known 'aanmelding' will be colored blue, the other ones are yellow.
+        Instead of making the distinction Blue/Yellow in the Javascript of "on_showOphaalpunten_clicked()",
+        we will make the distinction here. It is easier to query OphaalpuntenWidget than to write
+        an extensive Javascript.
+    **/
+
+    vvimDebug() << "Aanmelding_present for ophaalpunt #" << ophaalpunt_id << ophaalpuntenWidget.OphaalpuntHasAanmeldingPresent(ophaalpunt_id);
+
+    // check for aanmelding_present
+    // if(aanmelding_present)
+    //     Show MessageBox();
+    // else
     nieuwOphaalpuntWidget.showOphaalpunt(ophaalpunt_id);
     nieuwOphaalpuntWidget.showAanmeldingAndHistoriekButton(true);
     nieuwOphaalpuntWidget.setWindowTitle("info over ophaalpunt");

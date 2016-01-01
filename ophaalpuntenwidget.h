@@ -17,6 +17,7 @@ public:
     ~OphaalpuntenWidget();
 
     void initialise();
+    bool OphaalpuntHasAanmeldingPresent(int ophaalpunt_id);
     
 signals:
     void contentsOfDatabaseChanged();

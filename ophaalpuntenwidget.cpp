@@ -262,3 +262,46 @@ void OphaalpuntenWidget::databaseBeenUpdated()
 {
     emit contentsOfDatabaseChanged();
 }
+
+bool OphaalpuntenWidget::OphaalpuntHasAanmeldingPresent(int ophaalpunt_id)
+{
+    // get the information whether there is OPHAALPUNTQTREEVIEW_AANMELDING_PRESENT or not.
+
+    // FIRST CHECK IF MODEL IS INITIALISED!!!
+    vvimDebug() << "model is NULL?" <<     (model == NULL) ;
+    if(model == NULL)
+    {
+        vvimDebug() << "model is NULL! we should initialise and fill the model";
+        initialise();
+    }
+
+    int row = -1;
+    int i = 0;
+
+    // 1. search for row that contains ophaalpunt #ophaalpunt_id
+    /** is this the correct way to iterate through listOfLocationsModel? Better ask at StackExchange, maybe an Iterator is better? But can't find any for StandardItemModel?
+        form.cpp:   QSet<SOphaalpunt*>::Iterator it = markers_met_aanmelding.begin();
+        form.cpp:    while(it != markers_met_aanmelding.end()) **/
+    for(i; i < listOfLocationsModel->rowCount(); i++)
+    {
+        vvimDebug() << listOfLocationsModel->data(listOfLocationsModel->index(i, OPHAALPUNTQTREEVIEW_OPHAALPUNT_ID)).toInt()  << listOfLocationsModel->data(listOfLocationsModel->index(i, OPHAALPUNTQTREEVIEW_OPHAALPUNT_ID)).toString();
+        if(listOfLocationsModel->data(listOfLocationsModel->index(i, OPHAALPUNTQTREEVIEW_OPHAALPUNT_ID)).toInt() == ophaalpunt_id)
+        {
+            row = i;
+            break;
+        }
+    }
+
+    // what if Row is not found?
+    if(row < 0)
+    {
+        vvimDebug() << "ophaalpunt" << ophaalpunt_id << "was not found, even after iterating through " << i << listOfLocationsModel->rowCount() << "rows of the model. Return false";
+        vvimDebug() << "total of rows in model:" << listOfLocationsModel->rowCount();
+        return false;
+    }
+
+    vvimDebug() << "ophaalpunt" << ophaalpunt_id << "was found at row" << row << "total of rows:" << listOfLocationsModel->rowCount() << "name:" << listOfLocationsModel->data(listOfLocationsModel->index(row, OPHAALPUNTQTREEVIEW_OPHAALPUNT_NAAM)).toString();
+    // 2. return the column OPHAALPUNTQTREEVIEW_AANMELDING_PRESENT
+
+    return listOfLocationsModel->data(listOfLocationsModel->index(row, OPHAALPUNTQTREEVIEW_AANMELDING_PRESENT)).toBool();
+}
