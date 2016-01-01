@@ -43,6 +43,7 @@ OphaalpuntenWidget::OphaalpuntenWidget(QWidget *parent) :
 
     model = NULL;
     listOfLocationsModel = NULL;
+    initialise();
 
     connect(contactTreeView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(toonOphaalpuntInformatie(QModelIndex)));
 

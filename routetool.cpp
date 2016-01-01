@@ -117,7 +117,6 @@ void RouteTool::showBellijst()
 
 void RouteTool::showOphaalpuntenWidget()
 {
-    ophaalpuntenWidget.initialise();
     ophaalpuntenWidget.show();
 }
 
