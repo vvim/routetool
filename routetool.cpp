@@ -196,6 +196,7 @@ void RouteTool::showOphaalrondeAanpassen()
             break;
     }
     kgo->show();
+    connect(kgo, SIGNAL(aanmelding_for_route(QList<SOphaalpunt> *)), m_pForm, SLOT(add_aanmeldingen(QList<SOphaalpunt>*)));
 }
 
 void RouteTool::showExportCollectionHistory()
