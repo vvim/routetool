@@ -301,7 +301,6 @@ void RouteTool::showOphaalpuntInfo(int ophaalpunt_id)
                 QString postcode = query.value(11).toString();
                 QString plaats = query.value(12).toString();
                 QString land = query.value(13).toString();
-                QDate datum = query.value(14).toDate();
 
                 QList<SOphaalpunt> *listOfAanmeldingen = new QList<SOphaalpunt>();
                 SOphaalpunt _ophaalpunt(
