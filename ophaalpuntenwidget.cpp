@@ -282,9 +282,8 @@ bool OphaalpuntenWidget::OphaalpuntHasAanmeldingPresent(int ophaalpunt_id)
     /** is this the correct way to iterate through listOfLocationsModel? Better ask at StackExchange, maybe an Iterator is better? But can't find any for StandardItemModel?
         form.cpp:   QSet<SOphaalpunt*>::Iterator it = markers_met_aanmelding.begin();
         form.cpp:    while(it != markers_met_aanmelding.end()) **/
-    for(i; i < listOfLocationsModel->rowCount(); i++)
+    for(i = 0; i < listOfLocationsModel->rowCount(); i++)
     {
-        vvimDebug() << listOfLocationsModel->data(listOfLocationsModel->index(i, OPHAALPUNTQTREEVIEW_OPHAALPUNT_ID)).toInt()  << listOfLocationsModel->data(listOfLocationsModel->index(i, OPHAALPUNTQTREEVIEW_OPHAALPUNT_ID)).toString();
         if(listOfLocationsModel->data(listOfLocationsModel->index(i, OPHAALPUNTQTREEVIEW_OPHAALPUNT_ID)).toInt() == ophaalpunt_id)
         {
             row = i;

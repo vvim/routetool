@@ -194,8 +194,6 @@ void RouteTool::showOphaalpuntInfo(int ophaalpunt_id)
         an extensive Javascript.
     **/
 
-    vvimDebug() << "Aanmelding_present for ophaalpunt #" << ophaalpunt_id << ophaalpuntenWidget.OphaalpuntHasAanmeldingPresent(ophaalpunt_id);
-
     // check for aanmelding_present
     // if(aanmelding_present)
     //     Show MessageBox();
