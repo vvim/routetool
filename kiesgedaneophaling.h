@@ -6,6 +6,7 @@
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QDate>
+#include "sophaalpunt.h"
 
 enum KGOPurpose { Confirming, Deleting, Editing };
 
@@ -18,7 +19,8 @@ public:
     int initialise(); // return: -1 is error, 0 is nothing found, +1 is all ok
 
 signals:
-    
+    void aanmelding_for_route(QList<SOphaalpunt> *);
+
 public slots:
     
 private:
@@ -30,6 +32,7 @@ private:
 
     void confirmRoute(QDate ophaalronde_datum);
     void cancelRoute(QDate ophaalronde_datum);
+    void editRoute(QDate ophaalronde_datum);
 
 private slots:
     void reject();

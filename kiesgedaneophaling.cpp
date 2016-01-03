@@ -100,6 +100,7 @@ void KiesGedaneOphaling::accept()
 
         case Editing:
             vvimDebug() << "moving on to EDITING a planned route, should notify Routetool that we are _editing_";
+            editRoute(ophaalronde_datum);
             break;
 
         default:
@@ -174,6 +175,114 @@ void KiesGedaneOphaling::confirmRoute(QDate ophaalronde_datum)
     OpgehaaldeHoeveelheid *dialogboxToConfirmCollectedQuantities = new OpgehaaldeHoeveelheid(ophaalronde_datum);
     dialogboxToConfirmCollectedQuantities->show();
     reject();
+}
+
+void KiesGedaneOphaling::editRoute(QDate ophaalronde_datum)
+{
+    vvimDebug() << "[0] FIRST, CLEAN CURRENT ROUTE. Save it ???";
+    vvimDebug() << "[0] FIRST, CLEAN CURRENT ROUTE. Save it ???";
+    vvimDebug() << "[0] FIRST, CLEAN CURRENT ROUTE. Save it ???";
+    vvimDebug() << "[0] FIRST, CLEAN CURRENT ROUTE. Save it ???";
+
+    //assuming m_confirm_or_cancel == Editing -> tested by accept()
+
+    vvimDebug() << "get ready to edit" << "[A] SELECT ALL locations from route" << ophaalronde_datum.toString();
+
+    QString SQLquery = QString("SELECT * from aanmelding, ophaalpunten where aanmelding.ophaalpunt = ophaalpunten.id AND ophaalronde_datum = %1 ORDER BY volgorde ASC").arg(ophaalronde_datum.toString());
+
+    QSqlQuery query;
+    query.prepare(" SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, "
+                  "        aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, aanmelding.id, "
+                  "        ophaalpunten.id, aanmelding.opmerkingen, ophaalpunten.straat, "
+                  "        ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, "
+                  "        ophaalpunten.plaats, ophaalpunten.land "
+                  " FROM aanmelding, ophaalpunten "
+                  " WHERE aanmelding.ophaalpunt = ophaalpunten.id AND ophaalronde_datum = :ophaalrondedatum "
+                  " ORDER BY volgorde ASC");
+    query.bindValue(":ophaalrondedatum",ophaalronde_datum);
+
+    if(!query.exec())
+    {
+        vvimDebug() << "first try went wrong, trying to reconnect to DB" << query.lastError().text();
+
+        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "unable to reconnect to DB, showing critical QMessagebox";
+            QMessageBox::critical(this,tr("Geen verbinding met databank, dus wijzigen van ophaalronde niet gelukt"),
+                                query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
+            qCritical(QString(tr("Wijzigen van ophaalronde %1 is niet gelukt! Kon geen verbinding met databank maken... SELECT * from aanmelding, ophaalpunten where aanmelding.ophaalpunt = ophaalpunten.id AND ophaalronde_datum = %1 ORDER BY volgorde ASC , error: ").arg(ophaalronde_datum.toString()).append(query.lastError().text())).toStdString().c_str());
+            return;
+        }
+        QSqlQuery query2;
+        query2.prepare(" SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, "
+                       "        aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten, aanmelding.id, "
+                       "        ophaalpunten.id, aanmelding.opmerkingen, ophaalpunten.straat, "
+                       "        ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, "
+                       "        ophaalpunten.plaats, ophaalpunten.land "
+                       " FROM aanmelding, ophaalpunten "
+                       " WHERE aanmelding.ophaalpunt = ophaalpunten.id AND ophaalronde_datum = :ophaalrondedatum "
+                       " ORDER BY volgorde ASC");
+        query = query2;
+        query.bindValue(":ophaalrondedatum",ophaalronde_datum);
+
+        if(!query.exec())
+        {
+            QMessageBox::critical(this,tr("Wijzigen van ophaalronde niet gelukt"),
+                                query.lastError().text().append(tr("\n\nHerstel de fout en probeer opnieuw.")), QMessageBox::Cancel);
+            qCritical(QString(tr("Wijzigen van ophaalronde %1 is niet gelukt! SELECT * from aanmelding, ophaalpunten where aanmelding.ophaalpunt = ophaalpunten.id AND ophaalronde_datum = %1 ORDER BY volgorde ASC , error: ").arg(ophaalronde_datum.toString()).append(query.lastError().text())).toStdString().c_str());
+            return; // errorboodschap tonen???
+        }
+    }
+
+    vvimDebug() << "get ready to edit" << "[B] set FLAG / Boolean in Routetool , voor als de gebruiker nu klikt op 'route opslaan', dat we de vorige overschrijven (geef messagebox: overschrijven of nieuwe?)";
+
+    vvimDebug() << "get ready to edit" << "[C] put locations in routetool";
+    QList<SOphaalpunt> *listOfAanmeldingen = new QList<SOphaalpunt>();
+
+    while(query.next())
+    {
+        QString ophaalpunt_naam = query.value(0).toString();
+        double kg_kurk = query.value(1).toDouble();
+        double kg_kaars = query.value(2).toDouble();
+        double zakken_kurk = query.value(3).toDouble();
+        double zakken_kaars = query.value(4).toDouble();
+        int aanmelding_id = query.value(5).toInt();
+        int ophaalpunt_id = query.value(6).toInt();
+        QString opmerkingen = query.value(7).toString();  // opmerkingen (uit table aanmelding)
+        QString ophaalpunt_straat = query.value(8).toString();
+        QString huisnr = query.value(9).toString();
+        QString busnr = query.value(10).toString();
+        QString postcode = query.value(11).toString();
+        QString plaats = query.value(12).toString();
+        QString land = query.value(13).toString();
+
+        SOphaalpunt _ophaalpunt(
+                        ophaalpunt_naam,
+                        ophaalpunt_straat,
+                        huisnr,
+                        busnr,
+                        postcode,
+                        plaats,
+                        land,
+                        kg_kurk,
+                        kg_kaars,
+                        zakken_kurk,
+                        zakken_kaars,
+                        aanmelding_id,
+                        ophaalpunt_id,
+                        opmerkingen
+                    );
+        listOfAanmeldingen->append(_ophaalpunt);
+    }
+
+    vvimDebug() << "get ready to edit" << "[D] emit list to routetool";
+    vvimDebug() << "List size:" << listOfAanmeldingen->count();
+    emit aanmelding_for_route(listOfAanmeldingen);
+    //emit LIST
+
+
+    reject();
+
 }
 
 void KiesGedaneOphaling::cancelRoute(QDate ophaalronde_datum)
