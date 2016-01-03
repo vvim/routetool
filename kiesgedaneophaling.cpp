@@ -9,24 +9,37 @@
 #include "opgehaaldehoeveelheid.h"
 #include "globalfunctions.h"
 
-KiesGedaneOphaling::KiesGedaneOphaling(bool confirm, QWidget *parent) :
+KiesGedaneOphaling::KiesGedaneOphaling(KGOPurpose purpose, QWidget *parent) :
     QWidget(parent)
 {
     vvimDebug() << "<vvim> [TODO] if window KiesGedaneOphaling gets closed: NOTHING HAPPENS! how to delete from memory???";
 
-    m_confirm_or_cancel = confirm;
+    m_confirm_or_cancel = purpose;
 
-    if(m_confirm_or_cancel)
+    switch(m_confirm_or_cancel)
     {
-        // select route to confirm it
-        ophalingenLabel = new QLabel(tr("Voor welke ophaalronde wil je de hoeveelheden bevestigen?"));
-        setWindowTitle(tr("Bevestigen opgehaalde hoeveelheden"));
-    }
-    else
-    {
-        // select route to cancel it
-        ophalingenLabel = new QLabel(tr("Welke ophaalronde wil je annuleren?"));
-        setWindowTitle(tr("Annuleer geplande ophaalronde"));
+        case Confirming:
+            vvimDebug() << "purpose is to confirm finished routes";
+            // select route to confirm it
+            ophalingenLabel = new QLabel(tr("Voor welke ophaalronde wil je de hoeveelheden bevestigen?"));
+            setWindowTitle(tr("Bevestigen opgehaalde hoeveelheden"));
+            break;
+
+        case Deleting:
+            vvimDebug() << "purpose is to delete a planned route";
+            // select route to cancel it
+            ophalingenLabel = new QLabel(tr("Welke ophaalronde wil je annuleren?"));
+            setWindowTitle(tr("Annuleer geplande ophaalronde"));
+            break;
+
+        case Editing:
+            vvimDebug() << "purpose is to edit a planned route";
+            ophalingenLabel = new QLabel(tr("Welke ophaalronde wil je aanpassen?"));
+            setWindowTitle(tr("Wijzig geplande ophaalronde"));
+            break;
+
+        default:
+            vvimDebug() << "this should not be happening, Default option triggered in switch(m_confirm_or_cancel) , ERROR";
     }
 
     ophalingenComboBox = new QComboBox();
@@ -73,15 +86,24 @@ void KiesGedaneOphaling::accept()
     QDate ophaalronde_datum = ophalingenMap[ophalingenComboBox->currentIndex()];
     vvimDebug() << "choice has been made" << ophalingenComboBox->currentIndex() << ophalingenComboBox->itemText(ophalingenComboBox->currentIndex()) << ophalingenMap[ophalingenComboBox->currentIndex()].toString();
 
-    if(m_confirm_or_cancel)
+    switch(m_confirm_or_cancel)
     {
-        vvimDebug() << "moving on to confirming a finished route";
-        confirmRoute(ophaalronde_datum);
-    }
-    else
-    {
-        vvimDebug() << "moving on to CANCELING a finished route, first ask permission to cancel selected route";
-        cancelRoute(ophaalronde_datum);
+        case Confirming:
+            vvimDebug() << "moving on to CONFIRMING a finished route";
+            confirmRoute(ophaalronde_datum);
+            break;
+
+        case Deleting:
+            vvimDebug() << "moving on to CANCELING a planned route, first ask permission to cancel selected route";
+            cancelRoute(ophaalronde_datum);
+            break;
+
+        case Editing:
+            vvimDebug() << "moving on to EDITING a planned route, should notify Routetool that we are _editing_";
+            break;
+
+        default:
+            vvimDebug() << "this should not be happening, Default option triggered in switch(m_confirm_or_cancel) , ERROR";
     }
 }
 
@@ -148,7 +170,7 @@ int KiesGedaneOphaling::initialise()
 
 void KiesGedaneOphaling::confirmRoute(QDate ophaalronde_datum)
 {
-    //assuming m_confirm_or_cancel == TRUE -> tested by accept()
+    //assuming m_confirm_or_cancel == Confirming -> tested by accept()
     OpgehaaldeHoeveelheid *dialogboxToConfirmCollectedQuantities = new OpgehaaldeHoeveelheid(ophaalronde_datum);
     dialogboxToConfirmCollectedQuantities->show();
     reject();
@@ -156,7 +178,7 @@ void KiesGedaneOphaling::confirmRoute(QDate ophaalronde_datum)
 
 void KiesGedaneOphaling::cancelRoute(QDate ophaalronde_datum)
 {
-    //assuming m_confirm_or_cancel == FALSE -> tested by accept()
+    //assuming m_confirm_or_cancel == Deleting -> tested by accept()
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, tr("Annuleer geselecteerde ophaalronde"),
                     tr("Ben je zeker dat je de geplande ophaalronde van %1 wilt annuleren?").arg(ophaalronde_datum.toString()), QMessageBox::Yes|QMessageBox::No);

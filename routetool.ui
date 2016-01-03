@@ -50,6 +50,7 @@
     </property>
     <addaction name="effectiefOpgehaaldeHoeveelhedenMenuButton"/>
     <addaction name="actionAnnuleer_ingegeven_ophaalronde"/>
+    <addaction name="actionOphaalronde_aanpassen"/>
    </widget>
    <addaction name="menuMenuOphaalpunten"/>
    <addaction name="menuMenuAanmeldingen"/>
@@ -113,6 +114,11 @@
   <action name="actionExporteer_Historiek">
    <property name="text">
     <string>Exporteer historiek</string>
+   </property>
+  </action>
+  <action name="actionOphaalronde_aanpassen">
+   <property name="text">
+    <string>Ophaalronde aanpassen</string>
    </property>
   </action>
  </widget>

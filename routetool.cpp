@@ -124,7 +124,7 @@ void RouteTool::showOphaalpuntenWidget()
 void RouteTool::showEffectiefOpgehaaldeHoeveelheden()
 {
     vvimDebug() << "user clicked on showEffectiefOpgehaaldeHoeveelheden()";
-    KiesGedaneOphaling *kgo = new KiesGedaneOphaling();
+    KiesGedaneOphaling *kgo = new KiesGedaneOphaling(Confirming);
 
     switch(kgo->initialise())
     {
@@ -161,7 +161,7 @@ void RouteTool::showAnnuleerIngegevenOphaalronde()
 {
     // inherit KiesGedaneOphaling , override "accept" met UPDATE aanmelding SET ophalings_datum = NULL, volgorde = NULL WHERE ophalings_datum = :ophalingsdatum;
     vvimDebug() << "user clicked on showAnnuleerIngegevenOphaalronde()";
-    KiesGedaneOphaling *kgo = new KiesGedaneOphaling(false);
+    KiesGedaneOphaling *kgo = new KiesGedaneOphaling(Deleting);
 
     switch(kgo->initialise())
     {
