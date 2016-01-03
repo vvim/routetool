@@ -345,6 +345,7 @@ void Form::on_pbRemoveMarker_clicked()
     //deleteing caption from ListWidget
     delete ui->lwMarkers->takeItem(ui->lwMarkers->currentRow());
 
+    setTotalWeightTotalVolume();
     drawRoute();
 }
 
