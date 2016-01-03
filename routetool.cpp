@@ -35,6 +35,7 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(ui->effectiefOpgehaaldeHoeveelhedenMenuButton, SIGNAL(triggered()), this, SLOT(showEffectiefOpgehaaldeHoeveelheden()));
     connect(ui->actionAnnuleer_ingegeven_ophaalronde, SIGNAL(triggered()), this, SLOT(showAnnuleerIngegevenOphaalronde()));
     connect(ui->actionExporteer_Historiek, SIGNAL(triggered()), this, SLOT(showExportCollectionHistory()));
+    connect(ui->actionOphaalronde_aanpassen, SIGNAL(triggered()), this, SLOT(showOphaalrondeAanpassen()));
 
     m_pForm = new Form(this);
     setCentralWidget(m_pForm);
@@ -162,6 +163,26 @@ void RouteTool::showAnnuleerIngegevenOphaalronde()
     // inherit KiesGedaneOphaling , override "accept" met UPDATE aanmelding SET ophalings_datum = NULL, volgorde = NULL WHERE ophalings_datum = :ophalingsdatum;
     vvimDebug() << "user clicked on showAnnuleerIngegevenOphaalronde()";
     KiesGedaneOphaling *kgo = new KiesGedaneOphaling(Deleting);
+
+    switch(kgo->initialise())
+    {
+        case -1 :
+            QMessageBox::critical(this, tr("Databank error"), tr("We konden de onbevestigde ophaalrondes niet opzoeken in de databank."));
+            return;
+            break;
+        case 0 :
+            QMessageBox::information(this, tr("Geen onbevestigde ophaalrondes gevonden"), tr("Er werden geen onbevestigde ophaalrondes gevonden."));
+            return;
+            break;
+    }
+    kgo->show();
+}
+
+void RouteTool::showOphaalrondeAanpassen()
+{
+    // inherit KiesGedaneOphaling
+    vvimDebug() << "user clicked on showOphaalrondeAanpassen()";
+    KiesGedaneOphaling *kgo = new KiesGedaneOphaling(Editing);
 
     switch(kgo->initialise())
     {
