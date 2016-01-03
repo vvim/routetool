@@ -28,6 +28,8 @@ public:
     explicit RouteTool(QWidget *parent = 0);
     ~RouteTool();
 
+signals:
+    void aanmelding_for_route(QList<SOphaalpunt> *);
 
 private:
     Ui::RouteTool *ui;

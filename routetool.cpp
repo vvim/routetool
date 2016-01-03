@@ -40,6 +40,7 @@ RouteTool::RouteTool(QWidget *parent) :
     setCentralWidget(m_pForm);
 
     connect(&kiesOphaalpuntenWidget, SIGNAL(aanmelding_for_route(QList<SOphaalpunt> *)), m_pForm, SLOT(add_aanmeldingen(QList<SOphaalpunt>*)));
+    connect(this, SIGNAL(aanmelding_for_route(QList<SOphaalpunt> *)), m_pForm, SLOT(add_aanmeldingen(QList<SOphaalpunt>*)));
     connect(&leveringWidget, SIGNAL(levering_for_route(SLevering)), m_pForm, SLOT(add_levering(SLevering)));
     connect(&configurationWidget, SIGNAL(configurationChanged()), m_pForm, SLOT(setTotalWeightTotalVolume()));
 
@@ -194,10 +195,130 @@ void RouteTool::showOphaalpuntInfo(int ophaalpunt_id)
         an extensive Javascript.
     **/
 
-    // check for aanmelding_present
-    // if(aanmelding_present)
-    //     Show MessageBox();
-    // else
+    if(ophaalpuntenWidget.OphaalpuntHasAanmeldingPresent(ophaalpunt_id))
+    {
+        // YES, ophaalpunt has an Aanmelding present. But which one? => query database
+
+        QString SQLquery = QString("SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten,"
+                " aanmelding.id, ophaalpunten.id, aanmelding.opmerkingen,"
+                " ophaalpunten.straat, ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land, aanmelding.datum "
+                " FROM aanmelding, ophaalpunten"
+                " WHERE ophaalpunten.id = aanmelding.ophaalpunt AND ophaalpunten.id = %1 AND aanmelding.ophaalronde_datum is NULL").arg(ophaalpunt_id);
+
+        QSqlQuery query;
+        query.prepare("SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten,"
+                      " aanmelding.id, ophaalpunten.id, aanmelding.opmerkingen,"
+                      " ophaalpunten.straat, ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land, aanmelding.datum "
+                      " FROM aanmelding, ophaalpunten"
+                      " WHERE ophaalpunten.id = aanmelding.ophaalpunt AND ophaalpunten.id = :ophaalpuntid AND aanmelding.ophaalronde_datum is NULL");
+        query.bindValue(":ophaalpuntid",ophaalpunt_id);
+
+        if(!query.exec())
+        {
+            if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+            {
+                vvimDebug() << "unable to reconnect to DB, halting";
+                QMessageBox::information(this, tr("Fout bij verbinding met de databank in functie %1").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+                return;
+            }
+            vvimDebug() << "reconnected to DB, will try query again";
+
+            QSqlQuery query2;
+            query2.prepare("SELECT ophaalpunten.naam, aanmelding.kg_kurk, aanmelding.kg_kaarsresten, aanmelding.zakken_kurk, aanmelding.zakken_kaarsresten,"
+                          " aanmelding.id, ophaalpunten.id, aanmelding.opmerkingen,"
+                          " ophaalpunten.straat, ophaalpunten.nr, ophaalpunten.bus, ophaalpunten.postcode, ophaalpunten.plaats, ophaalpunten.land, aanmelding.datum "
+                          " FROM aanmelding, ophaalpunten"
+                          " WHERE ophaalpunten.id = aanmelding.ophaalpunt AND ophaalpunten.id = :ophaalpuntid AND aanmelding.ophaalronde_datum is NULL");
+
+            query = query2;
+            query.bindValue(":ophaalpuntid",ophaalpunt_id);
+
+            if(!query.exec())
+            {
+                vvimDebug() << "ophaalpuntid = " << ophaalpunt_id << "-" << "something went wrong with checking for an existing aanmelding" << query.lastError();
+                QMessageBox::information(this, tr("Fout bij verbinding met heruitvoeren query in functie %1").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+                return;
+            }
+        }
+
+        if(query.size() != 1)
+        	vvimDebug() << "[ERROR] size of result set should be 1 but is " << query.size() << "how come? There should only be 1 aanmelding???";
+
+        if (query.next())
+        {
+            QString ophaalpunt_naam = query.value(0).toString();
+
+            double kg_kurk = query.value(1).toDouble();
+            double kg_kaars = query.value(2).toDouble();
+            double zakken_kurk = query.value(3).toDouble();
+            double zakken_kaars = query.value(4).toDouble();
+            int aanmelding_id = query.value(5).toInt();
+
+            QString message_for_messagebox = tr("Ophaalpunt %5 heeft %1 kg kurk aangemeld (%2 zakken) en %3 kg kaarsresten (%4 zakken).\n\nWilt u dit ophaalpunt toevoegen aan de huidige route of het informatiescherm van dit ophaalpunt zien?").arg(kg_kurk).arg(zakken_kurk).arg(kg_kaars).arg(zakken_kaars).arg(ophaalpunt_naam);
+            vvimDebug() << "aanmelding:" << message_for_messagebox;
+
+
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Dit ophaalpunt heeft een aanmelding"));
+            msgBox.setText(message_for_messagebox);
+            QAbstractButton *myYesButton = msgBox.addButton(tr("Toevoegen aan route"), QMessageBox::YesRole);
+            QAbstractButton *myNoButton = msgBox.addButton(tr("Toon info ophaalpunt"), QMessageBox::NoRole);
+            QAbstractButton *myCancelButton = msgBox.addButton(tr("Annuleren"), QMessageBox::RejectRole);
+            // msgBox.setStandardButtons(QMessageBox::Cancel); -> how to translate buttons to Dutch?
+            msgBox.setIcon(QMessageBox::Question);
+            msgBox.exec();
+
+            if(msgBox.clickedButton() == myYesButton)
+            {
+                vvimDebug() << "voeg ophaalpunt" << ophaalpunt_id << "toe aan route";
+
+                QString opmerkingen = query.value(7).toString();  // opmerkingen (uit table aanmelding)
+                QString ophaalpunt_straat = query.value(8).toString();
+                QString huisnr = query.value(9).toString();
+                QString busnr = query.value(10).toString();
+                QString postcode = query.value(11).toString();
+                QString plaats = query.value(12).toString();
+                QString land = query.value(13).toString();
+                QDate datum = query.value(14).toDate();
+
+                QList<SOphaalpunt> *listOfAanmeldingen = new QList<SOphaalpunt>();
+                SOphaalpunt _ophaalpunt(
+                                ophaalpunt_naam,
+                                ophaalpunt_straat,
+                                huisnr,
+                                busnr,
+                                postcode,
+                                plaats,
+                                land,
+                                kg_kurk,
+                                kg_kaars,
+                                zakken_kurk,
+                                zakken_kaars,
+                                aanmelding_id,
+                                ophaalpunt_id,
+                                opmerkingen
+                            );
+                listOfAanmeldingen->append(_ophaalpunt);
+                emit aanmelding_for_route(listOfAanmeldingen);
+                return;
+            }
+            if(msgBox.clickedButton() == myCancelButton)
+            {
+                vvimDebug() << "user canceled action";
+                return;
+            }
+        }
+        else
+        {
+            vvimDebug() << "ERROR, something went wrong with querying for the aanmelding??";
+            vvimDebug() << "will just show info on Ophaalpunt";
+        }
+
+    }
+
+    vvimDebug() << "user agreed, or there is no Messagebox (because the ophaalpunt has no aanmelding_present, or maybe a DB-error occured in the final request?";
+
+    // so we arrive at this point in 2 instances: or there is no AanmeldingPresent, or there is but the user clicked on "ShowOphaalpuntInfo" in during the messagebox
     nieuwOphaalpuntWidget.showOphaalpunt(ophaalpunt_id);
     nieuwOphaalpuntWidget.showAanmeldingAndHistoriekButton(true);
     nieuwOphaalpuntWidget.setWindowTitle("info over ophaalpunt");
