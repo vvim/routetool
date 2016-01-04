@@ -180,8 +180,44 @@ void RouteTool::showAnnuleerIngegevenOphaalronde()
 
 void RouteTool::showOphaalrondeAanpassen()
 {
-    // inherit KiesGedaneOphaling
     vvimDebug() << "user clicked on showOphaalrondeAanpassen()";
+    vvimDebug() << "[0] FIRST, CLEAN CURRENT ROUTE. Save it ???";
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(tr("Huidige route opslaan?"));
+    msgBox.setText(tr("Voor je de ingegeven route opent, wil je de huidige opslaan?"));
+    QAbstractButton *myYesButton = msgBox.addButton(tr("Route opslaan"), QMessageBox::YesRole);
+    QAbstractButton *myNoButton = msgBox.addButton(tr("Route wissen"), QMessageBox::NoRole);
+    QAbstractButton *myCancelButton = msgBox.addButton(tr("Annuleren"), QMessageBox::RejectRole);
+
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.exec();
+
+    if(msgBox.clickedButton() == myCancelButton)
+    {
+        // works also when the user presses ESC or simply closes the QMessageBox
+        vvimDebug() << "user cancelled action";
+        return;
+    }
+
+    if(msgBox.clickedButton() == myYesButton)
+    {
+        // open "save route"
+        vvimDebug() << "user wants to save the current route before continuing";
+        //m_pForm->on_pbTransportationList_clicked(); // crashes for some reason??
+        QMessageBox msgBoxInform;
+        msgBoxInform.setWindowTitle(tr("Huidige route opslaan"));
+        msgBoxInform.setText(tr("Druk op de knop 'Vervoerslijst aanmaken'"));
+        msgBoxInform.setIcon(QMessageBox::Information);
+        msgBoxInform.exec();
+        return;
+    }
+
+    // if the user pressed "myNoButton", we arrive here immediately
+    vvimDebug() << "now we erase the current route and show the KGO to choose a previously saved route";
+    m_pForm->removeAllMarkers();
+
+    // inherit KiesGedaneOphaling
     KiesGedaneOphaling *kgo = new KiesGedaneOphaling(Editing);
 
     switch(kgo->initialise())

@@ -180,9 +180,8 @@ void KiesGedaneOphaling::confirmRoute(QDate ophaalronde_datum)
 void KiesGedaneOphaling::editRoute(QDate ophaalronde_datum)
 {
     vvimDebug() << "[0] FIRST, CLEAN CURRENT ROUTE. Save it ???";
-    vvimDebug() << "[0] FIRST, CLEAN CURRENT ROUTE. Save it ???";
-    vvimDebug() << "[0] FIRST, CLEAN CURRENT ROUTE. Save it ???";
-    vvimDebug() << "[0] FIRST, CLEAN CURRENT ROUTE. Save it ???";
+
+    // will be done in RouteTool::showOphaalrondeAanpassen() , by asking the user in a MessageBox
 
     //assuming m_confirm_or_cancel == Editing -> tested by accept()
 
