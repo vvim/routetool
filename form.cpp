@@ -1168,3 +1168,30 @@ bool Form::testIfLWMarkersHasChanged()
     return false;
 
 }
+
+void Form::removeAllMarkers()
+{
+    m_markers.clear();
+    ui->lwMarkers->clear();
+
+    //reset starting point
+    ui->lePostalAddress->setText(settings.value("startpunt").toString());
+    goClicked();
+
+    matrices_up_to_date = false;
+    after_calculating_distance_matrix_continue_to_tsp = false;
+    after_calculating_distance_matrix_continue_to_transportationlist = false;
+    after_calculating_distance_matrix_continue_to_setTotalDistanceAndTotalTime = false;
+
+    resetTotalDistanceAndTotalTime(); // not necessary because 'drawRoute()' will be called, but in case future changes remove that call, this line is for avoiding bugs
+
+    //reorder Markers: doesn't seem necessary as the QListWidget and m_markers are empty, but for completion sake
+    reorderMarkers();
+    setTotalWeightTotalVolume();
+
+    vvimDebug() << "[TODO] <vvim> normally I would 'drawRoute', but it is called too soon after 'goClicked()'\n"
+                << "therefore it is now resulting in a Google Maps API error: empty request\n"
+                << "solution could be to 'sleep' 1 second, but at the moment I opt for ignoring it";
+
+    //drawRoute();
+}

@@ -34,6 +34,7 @@ class Form : public QWidget
 
 public:
     explicit Form(QWidget *parent = 0);
+    void removeAllMarkers();
     ~Form();
 
 signals:
