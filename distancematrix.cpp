@@ -34,6 +34,9 @@ DistanceMatrix::DistanceMatrix(QObject *parent) :
 
     //calculate distance in meters or in seconds?
     distance_calc = DISTANCE_IN_METERS;
+
+    distance_matrix_in_meters = NULL;
+    distance_matrix_in_seconds = NULL;
 }
 
 QString DistanceMatrix::buildQjsonUrl(QList <SMarker*> markers, int origins_start, int origins_end, int destinations_start, int destinations_end)
