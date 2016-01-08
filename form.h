@@ -42,6 +42,7 @@ signals:
 
 public slots:
     void askMainProgramToShowOphaalpuntInfo(int ophaalpunt_id);
+    void on_pbTransportationList_clicked();
 
 private slots:
     void goClicked();
@@ -63,7 +64,6 @@ private slots:
     void on_pbRemoveMarker_clicked();
     void on_zoomSpinBox_valueChanged(int arg1);
     void on_pbOptimizeRoute_clicked();
-    void on_pbTransportationList_clicked();
     void drawRoute();
     void on_pbRouteOmdraaien_clicked();
     void reorderMarkers();

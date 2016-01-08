@@ -204,13 +204,7 @@ void RouteTool::showOphaalrondeAanpassen()
     {
         // open "save route"
         vvimDebug() << "user wants to save the current route before continuing";
-        //m_pForm->on_pbTransportationList_clicked(); // crashes for some reason??
-        QMessageBox msgBoxInform;
-        msgBoxInform.setWindowTitle(tr("Huidige route opslaan"));
-        msgBoxInform.setText(tr("Druk op de knop 'Vervoerslijst aanmaken'"));
-        msgBoxInform.setIcon(QMessageBox::Information);
-        msgBoxInform.exec();
-        return;
+        m_pForm->on_pbTransportationList_clicked(); // crashes for some reason??
     }
 
     // if the user pressed "myNoButton", we arrive here immediately
