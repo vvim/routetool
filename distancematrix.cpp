@@ -923,13 +923,30 @@ void DistanceMatrix::deleteTheMatrices()
 
     if(nr_of_cities > 0)
     {
-        for(int i = 0; i < nr_of_cities; i++) {
-            delete [] distance_matrix_in_meters[i];
-            delete [] distance_matrix_in_seconds[i];
+        if( (distance_matrix_in_meters == NULL) || (distance_matrix_in_seconds == NULL) )
+        {
+            vvimDebug() << "distance_matrix is NULL, no need to delete the 2nd dimension of the matrix"; // insert Neo-pun
         }
-        delete [] distance_matrix_in_meters;
-        delete [] distance_matrix_in_seconds;
+        else
+        {
+            vvimDebug() << "not null, let's go!";
+            for(int i = 0; i < nr_of_cities; i++) {
+                vvimDebug() << "-- deleting meters" << i;
+                delete [] distance_matrix_in_meters[i];
+                vvimDebug() << "-- deleting seconds" << i;
+                delete [] distance_matrix_in_seconds[i];
+                vvimDebug() << "done";
+            }
+        }
     }
+
+    vvimDebug() << "deleting meters []";
+    delete [] distance_matrix_in_meters;
+    vvimDebug() << "deleting seconds []";
+    delete [] distance_matrix_in_seconds;
+    vvimDebug() << "done";
+
+    // now distance_matrix is NULL again
 }
 
 DistanceMatrix::~DistanceMatrix()
