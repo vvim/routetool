@@ -196,18 +196,28 @@ void RouteTool::showOphaalrondeAanpassen()
     if(msgBox.clickedButton() == myCancelButton)
     {
         // works also when the user presses ESC or simply closes the QMessageBox
-        vvimDebug() << "user cancelled action";
+        vvimDebug() << "user pressed CANCEL or ESC";
         return;
     }
 
     if(msgBox.clickedButton() == myYesButton)
     {
         // open "save route"
-        vvimDebug() << "user wants to save the current route before continuing";
-        m_pForm->on_pbTransportationList_clicked(); // crashes for some reason??
+        vvimDebug() << "user pressed YES" << "save the current route before continuing";
+        m_pForm->on_pbTransportationList_clicked();
+        return;
     }
 
-    // if the user pressed "myNoButton", we arrive here immediately
+    if(msgBox.clickedButton() == myNoButton)
+    {
+        // do not save previous work, just open old route
+        vvimDebug() << "user pressed NO" << "do not save the current route, just open old route";
+        cleanMarkersAndOpenOldRoute();
+    }
+}
+
+void RouteTool::cleanMarkersAndOpenOldRoute()
+{
     vvimDebug() << "now we erase the current route and show the KGO to choose a previously saved route";
     m_pForm->removeAllMarkers();
 

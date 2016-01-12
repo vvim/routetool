@@ -55,6 +55,7 @@ private slots:
     void showExportCollectionHistory();
     void showOphaalpuntInfo(int ophaalpunt_id);
     void showOphaalrondeAanpassen();
+    void cleanMarkersAndOpenOldRoute();
 };
 
 #endif // ROUTETOOL_H
