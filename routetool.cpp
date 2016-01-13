@@ -66,6 +66,8 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(m_pForm, SIGNAL(showOphaalpuntInfo(int)), this, SLOT(showOphaalpuntInfo(int)));
     connect(&nieuwOphaalpuntWidget,SIGNAL(nieuweAanmelding(int)),&nieuweAanmeldingWidget,SLOT(aanmeldingVoorOphaalpunt(int)));
 
+    /// call cleanMarkersAndOpenOldRoute() when TransportationListWriter::print() is done and Boolean is set commit 89741718d8520aab7ddb21a1a9bc2b90b7f5ec2c https://github.com/vvim/routetool/commit/89741718d8520aab7ddb21a1a9bc2b90b7f5ec2c
+    connect(m_pForm, SIGNAL(signalCleanMarkersAndOpenOldRoute()), this, SLOT(cleanMarkersAndOpenOldRoute()));
 }
 
 RouteTool::~RouteTool()

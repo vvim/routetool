@@ -78,6 +78,9 @@ Form::Form(QWidget *parent) :
 
     setTotalWeightTotalVolume();
     resetTotalDistanceAndTotalTime();
+
+    /// call cleanMarkersAndOpenOldRoute() when TransportationListWriter::print() is done and Boolean is set commit 89741718d8520aab7ddb21a1a9bc2b90b7f5ec2c https://github.com/vvim/routetool/commit/89741718d8520aab7ddb21a1a9bc2b90b7f5ec2c
+    connect(&transportationlistWriter, SIGNAL(signalCleanMarkersAndOpenOldRoute()), this, SLOT(cleanMarkersAndOpenOldRoute()));
 }
 
 Form::~Form()
@@ -1201,4 +1204,9 @@ void Form::removeAllMarkers()
 void Form::afterTransportationListCleanMarkersAndOpenRoute()
 {
     transportationlistWriter.afterTransportationListCleanMarkersAndOpenRoute();
+}
+
+void Form::cleanMarkersAndOpenOldRoute()
+{
+    emit signalCleanMarkersAndOpenOldRoute();
 }

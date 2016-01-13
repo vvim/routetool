@@ -315,7 +315,7 @@ void TransportationListWriter::print()
         QMessageBox::information(this, messagebox_title, messagebox_content);
         vvimDebug() << "The program 'waits' during previous messagebox, now we can run CleanMarkersAndOpenRoute";
         after_transportationlist_cleanmarkersandopenroute = false;
-        // EMIT "now CleanMarkersAndOpenRoute"
+        emit signalCleanMarkersAndOpenOldRoute();
     }
     else
     {

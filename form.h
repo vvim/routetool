@@ -40,6 +40,7 @@ public:
 
 signals:
     void showOphaalpuntInfo(int ophaalpunt_id);
+    void signalCleanMarkersAndOpenOldRoute();
 
 public slots:
     void askMainProgramToShowOphaalpuntInfo(int ophaalpunt_id);
@@ -70,11 +71,10 @@ private slots:
     void reorderMarkers();
     void setTotalWeightTotalVolume();
     void reloadCompleter();
-
     void on_showOphaalpunten_clicked();
     void populateJavaScriptWindowObject();
-
     void on_pbShowTotalDistanceAndTotalTime_clicked();
+    void cleanMarkersAndOpenOldRoute();
 
 private:
     int **distance_matrix_in_meters;

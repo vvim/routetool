@@ -28,6 +28,7 @@ public:
     inline bool checkIfWeShouldRemoveAllMarkersAndOpenRouteAfterBuildingTransportationList() { return after_transportationlist_cleanmarkersandopenroute; }
 
 signals:
+    void signalCleanMarkersAndOpenOldRoute();
     
 private slots:
     void editExpectedArrivalTime(QTime);
