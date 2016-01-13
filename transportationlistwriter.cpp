@@ -24,6 +24,8 @@ TransportationListWriter::TransportationListWriter(QWidget *parent) :
     seconds_needed_to_complete_transport = 0;
     ready = false;
 
+    after_transportationlist_cleanmarkersandopenroute = false;
+
     translist_doc = new TransportationListDocumentWriter(QDate::currentDate(),0,0);
 
 
@@ -302,8 +304,23 @@ void TransportationListWriter::print()
     QString name_vervoerslijst = QString(tr("vervoerslijst")).append(uniqueFeatureForFilenames);
     translist_doc->write(name_vervoerslijst, filename_map);
 
+    QString messagebox_title = tr("Vervoerslijst is aangemaakt");
+    QString messagebox_content = tr("De vervoerslijst is aangemaakt, het bestand heet '%1.doc' en de kaart is opgeslagen in het bestand '%2'.").arg(name_vervoerslijst).arg(filename_map);
+
     vvimDebug() << "Vervoerslijst is aangemaakt en heet" << name_vervoerslijst << ".doc, de kaart heet" << filename_map;
-    QMessageBox::information(this, tr("Vervoerslijst is aangemaakt"), tr("De vervoerslijst is aangemaakt, het bestand heet '%1.doc' en de kaart is opgeslagen in het bestand '%2'.").arg(name_vervoerslijst).arg(filename_map));
+
+    if(after_transportationlist_cleanmarkersandopenroute)
+    {
+        messagebox_content.append(tr("\n\nIn het volgende venster kan u kiezen welke oude route u wilt openen."));
+        QMessageBox::information(this, messagebox_title, messagebox_content);
+        vvimDebug() << "The program 'waits' during previous messagebox, now we can run CleanMarkersAndOpenRoute";
+        after_transportationlist_cleanmarkersandopenroute = false;
+        // EMIT "now CleanMarkersAndOpenRoute"
+    }
+    else
+    {
+        QMessageBox::information(this, messagebox_title, messagebox_content);
+    }
 }
 
 
@@ -525,6 +542,9 @@ void TransportationListWriter::populateWithSmarker(SMarker* marker, int previous
 
 void TransportationListWriter::reject()
 {
+    vvimDebug() << "USER PRESSED ON CANCEL" << "we should not continu, also not to 'Clean Markers and Open Old Route' => reset boolean";
+    after_transportationlist_cleanmarkersandopenroute = false;
+    // we cannot put this boolean in 'setOriginalValues()' because 'prepare()' calls 'setOriginalValues()' as well.
     setOriginalValues();
     ready = false;
     close();

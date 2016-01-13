@@ -204,6 +204,8 @@ void RouteTool::showOphaalrondeAanpassen()
     {
         // open "save route"
         vvimDebug() << "user pressed YES" << "save the current route before continuing";
+        // EXTRA BOOLEAN VOOR FORM.CPP, zie on_pbTransportationList. AFTER_VERVOERSLIJST_CONTINUE_TO_OPEN
+        m_pForm->afterTransportationListCleanMarkersAndOpenRoute();
         m_pForm->on_pbTransportationList_clicked();
         return;
     }

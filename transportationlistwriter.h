@@ -24,6 +24,8 @@ public:
     void print();
     inline int getTotalMetersOfRoute() { return total_distance_in_meters; }
     inline int getTotalSecondsOfRoute() { return seconds_needed_to_complete_transport; }
+    inline void afterTransportationListCleanMarkersAndOpenRoute() { after_transportationlist_cleanmarkersandopenroute = true; }
+    inline bool checkIfWeShouldRemoveAllMarkersAndOpenRouteAfterBuildingTransportationList() { return after_transportationlist_cleanmarkersandopenroute; }
 
 signals:
     
@@ -42,7 +44,7 @@ private:
 
     QSpinBox* empty_bags_of_kurk_neededEdit;
     QSpinBox* empty_bags_of_kaarsresten_neededEdit;
-    bool ready;
+    bool ready, after_transportationlist_cleanmarkersandopenroute;
 
     int empty_bags_of_kurk_needed;
     int empty_bags_of_kaarsresten_needed;

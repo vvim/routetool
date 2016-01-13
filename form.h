@@ -34,8 +34,9 @@ class Form : public QWidget
 
 public:
     explicit Form(QWidget *parent = 0);
-    void removeAllMarkers();
     ~Form();
+    void removeAllMarkers();
+    void afterTransportationListCleanMarkersAndOpenRoute();
 
 signals:
     void showOphaalpuntInfo(int ophaalpunt_id);

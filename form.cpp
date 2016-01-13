@@ -729,6 +729,8 @@ void Form::on_pbTransportationList_clicked()
     // for the map: see http://qt-project.org/doc/qt-4.8/desktop-screenshot.html
     //              see http://stackoverflow.com/questions/681148/how-to-print-a-qt-dialog-or-window
 
+    vvimDebug() << "Boolean set 'when transportation list is built, we have to remove all markers and open old route?'" << transportationlistWriter.checkIfWeShouldRemoveAllMarkersAndOpenRouteAfterBuildingTransportationList();
+
     // 1. prepare the Maps for a screenshot
     drawRoute();
     // drawRoute() also calls `reorderMarkers()` so that is taken care of: "make sure Drag and Drop changes are in place"
@@ -1194,4 +1196,9 @@ void Form::removeAllMarkers()
                 << "solution could be to 'sleep' 1 second, but at the moment I opt for ignoring it";
 
     //drawRoute();
+}
+
+void Form::afterTransportationListCleanMarkersAndOpenRoute()
+{
+    transportationlistWriter.afterTransportationListCleanMarkersAndOpenRoute();
 }
