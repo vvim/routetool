@@ -52,6 +52,12 @@ Form::Form(QWidget *parent) :
     ui->pbTransportationList->setEnabled(true);
     ui->pbRouteOmdraaien->setEnabled(true);
 
+    //stylesheet for "routeLoaded" (see http://doc.qt.io/qt-4.8/stylesheet-examples.html#customizing-a-qpushbutton-using-the-box-model)
+    ui->routeLoaded->setStyleSheet("QLabel { color: blue; padding: 5px; font-weight : bold; text-align: right }");
+    ui->routeLoadedCancel_button->setStyleSheet("QPushButton { color: blue; }");
+    //ui: "routeLoaded" should be invisible until a planned route is being opened to edit
+    disableRouteLabel();
+
     connect(ui->pbShowRouteAsDefined, SIGNAL(clicked()), this, SLOT(drawRoute()));
 
     connect(&m_geocodeDataManager, SIGNAL(coordinatesReady(double,double,QString)), this, SLOT(showCoordinates(double,double,QString)));
@@ -516,6 +522,18 @@ void Form::keyPressEvent( QKeyEvent *k )
         on_pbRemoveMarker_clicked();
 }
 
+void Form::showPlannedRoute(QList<SOphaalpunt> *locations, QDate routeCurrentlyBeingEdited)
+{
+    vvimDebug() << "get ready to edit" << "[B] set FLAG / Boolean in Routetool , voor als de gebruiker nu klikt op 'route opslaan', dat we de vorige overschrijven (geef messagebox: overschrijven of nieuwe?)";
+    vvimDebug() << "Date  of route being edited:" << routeCurrentlyBeingEdited;
+    transportationlistWriter.setCurrentlyEditedRoute(routeCurrentlyBeingEdited);
+
+    vvimDebug() << "show ui->routeLoaded to inform user that he is currently editing a planned route";
+    setRouteLabel(routeCurrentlyBeingEdited);
+
+    add_aanmeldingen(locations); // issue #40
+}
+
 
 void Form::drawRoute()
 {
@@ -728,6 +746,15 @@ void Form::setTotalDistanceAndTotalTime()
 
 void Form::on_pbTransportationList_clicked()
 {
+    if(transportationlistWriter.getCurrentlyEditedRoute() != QDate())
+    {
+    /// QMessagebox "overwrite transportationlist in database, or save as new route?
+        /**
+           WIS VORIGE datum uit de databank (gebruik functie RemoveTransportationList
+           EN SLA de nieuwe datum op
+          **/
+    }
+
     vvimDebug() << "This is where we should work on making the Transportation List (using distance matrices and Document Writer)";
     // for the map: see http://qt-project.org/doc/qt-4.8/desktop-screenshot.html
     //              see http://stackoverflow.com/questions/681148/how-to-print-a-qt-dialog-or-window
@@ -1209,4 +1236,26 @@ void Form::afterTransportationListCleanMarkersAndOpenRoute()
 void Form::cleanMarkersAndOpenOldRoute()
 {
     emit signalCleanMarkersAndOpenOldRoute();
+}
+
+
+void Form::disableRouteLabel()
+{
+    ui->routeLoaded->setText(tr("Nieuwe route"));
+    ui->routeLoadedCancel_button->setEnabled(false);
+    ui->routeLoaded->setVisible(false);
+    ui->routeLoadedCancel_button->setVisible(false);
+}
+
+void Form::setRouteLabel(QDate route)
+{
+    /// to force redrawing of ui: http://stackoverflow.com/questions/2052907/qt-repaint-redraw-update-do-something/2066916#2066916
+    /// and http://stackoverflow.com/questions/4510712/qlabel-settext-not-displaying-text-immediately-before-running-other-method
+
+    vvimDebug() << "loading route" << route.toString();
+
+    ui->routeLoaded->setText(tr("Route van %1 aan het bewerken.").arg(QLocale().toString(route))); // "ddd dd MM yyyy"
+    ui->routeLoaded->setVisible(true);
+    ui->routeLoadedCancel_button->setEnabled(true);
+    ui->routeLoadedCancel_button->setVisible(true);
 }

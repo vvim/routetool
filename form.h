@@ -60,6 +60,7 @@ private slots:
     void process_result_distancematrix(QList<int> *);
     void reload_distancematrix(int**, int**);
     void add_aanmeldingen(QList<SOphaalpunt> *);
+    void showPlannedRoute(QList<SOphaalpunt> *locations, QDate routeCurrentlyBeingEdited);
     void add_levering(SLevering);
     void keyPressEvent( QKeyEvent *k );
     void on_lwMarkers_currentRowChanged(int currentRow);
@@ -105,6 +106,8 @@ private:
     void setTotalDistanceAndTotalTime();
     void resetTotalDistanceAndTotalTime();
     bool testIfLWMarkersHasChanged();
+    void disableRouteLabel();
+    void setRouteLabel(QDate route);
 };
 
 #endif // FORM_H
