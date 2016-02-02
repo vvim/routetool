@@ -240,7 +240,7 @@ void RouteTool::cleanMarkersAndOpenOldRoute()
             break;
     }
     kgo->show();
-    connect(kgo, SIGNAL(aanmelding_for_route(QList<SOphaalpunt> *)), m_pForm, SLOT(add_aanmeldingen(QList<SOphaalpunt>*)));
+    connect(kgo, SIGNAL(showPlannedRoute(QList<SOphaalpunt> *, QDate)), m_pForm, SLOT(showPlannedRoute(QList<SOphaalpunt>*, QDate)));
 }
 
 void RouteTool::showExportCollectionHistory()

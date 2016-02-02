@@ -19,7 +19,7 @@ public:
     int initialise(); // return: -1 is error, 0 is nothing found, +1 is all ok
 
 signals:
-    void aanmelding_for_route(QList<SOphaalpunt> *);
+    void showPlannedRoute(QList<SOphaalpunt> *, QDate);
 
 public slots:
     

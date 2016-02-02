@@ -26,6 +26,8 @@ public:
     inline int getTotalSecondsOfRoute() { return seconds_needed_to_complete_transport; }
     inline void afterTransportationListCleanMarkersAndOpenRoute() { after_transportationlist_cleanmarkersandopenroute = true; }
     inline bool checkIfWeShouldRemoveAllMarkersAndOpenRouteAfterBuildingTransportationList() { return after_transportationlist_cleanmarkersandopenroute; }
+    inline void setCurrentlyEditedRoute(QDate routeBeingEdited) { routeCurrentlyBeingEdited = routeBeingEdited; }
+    inline QDate getCurrentlyEditedRoute() { return routeCurrentlyBeingEdited; }
 
 signals:
     void signalCleanMarkersAndOpenOldRoute();
@@ -59,6 +61,7 @@ private:
     QWidget *mapwidget;
 
     TransportationListDocumentWriter * translist_doc;
+    QDate routeCurrentlyBeingEdited;
 
     void populateWithSmarker(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i);
     void writeInformation(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i, int counter = 0, char kaart_nr = 0);

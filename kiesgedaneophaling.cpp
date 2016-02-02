@@ -235,6 +235,8 @@ void KiesGedaneOphaling::editRoute(QDate ophaalronde_datum)
 
     vvimDebug() << "get ready to edit" << "[B] set FLAG / Boolean in Routetool , voor als de gebruiker nu klikt op 'route opslaan', dat we de vorige overschrijven (geef messagebox: overschrijven of nieuwe?)";
 
+    QDate routeCurrentlyBeingEdited = ophaalronde_datum;
+
     vvimDebug() << "get ready to edit" << "[C] put locations in routetool";
     QList<SOphaalpunt> *listOfAanmeldingen = new QList<SOphaalpunt>();
 
@@ -276,7 +278,7 @@ void KiesGedaneOphaling::editRoute(QDate ophaalronde_datum)
 
     vvimDebug() << "get ready to edit" << "[D] emit list to routetool";
     vvimDebug() << "List size:" << listOfAanmeldingen->count();
-    emit aanmelding_for_route(listOfAanmeldingen);
+    emit showPlannedRoute(listOfAanmeldingen, routeCurrentlyBeingEdited);
     //emit LIST
 
 

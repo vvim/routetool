@@ -25,6 +25,7 @@ TransportationListWriter::TransportationListWriter(QWidget *parent) :
     ready = false;
 
     after_transportationlist_cleanmarkersandopenroute = false;
+    routeCurrentlyBeingEdited = QDate(); // empty QDate, no route is being edited at the moment
 
     translist_doc = new TransportationListDocumentWriter(QDate::currentDate(),0,0);
 
@@ -315,6 +316,7 @@ void TransportationListWriter::print()
         QMessageBox::information(this, messagebox_title, messagebox_content);
         vvimDebug() << "The program 'waits' during previous messagebox, now we can run CleanMarkersAndOpenRoute";
         after_transportationlist_cleanmarkersandopenroute = false;
+        routeCurrentlyBeingEdited = QDate();
         emit signalCleanMarkersAndOpenOldRoute();
     }
     else
@@ -544,7 +546,8 @@ void TransportationListWriter::reject()
 {
     vvimDebug() << "USER PRESSED ON CANCEL" << "we should not continu, also not to 'Clean Markers and Open Old Route' => reset boolean";
     after_transportationlist_cleanmarkersandopenroute = false;
-    // we cannot put this boolean in 'setOriginalValues()' because 'prepare()' calls 'setOriginalValues()' as well.
+    routeCurrentlyBeingEdited = QDate();
+    // we cannot put this boolean or QDate in 'setOriginalValues()' because 'prepare()' calls 'setOriginalValues()' as well.
     setOriginalValues();
     ready = false;
     close();
