@@ -27,6 +27,7 @@ public:
     inline void afterTransportationListCleanMarkersAndOpenRoute() { after_transportationlist_cleanmarkersandopenroute = true; }
     inline bool checkIfWeShouldRemoveAllMarkersAndOpenRouteAfterBuildingTransportationList() { return after_transportationlist_cleanmarkersandopenroute; }
     inline void setCurrentlyEditedRoute(QDate routeBeingEdited) { routeCurrentlyBeingEdited = routeBeingEdited; }
+    inline void cancelCurrentlyEditedRoute() { routeCurrentlyBeingEdited = QDate(); }
     inline QDate getCurrentlyEditedRoute() { return routeCurrentlyBeingEdited; }
 
 signals:

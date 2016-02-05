@@ -1259,3 +1259,15 @@ void Form::setRouteLabel(QDate route)
     ui->routeLoadedCancel_button->setEnabled(true);
     ui->routeLoadedCancel_button->setVisible(true);
 }
+
+void Form::on_routeLoadedCancel_button_clicked()
+{
+    vvimDebug() << "user request to cancel any changes made to route";
+    vvimDebug() << "1. we do not remove the route on the screen";
+    vvimDebug() << "2. but we will remove the FLAG set in TransportationListWriter";
+    vvimDebug() << "   flag used to be:" << transportationlistWriter.getCurrentlyEditedRoute().toString();
+    transportationlistWriter.cancelCurrentlyEditedRoute();
+    vvimDebug() << "   but is now reset to:" << transportationlistWriter.getCurrentlyEditedRoute().toString();
+    vvimDebug() << "3. and stop showing the name of the route in the UI";
+    disableRouteLabel();
+}

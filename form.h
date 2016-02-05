@@ -76,6 +76,7 @@ private slots:
     void populateJavaScriptWindowObject();
     void on_pbShowTotalDistanceAndTotalTime_clicked();
     void cleanMarkersAndOpenOldRoute();
+    void on_routeLoadedCancel_button_clicked();
 
 private:
     int **distance_matrix_in_meters;
