@@ -23,6 +23,7 @@ KiesGedaneOphaling::KiesGedaneOphaling(KGOPurpose purpose, QWidget *parent) :
             // select route to confirm it
             ophalingenLabel = new QLabel(tr("Voor welke ophaalronde wil je de hoeveelheden bevestigen?"));
             setWindowTitle(tr("Bevestigen opgehaalde hoeveelheden"));
+            messageBoxMessage = tr("Kies een ophaalronde om de effectief opgehaalde hoeveelheden te bevestigen.");
             break;
 
         case Deleting:
@@ -30,13 +31,15 @@ KiesGedaneOphaling::KiesGedaneOphaling(KGOPurpose purpose, QWidget *parent) :
             // select route to cancel it
             ophalingenLabel = new QLabel(tr("Welke ophaalronde wil je annuleren?"));
             setWindowTitle(tr("Annuleer geplande ophaalronde"));
+            messageBoxMessage = tr("Kies een ophaalronde om te verwijderen.");
             break;
 
         case Editing:
             vvimDebug() << "purpose is to edit a planned route";
             ophalingenLabel = new QLabel(tr("Welke ophaalronde wil je aanpassen?"));
             setWindowTitle(tr("Wijzig geplande ophaalronde"));
-            break;
+            messageBoxMessage = tr("Kies een ophaalronde om te bewerken.");
+        break;
 
         default:
             vvimDebug() << "this should not be happening, Default option triggered in switch(m_confirm_or_cancel) , ERROR";
@@ -80,7 +83,8 @@ void KiesGedaneOphaling::accept()
 {
     if( ophalingenComboBox->currentIndex() < 1)
     {
-        QMessageBox::warning(this, tr("Geen ophalingsdatum gekozen"), tr("Kies een ophaalronde om de effectief opgehaalde hoeveelheden te bevestigen."));
+        QString title = tr("Geen ophalingsdatum gekozen");
+        QMessageBox::warning(this, title, messageBoxMessage); // message is being set in KiesGedaneOphaling::KiesGedaneOphaling(KGOPurpose purpose, QWidget *parent)
         return;
     }
     QDate ophaalronde_datum = ophalingenMap[ophalingenComboBox->currentIndex()];

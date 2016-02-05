@@ -29,6 +29,7 @@ private:
     QDialogButtonBox *buttonBox;
     QMap<int,QDate> ophalingenMap; //QMap die linkt tussen ophalingenComboBox-> index en QDate
     KGOPurpose m_confirm_or_cancel;
+    QString messageBoxMessage;
 
     void confirmRoute(QDate ophaalronde_datum);
     void cancelRoute(QDate ophaalronde_datum);
