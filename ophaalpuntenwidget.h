@@ -43,7 +43,7 @@ private:
 
     QMap<QString, int> ophaalpunten;
 
-    void addToTreeView(int ophaalpuntId, QString naamOphaalpunt, QString straat, QString huisnummer, QString busnummer, QString postcode, QString plaats, QString land, bool color_item = false);
+    void addToTreeView(int ophaalpuntId, QString naamOphaalpunt, QString straat, QString huisnummer, QString busnummer, QString postcode, QString plaats, QString land, QString email1, QString email2, bool color_item = false);
     void initModel();
 };
 

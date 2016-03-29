@@ -85,7 +85,7 @@ void OphaalpuntenWidget::initModel()
     delete listOfLocationsModel;
 
     QStringList labels;
-    labels << tr("id") << tr("Ophaalpunt") << tr("Straat") << tr("Huisnummer") << tr("Busnummer") << tr("Postcode") << tr("Plaats") << tr("Land") << tr("Aanmelding_present");
+    labels << tr("id") << tr("Ophaalpunt") << tr("Straat") << tr("Huisnummer") << tr("Busnummer") << tr("Postcode") << tr("Plaats") << tr("Land") << tr("Email1") << tr("Email2") << tr("Aanmelding_present");
 
     model = new QStandardItemModel(0, labels.count());
 
@@ -126,7 +126,7 @@ void OphaalpuntenWidget::loadOphaalpunten()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
 
-    QString SQLquery = "SELECT naam, straat, nr, bus, postcode, plaats, land, id FROM ophaalpunten ORDER by postcode, naam";
+    QString SQLquery = "SELECT naam, straat, nr, bus, postcode, plaats, land, email1, email2, id FROM ophaalpunten ORDER by postcode, naam";
     QSqlQuery query(SQLquery);
 
     vvimDebug() << "<vvim> TODO: testen -> geeft 'query.next()' al meteen de tweede oplossing, of de eerste? En wat met 'query.exec()'' gevolgd door 'query.next()' ?";
@@ -160,9 +160,11 @@ void OphaalpuntenWidget::loadOphaalpunten()
         QString postcode	= query.value(4).toString();
         QString plaats	= query.value(5).toString();
         QString land	= query.value(6).toString();
+        QString email1	= query.value(7).toString();
+        QString email2	= query.value(8).toString();
 
         // 1. add ophaalpunt to QTextEdit Completer
-        int ophaalpunt_id = query.value(7).toInt();
+        int ophaalpunt_id = query.value(9).toInt();
 
         QString ophaalpunt = naam;
         ophaalpunt.append(QString(", %1 %2, %3 %4, %5").arg(straat).arg(nr).arg(postcode).arg(plaats).arg(land));
@@ -190,7 +192,7 @@ void OphaalpuntenWidget::loadOphaalpunten()
             vvimDebug() << "something went wrong with checking for an existing aanmelding";
 
         // 2. [B] add ophaalpunt to QTreeView
-        addToTreeView(ophaalpunt_id, naam, straat, nr, bus, postcode, plaats, land, aanmelding_running);
+        addToTreeView(ophaalpunt_id, naam, straat, nr, bus, postcode, plaats, land, email1, email2, aanmelding_running);
     }
 
     vvimDebug() << "TOTAL of ophaalpunten loaded in \"OphaalpuntQTreeView\" :" << model->rowCount();
@@ -209,7 +211,7 @@ void OphaalpuntenWidget::loadOphaalpunten()
     vvimDebug() << "done, completer (re)loaded.";
 }
 
-void OphaalpuntenWidget::addToTreeView(int ophaalpuntId, QString naamOphaalpunt, QString straat, QString huisnummer, QString busnummer, QString postcode, QString plaats, QString land, bool color_item)
+void OphaalpuntenWidget::addToTreeView(int ophaalpuntId, QString naamOphaalpunt, QString straat, QString huisnummer, QString busnummer, QString postcode, QString plaats, QString land, QString email1, QString email2, bool color_item)
 {
     model->insertRow(0);
     model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_ID), ophaalpuntId);
@@ -220,6 +222,8 @@ void OphaalpuntenWidget::addToTreeView(int ophaalpuntId, QString naamOphaalpunt,
     model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_POSTCODE), postcode);
     model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_PLAATS), plaats);
     model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_LAND), land);
+    model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_EMAIL1), email1);
+    model->setData(model->index(0,OPHAALPUNTQTREEVIEW_OPHAALPUNT_EMAIL2), email2);
     model->setData(model->index(0,OPHAALPUNTQTREEVIEW_AANMELDING_PRESENT), color_item);
 }
 
