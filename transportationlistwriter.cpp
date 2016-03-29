@@ -316,6 +316,7 @@ void TransportationListWriter::print()
         QMessageBox::information(this, messagebox_title, messagebox_content);
         vvimDebug() << "The program 'waits' during previous messagebox, now we can run CleanMarkersAndOpenRoute";
         after_transportationlist_cleanmarkersandopenroute = false;
+        vvimDebug() << "flag for issue 42: resetting routeCurrentlyBeingEdited , here it should be harmless";
         routeCurrentlyBeingEdited = QDate();
         emit signalCleanMarkersAndOpenOldRoute();
     }
@@ -546,7 +547,6 @@ void TransportationListWriter::reject()
 {
     vvimDebug() << "USER PRESSED ON CANCEL" << "we should not continu, also not to 'Clean Markers and Open Old Route' => reset boolean";
     after_transportationlist_cleanmarkersandopenroute = false;
-    routeCurrentlyBeingEdited = QDate();
     // we cannot put this boolean or QDate in 'setOriginalValues()' because 'prepare()' calls 'setOriginalValues()' as well.
     setOriginalValues();
     ready = false;
