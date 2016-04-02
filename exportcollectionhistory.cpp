@@ -237,6 +237,7 @@ bool ExportCollectionHistory::saveToCSV()
     {
         vvimDebug() << "FAILED: We could not opened file" << filename << "show messagebox to user and return to Export Collection History Dialog Box";
         QMessageBox::information(this, tr("Kan bestand niet openen"), tr("Bestand %1 kan niet geopend worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder.").arg(filename));
+        return false;
     }
 
     QTextStream data( &f );
@@ -340,6 +341,7 @@ bool ExportCollectionHistory::saveToCSV()
             vvimDebug() << "FAILED: We could not execute the query SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = :ophaalpuntid AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id .";
             vvimDebug() << "show messagebox to user and return to Export Collection History Dialog Box";
             QMessageBox::information(this, tr("Fout bij verbinding met de databank").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return false;
         }
         else
         {
@@ -350,6 +352,7 @@ bool ExportCollectionHistory::saveToCSV()
                 vvimDebug() << "FAILED: We could not execute the query SELECT ophalinghistoriek.*, ophaalpunten.naam FROM ophalinghistoriek, ophaalpunten WHERE ophaalpunt = :ophaalpuntid AND ophalingsdatum >= :startdate AND ophalingsdatum <= :enddate AND ophalinghistoriek.ophaalpunt = ophaalpunten.id .";
                 vvimDebug() << "show messagebox to user and return to Export Collection History Dialog Box";
                 QMessageBox::information(this, tr("Fout bij verbinding met heruitvoeren query ").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+                return false;
             }
         }
     }
