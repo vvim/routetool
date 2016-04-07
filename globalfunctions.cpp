@@ -145,3 +145,33 @@ QString seconds_human_readable(int totalseconds)
     human_readable.sprintf("%01du %02dm %02ds", hours, minutes, seconds);
     return human_readable;
 }
+
+QMap<int, QString> getQMapFromSQLTable(QString select_query)
+{
+
+    vvimDebug() << ".. we zouden ook van elke soort een aparte functie kunnen maken, die wordt aangeroepen bij opstart, kan je dan meteen ook gebruiken voor de DialogBox van InformatieOphaalpunt, zonder dat je opnieuw de databank moet aanroepen";
+
+    QSqlQuery query;
+    query.prepare(select_query);
+    query.exec();
+    QMap <int,QString> result;
+    while (query.next())
+    {
+        result[query.value(0).toInt()] = query.value(1).toString();
+    }
+
+    /*
+      for debugging:
+
+    QMap<int, QString>::iterator it;
+    QString output;
+
+    for (it = contact_preference.begin(); it != contact_preference.end(); ++it) {
+        // Format output here.
+        output += QString("...... %1 : %2\n").arg(it.key()).arg(it.value());
+    }
+    vvimDebug() << output;
+    */
+
+    return result;
+}

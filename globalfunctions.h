@@ -48,4 +48,6 @@ bool reConnectToDatabase(QSqlError lasterror, QString SQLquery, QString callingf
 
 QString seconds_human_readable(int totalseconds);
 
+QMap<int, QString> getQMapFromSQLTable(QString select_query);
+
 #endif // GLOBALFUNCTIONS_H
