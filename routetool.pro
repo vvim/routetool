@@ -28,10 +28,6 @@ win32-g++ {
     LIBS += ../qjson/build/lib/libqjson.dll
     LIBS += C:\\Wim\\MySQL\\MySQLServer55\\lib\\libmysql.dll
     LIBS += C:\\Wim\\MySQL\\MySQLServer55\\lib\\libmysql.lib
-#I don't think these ones are necessary, but just in case:
-    LIBS += C:\\Wim\\Qt\\4.8.6\\plugins\\sqldrivers\\libqsqlmysql4.a
-    LIBS += C:\\Wim\\Qt\\4.8.6\\plugins\\sqldrivers\\qsqlmysql4.dll
-    LIBS += C:\\Wim\\Qt\\4.8.6\\plugins\\sqldrivers\\qsqlmysqld4.dll
 }
 
 win32-msvc* {
@@ -39,10 +35,6 @@ win32-msvc* {
     LIBS += ../qjson/build/lib/libqjson.dll
     LIBS += C:\\Wim\\MySQL\\MySQLServer55\\lib\\libmysql.dll
     LIBS += C:\\Wim\\MySQL\\MySQLServer55\\lib\\libmysql.lib
-#I don't think these ones are necessary, but just in case:
-    LIBS += C:\\Wim\\Qt\\4.8.6\\plugins\\sqldrivers\\libqsqlmysql4.a
-    LIBS += C:\\Wim\\Qt\\4.8.6\\plugins\\sqldrivers\\qsqlmysql4.dll
-    LIBS += C:\\Wim\\Qt\\4.8.6\\plugins\\sqldrivers\\qsqlmysqld4.dll
 }
 
 macx* {
