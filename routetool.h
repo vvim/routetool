@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QSettings>
+#include <QFileDialog>
+#include <QSqlRecord>
 #include "nieuweaanmelding.h"
 #include "infoophaalpunt.h"
 #include "configuration.h"
@@ -53,6 +55,7 @@ private slots:
     void showEffectiefOpgehaaldeHoeveelheden();
     void showAnnuleerIngegevenOphaalronde();
     void showExportCollectionHistory();
+    void showExportGegevensOphaalpunten();
     void showOphaalpuntInfo(int ophaalpunt_id);
     void showOphaalrondeAanpassen();
     void cleanMarkersAndOpenOldRoute();

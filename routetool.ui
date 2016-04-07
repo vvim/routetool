@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMenuOphaalpunten">
@@ -29,6 +29,7 @@
     </property>
     <addaction name="nieuwOphaalpuntMenuButton"/>
     <addaction name="toonOphaalpuntenMenuButton"/>
+    <addaction name="actionExporteer_ophaalpunten"/>
     <addaction name="actionExporteer_Historiek"/>
    </widget>
    <widget class="QMenu" name="menuMenuAanmeldingen">
@@ -119,6 +120,11 @@
   <action name="actionOphaalronde_aanpassen">
    <property name="text">
     <string>Ophaalronde aanpassen</string>
+   </property>
+  </action>
+  <action name="actionExporteer_ophaalpunten">
+   <property name="text">
+    <string>Exporteer ophaalpunten</string>
    </property>
   </action>
  </widget>

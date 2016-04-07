@@ -4,16 +4,12 @@
 #include <QApplication>
 #include "form.h"
 
-
 #include <QMessageBox>
 
 #define vvimDebug()\
     qDebug() << "[" << Q_FUNC_INFO << "]"
 
-
-
-
-
+#define EndOfLine "\r\n"
 
 #include "kiesgedaneophaling.h"
 
@@ -35,6 +31,7 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(ui->effectiefOpgehaaldeHoeveelhedenMenuButton, SIGNAL(triggered()), this, SLOT(showEffectiefOpgehaaldeHoeveelheden()));
     connect(ui->actionAnnuleer_ingegeven_ophaalronde, SIGNAL(triggered()), this, SLOT(showAnnuleerIngegevenOphaalronde()));
     connect(ui->actionExporteer_Historiek, SIGNAL(triggered()), this, SLOT(showExportCollectionHistory()));
+    connect(ui->actionExporteer_ophaalpunten, SIGNAL(triggered()), this, SLOT(showExportGegevensOphaalpunten()));
     connect(ui->actionOphaalronde_aanpassen, SIGNAL(triggered()), this, SLOT(showOphaalrondeAanpassen()));
 
     m_pForm = new Form(this);
@@ -387,4 +384,204 @@ void RouteTool::showOphaalpuntInfo(int ophaalpunt_id)
     nieuwOphaalpuntWidget.showOphaalpunt(ophaalpunt_id);
     nieuwOphaalpuntWidget.showAanmeldingAndHistoriekButton(true);
     nieuwOphaalpuntWidget.setWindowTitle("info over ophaalpunt");
+}
+
+void RouteTool::showExportGegevensOphaalpunten()
+{
+    vvimDebug() << "export data of all locations";
+
+    vvimDebug() << "[1] show QFileDialog";
+
+    QString filters("CSVbestanden (*.csv);;Tekstbestanden (*.txt);;Microsoft Excel (*.xls *.xlsx);;All files (*.*)");
+    QString defaultFilter("Microsoft Excel (*.xls *.xlsx)");
+    QString filename = QFileDialog::getSaveFileName(0, tr("Exporteer lijst ophaalpunten naar..."), QDir::currentPath(), filters, &defaultFilter);
+
+    if(filename.count() < 1)
+    {
+        vvimDebug() << "... no filename given, the user must have pressed 'cancel' or 'close' in the FileDialogBox. Let's return to the Export Collection History Dialog Box like nothing happened...";
+        // no need to show QMessageBox
+        return; // RETURN FALSE
+    }
+
+    // would be better with "QFileDialog.SetDefaultSuffix()", but I simply don't get it: http://stackoverflow.com/questions/1953631/qfiledialog-adding-extension-automatically-when-saving-file
+    // so, a little hack:
+    if((filename.right(4) == ".xls") || (filename.right(5) == ".xlsx") || (filename.right(4) == ".txt") || (filename.right(4) == ".csv") )
+        vvimDebug() << "...file-extension is alright:" << filename.right(4);
+    else
+    {
+        vvimDebug() << "... no valid extension given, so we will add '.csv'";
+        filename.append(".csv");
+    }
+
+    vvimDebug() << "...we will save it as" << filename;
+
+    /// 2. now that we finally have this filename-stuff settled, let's go down to business!
+
+    vvimDebug() << "[2] open file";
+    QFile f( filename );
+
+    if(!f.open(QFile::WriteOnly | QFile::Truncate)) // 'truncate' == overwrite
+    {
+        vvimDebug() << "... FAILED: We could not opened file" << filename << "show messagebox to user and return to Export Collection History Dialog Box";
+        QMessageBox::information(this, tr("Kan bestand niet openen"), tr("Bestand %1 kan niet geopend worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder.").arg(filename));
+        return; // RETURN FALSE
+    }
+
+    QTextStream data( &f );
+    //data.setCodec("Latin-1");
+    data.setCodec("UTF-8");
+    data.setGenerateByteOrderMark(true);
+
+    QSqlQuery query;
+    QString SQLquery = "SELECT * FROM ophaalpunten ORDER BY postcode";
+
+    query.prepare(SQLquery);
+    data << tr("\"Export van de ophaalpunten uit de databank\"")+EndOfLine;
+    data << EndOfLine;
+
+
+    if(!query.exec())
+    {
+        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
+        {
+            vvimDebug() << "... FAILED: We could not execute the query " << SQLquery;
+            vvimDebug() << "... show messagebox to user and cancel function";
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            return; // RETURN FALSE
+        }
+        else
+        {
+
+            query.prepare(SQLquery);
+            if(!query.exec())
+            {
+                vvimDebug() << "FAILED: We could not execute the query " << SQLquery;
+                vvimDebug() << "show messagebox to user and return to Export Collection History Dialog Box";
+                QMessageBox::information(this, tr("Fout bij verbinding met heruitvoeren query ").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+                return; // RETURN FALSE
+            }
+        }
+    }
+
+    QStringList strList;
+
+    int records = 0;
+
+    int columns_in_queryresult = query.record().count();
+
+    vvimDebug() << "[3] get all possibilities for contactpreference, attestation, language, ... and put them in QMaps";
+
+    QMap <int,QString> contact_preference = getQMapFromSQLTable("SELECT id, medium FROM contacteren");
+    QMap <int,QString> attest_frequencies = getQMapFromSQLTable("SELECT id, frequentie FROM frequentie");
+    QMap <int,QString> location_type = getQMapFromSQLTable("SELECT code, soort FROM soort_ophaalpunt");
+    QMap <int,QString> intercommunales = getQMapFromSQLTable("SELECT id, naam_intercommunale FROM intercommunales");
+    QMap <int,QString> languages = getQMapFromSQLTable("SELECT id, taal FROM talen");
+
+    vvimDebug() << "[4] fill in columnheaders";
+    vvimDebug() << "... dit mag 'dynamischer', nu is alles hardcoded, niet flexibel";
+
+    strList << tr("\"Ophaalpunt\"");
+    strList << tr("\"Voor kurk\"");
+    strList << tr("\"Voor parafine\"");
+    strList << tr("\"Soort ophaalpunt\""); // "code"
+    strList << tr("\"Intercommunale?\""); // "code intercommunale"
+    strList << tr("\"Straat\"");
+    strList << tr("\"Nr\"");
+    strList << tr("\"Bus\"");
+    strList << tr("\"Postcode\"");
+    strList << tr("\"Plaats\"");
+    strList << tr("\"Land\"");
+    strList << tr("\"Openingsuren\"");
+    strList << tr("\"Contactpersoon\"");
+    strList << tr("\"Telefoon1\"");
+    strList << tr("\"Telefoon2\"");
+    strList << tr("\"Email1\"");
+    strList << tr("\"Email2\"");
+    strList << tr("\"Taalvoorkeur\""); // "taalvoorkeur"
+    strList << tr("\"Liefst contacteren per\""); // "preferred_contact"
+    strList << tr("\"Attest nodig?\"");
+    strList << tr("\"Attestfrequentie\"");
+    strList << tr("\"Extra informatie\"");
+    strList << tr("\"Laatste contactmoment\"");
+//    strList << tr("\"Contacteer tegen\""); -> we do not need to export this column, see (c == 25 ) while going through the results
+    strList << tr("\"Laatste ophaalmoment\"");
+    strList << tr("\"Voorspelde nieuwe ophaling\"");
+    strList << tr("\"Latitude\"");
+    strList << tr("\"Longitude\"");
+
+    data << strList.join( ";" )+EndOfLine;
+
+    vvimDebug() << "[5] fill in the content";
+
+    while (query.next())
+    {
+        strList.clear();
+        for( int c = 2; c < columns_in_queryresult; ++c ) // first two columns, namely "ophaalpunten.id" and "ophaalpunten.timestamp", do not need to be exported
+        {
+/// MAKE THIS A SWITCH STATEMENT!!!
+            switch(c)
+            {
+                case 25:
+                    // the column "contact_again_on" is obsolete, but still exist in the database
+                    break;
+
+                // Boolean values:
+                case 3: // Kurk?
+                case 4: // Parafine?
+                case 21: // Attest nodig?
+/**                    if(query.value(c).toInt() == 1)
+                        strList <<  tr("\"ja\"");
+                    else
+                        strList <<  tr("\"nee\"");
+                    break;
+**/                    if(query.value(c).toBool())
+                        strList <<  tr("\"ja\"");
+                    else
+                        strList <<  tr("\"nee\"");
+                    break;
+                case 5: // Soort ophaalpunt
+                    strList <<  "\""+location_type.value(query.value(c).toInt()) +"\"";
+                    break;
+                case 6: // Intercommunale?
+                    strList <<  "\""+intercommunales.value(query.value(c).toInt()) +"\"";
+                    break;
+                case 19: // Taalvoorkeur?
+                    strList <<  "\""+languages.value(query.value(c).toInt()) +"\"";
+                    break;
+                case 20: // Liefst contacteren per?
+                    strList <<  "\""+contact_preference.value(query.value(c).toInt()) +"\"";
+                    break;
+                case 22: // Attestfrequentie
+                    strList <<  "\""+attest_frequencies.value(query.value(c).toInt()) +"\"";
+                    break;
+                default:
+                    strList <<  "\""+query.value(c).toString().toUtf8() +"\"";
+                    break;
+            }
+        }
+
+        /** MS Excel from Geert treats fields that contain a \n as a new row.
+            This can be very confusing, therefore we add the call to "replace()"
+            as to change every \n by a white space.
+        **/
+        data << strList.join( ";" ).replace("\n"," ")+EndOfLine;
+
+        records++;
+        data.flush();
+    }
+
+    if(records < 1)
+    {
+        vvimDebug() << "...no results from this query";
+        data << tr("Geen ophaalpunten gevonden in de databank.")+";\n";
+    }
+    else
+    {
+        vvimDebug() << "..." << records << "locations found and recorded";
+    }
+    QMessageBox::information(this, tr("Informatie ophaalpunten geëxporteerd"), tr("Er werden %1 ophaalpunten gevonden en geëxporteerd naar bestand %2.").arg(records).arg(filename));
+
+    f.close();
+
+    // RETURN TRUE
 }
