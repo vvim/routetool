@@ -185,8 +185,8 @@ void RouteTool::showOphaalrondeAanpassen()
     QMessageBox msgBox;
     msgBox.setWindowTitle(tr("Huidige route opslaan?"));
     msgBox.setText(tr("Voor je de ingegeven route opent, wil je de huidige opslaan?"));
-    QAbstractButton *myYesButton = msgBox.addButton(tr("Route opslaan"), QMessageBox::YesRole);
-    QAbstractButton *myNoButton = msgBox.addButton(tr("Route wissen"), QMessageBox::NoRole);
+    QAbstractButton *myYesButton = msgBox.addButton(tr("Huidige route opslaan"), QMessageBox::YesRole);
+    QAbstractButton *myNoButton = msgBox.addButton(tr("Huidige route wissen"), QMessageBox::NoRole);
     QAbstractButton *myCancelButton = msgBox.addButton(tr("Annuleren"), QMessageBox::RejectRole);
 
     msgBox.setIcon(QMessageBox::Question);
