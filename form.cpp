@@ -1060,7 +1060,7 @@ void Form::on_showOphaalpunten_clicked()
     while(it != markers_met_aanmelding.end())
     {
         //showing locations with aanmelding in blue
-        markers_js.append(str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("blue").arg((*it)->getOphaalpuntId()));
+        markers_js.append(str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg(JavaScriptEscape((*it)->getNameAndAddress())).arg("blue").arg((*it)->getOphaalpuntId()));
        ++it;
     }
 
@@ -1068,7 +1068,7 @@ void Form::on_showOphaalpunten_clicked()
     while(it != markers_zonder_aanmelding.end())
     {
       //showing locations without aanmelding in yellow
-      markers_js.append(str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg((*it)->getNameAndAddress().replace("\n"," ").replace("'","\\'")).arg("yellow").arg((*it)->getOphaalpuntId()));
+      markers_js.append(str.arg((*it)->getLatitude()).arg((*it)->getLongitude()).arg(JavaScriptEscape((*it)->getNameAndAddress())).arg("yellow").arg((*it)->getOphaalpuntId()));
       ++it;
     }
 

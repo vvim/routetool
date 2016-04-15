@@ -50,4 +50,6 @@ QString seconds_human_readable(int totalseconds);
 
 QMap<int, QString> getQMapFromSQLTable(QString select_query);
 
+QString JavaScriptEscape(QString plaintext);
+
 #endif // GLOBALFUNCTIONS_H

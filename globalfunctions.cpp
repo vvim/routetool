@@ -175,3 +175,10 @@ QMap<int, QString> getQMapFromSQLTable(QString select_query)
 
     return result;
 }
+
+QString JavaScriptEscape(QString plaintext)
+{
+    QString javascriptversion = plaintext.replace("\n"," ").replace("'","\\'");
+    javascriptversion.replace("\\\\'","\\'");
+    return javascriptversion;
+}
