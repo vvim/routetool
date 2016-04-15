@@ -157,18 +157,21 @@ void Form::putCoordinatesInDatabase(double east, double north, int ophaalpunt_id
         if(!reConnectToDatabase(query_update_coords.lastError(), SQLquery_update_coords, QString("[%1]").arg(Q_FUNC_INFO)))
         {
             vvimDebug() << "unable to reconnect to DB, halting";
-            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             return;
         }
         QSqlQuery query_temp;
         query_temp.prepare(SQLquery_update_coords);
+        query_temp.bindValue(":lat", north);
+        query_temp.bindValue(":lng", east);
+        query_temp.bindValue(":ophaalpunt_id", ophaalpunt_id);
         query_update_coords = query_temp;
         query_update_coords = QSqlQuery(SQLquery_update_coords);
         if(!query_update_coords.exec())
         {
             vvimDebug() << "FATAL:" << "Something went wrong, could not execute query:" << SQLquery_update_coords << query_update_coords.lastError();
             qFatal(QString("Something went wrong, could not execute query: %1").arg(SQLquery_update_coords).toStdString().c_str());
-            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, het programma zal zich nu afsluiten.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
             return;
         }
     }
