@@ -29,6 +29,7 @@ public:
     inline void setCurrentlyEditedRoute(QDate routeBeingEdited) { routeCurrentlyBeingEdited = routeBeingEdited; }
     inline void cancelCurrentlyEditedRoute() { routeCurrentlyBeingEdited = QDate(); }
     inline QDate getCurrentlyEditedRoute() { return routeCurrentlyBeingEdited; }
+    void setOverwrite(bool _overwrite);
 
 signals:
     void signalCleanMarkersAndOpenOldRoute();
@@ -67,6 +68,8 @@ private:
     void populateWithSmarker(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i);
     void writeInformation(SMarker* marker, int previous_distance_matrix_i, int current_distance_matrix_i, int counter = 0, char kaart_nr = 0);
     void deleteTheMatrices();
+
+    bool overwrite;
 };
 
 #endif // TRANSPORTATIONLISTWRITER_H

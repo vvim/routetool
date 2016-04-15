@@ -748,14 +748,71 @@ void Form::setTotalDistanceAndTotalTime()
 
 void Form::on_pbTransportationList_clicked()
 {
+    transportationlistWriter.setOverwrite(false);
     if(transportationlistWriter.getCurrentlyEditedRoute() != QDate())
     {
+        // -> we are editing an existing route
+
+        //QMessageBox: wilt u vorige versie overschrijven met deze nieuwe route?
+        vvimDebug() << "TESTING: we are overwriting an existing route!!!" << transportationlistWriter.getCurrentlyEditedRoute().toString();
+        vvimDebug() << "[[issue 42]]: https://github.com/vvim/routetool/issues/42 -> at what point should we reset transportationlistWriter.getCurrentlyEditedRoute() ?";
     /// QMessagebox "overwrite transportationlist in database, or save as new route?
         /**
            WIS VORIGE datum uit de databank (gebruik functie RemoveTransportationList
            EN SLA de nieuwe datum op
           **/
+
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Oude route overschrijven?"));
+        msgBox.setText(tr("Wilt u de oude route van %1 overschrijven?").arg(QLocale().toString(transportationlistWriter.getCurrentlyEditedRoute())));
+        QAbstractButton *myYesButton = msgBox.addButton(tr("Oude route overschrijven"), QMessageBox::YesRole);
+        QAbstractButton *myNoButton = msgBox.addButton(tr("Deze route opslaan als een andere route"), QMessageBox::NoRole);
+        QAbstractButton *myCancelButton = msgBox.addButton(tr("Annuleren"), QMessageBox::RejectRole);
+
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.exec();
+
+        if(msgBox.clickedButton() == myCancelButton)
+        {
+            // works also when the user presses ESC or simply closes the QMessageBox
+            vvimDebug() << "user pressed CANCEL or ESC";
+            return;
+        }
+
+        if(msgBox.clickedButton() == myYesButton)
+        {
+            vvimDebug() << "user pressed YES: " << "REMOVE the old route before continuing";
+            vvimDebug() << "[TODO] REMOVE from database, confirm again!";
+            // TODO REMOVE from database
+            QMessageBox msgBoxToConfirm;
+            msgBoxToConfirm.setWindowTitle(tr("Weet u het zeker?"));
+            msgBoxToConfirm.setText(tr("De oude informatie van de route van %1 zal gewist worden en overschreven met de route die u nu heeft ingegeven.\n\nU kan de oude route dan niet meer oproepen. Weet u dit zeker?").arg(QLocale().toString(transportationlistWriter.getCurrentlyEditedRoute())));
+            /* QAbstractButton *confirmYesButton = */ msgBoxToConfirm.addButton(tr("Oude route wissen en overschrijven"), QMessageBox::YesRole);
+            QAbstractButton *confirmCancelButton = msgBoxToConfirm.addButton(tr("Annuleren"), QMessageBox::RejectRole);
+
+            msgBoxToConfirm.setIcon(QMessageBox::Warning);
+            msgBoxToConfirm.exec();
+            if(msgBoxToConfirm.clickedButton() == confirmCancelButton)
+            {
+                // works also when the user presses ESC or simply closes the QMessageBox
+                vvimDebug() << "user did not confirm but pressed CANCEL or ESC";
+                return;
+            }
+            // nu kunnen we de datum in de dialogbox setten als de datum die voorgesteld wordt. Bij 'overschrijven' kan de dialogbox meteen met de juiste datum ingevuld worden
+            vvimDebug() << "[TODO] remove from database everything from the old route";
+            transportationlistWriter.setOverwrite(true);
+        }
+
+        if(msgBox.clickedButton() == myNoButton)
+        {
+            vvimDebug() << "user pressed NO: " << "do NOT overwrite the current route, SAVE AS NEW ROUTE";
+            transportationlistWriter.setOverwrite(false);
+            // nothing special to do
+        }
+
     }
+    else
+        vvimDebug() << "Flag transportationlistWriter.getCurrentlyEditedRoute() is not set, so this is a new route -> save as a new route";
 
     vvimDebug() << "This is where we should work on making the Transportation List (using distance matrices and Document Writer)";
     // for the map: see http://qt-project.org/doc/qt-4.8/desktop-screenshot.html
@@ -1256,7 +1313,7 @@ void Form::setRouteLabel(QDate route)
 
     vvimDebug() << "loading route" << route.toString();
 
-    ui->routeLoaded->setText(tr("Route van %1 aan het bewerken.").arg(QLocale().toString(route))); // "ddd dd MM yyyy"
+    ui->routeLoaded->setText(tr("Route van %1 aan het bewerken.\nDruk op 'Vervoerslijst aanmaken' om wijzigingen op te slaan.").arg(QLocale().toString(route))); // "ddd dd MM yyyy"
     ui->routeLoaded->setVisible(true);
     ui->routeLoadedCancel_button->setEnabled(true);
     ui->routeLoadedCancel_button->setVisible(true);

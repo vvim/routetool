@@ -73,6 +73,8 @@ TransportationListWriter::TransportationListWriter(QWidget *parent) :
 
     setLayout(formlayout);
     setWindowTitle("Aanmaken vervoerslijst");
+
+    overwrite = false;
 }
 
 TransportationListWriter::~TransportationListWriter()
@@ -574,8 +576,15 @@ void TransportationListWriter::accept()
 
 void TransportationListWriter::setOriginalValues()
 {
-    // how to set QDateEdit to 'NULL', it cannot be done: http://www.qtcentre.org/threads/17295-How-to-put-empty-value-in-QDateEdit
-    dateEdit->setDate(QDate::currentDate().addDays(-1));
+    if(overwrite)
+    {
+        dateEdit->setDate(routeCurrentlyBeingEdited);
+    }
+    else
+    {
+        // how to set QDateEdit to 'NULL', it cannot be done: http://www.qtcentre.org/threads/17295-How-to-put-empty-value-in-QDateEdit
+        dateEdit->setDate(QDate::currentDate().addDays(-1));
+    }
     empty_bags_of_kurk_neededEdit->setValue(empty_bags_of_kurk_needed);
     empty_bags_of_kaarsresten_neededEdit->setValue(empty_bags_of_kaarsresten_needed);
     startTimeEdit->setTime(QTime(8,0));
@@ -602,4 +611,18 @@ void TransportationListWriter::deleteTheMatrices()
         delete [] distance_matrix_in_seconds;
     }
     vvimDebug() << "done";
+}
+
+void TransportationListWriter::setOverwrite(bool _overwrite)
+{
+    overwrite = _overwrite;
+
+    if(overwrite)
+    {
+        dateEdit->setDate(routeCurrentlyBeingEdited);
+    }
+    else
+    {
+        dateEdit->setDate(QDate::currentDate().addDays(-1));
+    }
 }
