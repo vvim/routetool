@@ -42,6 +42,8 @@ Form::Form(QWidget *parent) :
     ui->totalKilometersEdit->setPalette(*normal);
     ui->totalTimeEdit->setPalette(*normal);
 
+    ui->testButton->setVisible(false); // test button is for tests only and should not be viewable for the user
+
     connect(ui->goButton, SIGNAL(clicked()), this, SLOT(goClicked()));
     connect(ui->lePostalAddress, SIGNAL(returnPressed()), this, SLOT(goClicked()));
 
@@ -1270,4 +1272,38 @@ void Form::on_routeLoadedCancel_button_clicked()
     vvimDebug() << "   but is now reset to:" << transportationlistWriter.getCurrentlyEditedRoute().toString();
     vvimDebug() << "3. and stop showing the name of the route in the UI";
     disableRouteLabel();
+}
+
+void Form::on_testButton_clicked()
+{
+    // test button can load any HTML to the QWebView to perform tests
+    vvimDebug() << "clickermeclickers!";
+
+    QString filters("HTML (*.html);;Tekstbestanden (*.txt);;All files (*.*)");
+    QString defaultFilter("HTML (*.html)");
+    QString filename = QFileDialog::getOpenFileName(0, tr("Laad HTML-bestand in QWebView"), QDir::currentPath(), filters, &defaultFilter);
+
+    if(filename.count() < 1)
+    {
+        vvimDebug() << "... no filename given, the user must have pressed 'cancel' or 'close' in the FileDialogBox. Let's return to the Export Collection History Dialog Box like nothing happened...";
+        // no need to show QMessageBox
+        return; // RETURN FALSE
+    }
+
+    QFile file(filename);
+    if(!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(0, "error", file.errorString());
+    }
+
+    QTextStream in(&file);
+
+    QString html ="";
+
+    while(!in.atEnd()) {
+        html += in.readLine();
+    }
+    file.close();
+    ui->webView->setHtml(html);
+    return;
+
 }

@@ -10,6 +10,8 @@
 #include <QSettings>
 #include <QList>
 #include <QWebPage>
+#include <QDir>
+#include <QFileDialog>
 #include "sophaalpunt.h"
 #include "transportationlistwriter.h"
 
@@ -77,6 +79,8 @@ private slots:
     void on_pbShowTotalDistanceAndTotalTime_clicked();
     void cleanMarkersAndOpenOldRoute();
     void on_routeLoadedCancel_button_clicked();
+
+    void on_testButton_clicked();
 
 private:
     int **distance_matrix_in_meters;
