@@ -570,6 +570,47 @@ void TransportationListWriter::accept()
     }
 
     close();
+
+    if(overwrite)
+    {
+        vvimDebug() << "Removing the old route!!" << routeCurrentlyBeingEdited.toString();
+
+        QString SQLquery_remove_old_route = "UPDATE aanmelding SET ophaalronde_datum = NULL and volgorde = NULL WHERE ophaalronde_datum = :date";
+
+        QSqlQuery query_remove_old_route;
+        query_remove_old_route.prepare(SQLquery_remove_old_route);
+        query_remove_old_route.bindValue(":date", routeCurrentlyBeingEdited);
+
+        if(!query_remove_old_route.exec())
+        {
+            if(!reConnectToDatabase(query_remove_old_route.lastError(), SQLquery_remove_old_route, QString("[%1]").arg(Q_FUNC_INFO)))
+            {
+                vvimDebug() << "unable to reconnect to DB, halting";
+                QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, de oude route is niet gewist en de nieuwe versie is ook niet opgeslagen.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+                return;
+            }
+            QSqlQuery query_temp;
+            query_temp.prepare(SQLquery_remove_old_route);
+            query_temp.bindValue(":date", routeCurrentlyBeingEdited);
+            query_remove_old_route = query_temp;
+            if(!query_remove_old_route.exec())
+            {
+                vvimDebug() << "FATAL:" << "Something went wrong, could not execute query:" << SQLquery_remove_old_route << query_remove_old_route.lastError();
+                qFatal(QString("Something went wrong, could not execute query: %1").arg(SQLquery_remove_old_route).toStdString().c_str());
+                QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, de oude route is niet gewist en de nieuwe versie is ook niet opgeslagen.\n\nProbeer later opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
+                return;
+            }
+        }
+        vvimDebug() << "Old route" << routeCurrentlyBeingEdited.toString() << "is removed from database, now save updated version.";
+
+
+        vvimDebug() << "Should we reset any FLAG ???"; // see Form::on_routeLoadedCancel_button_clicked() ] 2. but we will remove the FLAG set in TransportationListWriter
+    }
+    else
+    {
+        vvimDebug() << "Today, we do NOT overwrite";
+    }
+
     vvimDebug() << "printing time!";
     print();
 }
