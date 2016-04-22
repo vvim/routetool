@@ -613,6 +613,8 @@ void TransportationListWriter::accept()
 
     vvimDebug() << "printing time!";
     print();
+
+    emit endOfTransportationListWriter_RemoveCancelButton();
 }
 
 void TransportationListWriter::setOriginalValues()

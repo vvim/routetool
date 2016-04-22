@@ -46,6 +46,7 @@ Form::Form(QWidget *parent) :
 
     connect(ui->goButton, SIGNAL(clicked()), this, SLOT(goClicked()));
     connect(ui->lePostalAddress, SIGNAL(returnPressed()), this, SLOT(goClicked()));
+    connect(&transportationlistWriter, SIGNAL(endOfTransportationListWriter_RemoveCancelButton()), this, SLOT(on_routeLoadedCancel_button_clicked()));
 
     //ui: buttons should be disabled until optimal route has been calculated:
     ui->pbOptimizeRoute->setEnabled(true);
@@ -1324,7 +1325,7 @@ void Form::setRouteLabel(QDate route)
 
 void Form::on_routeLoadedCancel_button_clicked()
 {
-    vvimDebug() << "user request to cancel any changes made to route";
+    vvimDebug() << "user request to cancel any changes made to route or transportationlist is completed";
     vvimDebug() << "1. we do not remove the route on the screen";
     vvimDebug() << "2. but we will remove the FLAG set in TransportationListWriter";
     vvimDebug() << "   flag used to be:" << transportationlistWriter.getCurrentlyEditedRoute().toString();

@@ -33,6 +33,7 @@ public:
 
 signals:
     void signalCleanMarkersAndOpenOldRoute();
+    void endOfTransportationListWriter_RemoveCancelButton();
     
 private slots:
     void editExpectedArrivalTime(QTime);
