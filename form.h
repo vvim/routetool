@@ -82,6 +82,8 @@ private slots:
 
     void on_testButton_clicked();
 
+    void on_pushButton_latlng_clicked();
+
 private:
     int **distance_matrix_in_meters;
     int **distance_matrix_in_seconds;

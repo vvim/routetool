@@ -10,12 +10,13 @@
 
 // [0] define global variables: configuration-file 'settings' and logfile 'debuglogfile'
 
-QSettings settings("routetool.ini", QSettings::IniFormat);
+QSettings settings("lat-lng-b.ini", QSettings::IniFormat);
 
 FILE *debuglogfile;
 
 void checkSettings()
 {
+    /**
     // check if everything is filled in:
     QStringList needed_keys;
     needed_keys << "apiKey" <<  "db/databasename" << "db/host" << "db/password" << "db/username" << "startpunt" << "zak_kaarsresten_naar_kg" << "zak_kaarsresten_volume" << "zak_kurk_naar_kg" << "zak_kurk_volume" << "max_gewicht_vrachtwagen" << "max_volume_vrachtwagen";
@@ -38,6 +39,7 @@ void checkSettings()
     }
 
     vvimDebug() << QObject::tr("Configuration checkSettings(): OK! All settings are filled in.");
+    **/
 }
 
 void myMessageOutput(QtMsgType type, const char *msg)

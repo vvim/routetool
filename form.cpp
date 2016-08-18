@@ -142,9 +142,9 @@ void Form::putCoordinatesInDatabase(double east, double north, int ophaalpunt_id
     /** this function is only to put the coordinates in the database, NOT to put a marker on the screen **/
 
 
-    vvimDebug() << "update db: lat / lng / ophaalpunt" << north << east << ophaalpunt_id;
+    vvimDebug() << "DIT IS WAT IK WIL :-)" << "update db: lat / lng / ophaalpunt" << north << east << ophaalpunt_id;
 
-    QString SQLquery_update_coords = "UPDATE ophaalpunten SET lat = :lat, lng = :lng WHERE id = :ophaalpunt_id";
+    QString SQLquery_update_coords = "UPDATE t_deelnemers SET lat = :lat, lng = :lng WHERE id = :ophaalpunt_id";
 
     QSqlQuery query_update_coords;
     query_update_coords.prepare(SQLquery_update_coords);
@@ -867,78 +867,7 @@ void Form::logOutputLwMarkers()
 
 void Form::reloadCompleter()
 {
-    vvimDebug() << "database has been changed, so we should reload the Completer";
 
-    /** version from database **/
-    QStringList words; // "don't come easy, to me, la la la laaa la la"
-
-    vvimDebug() << "1. made QStringList words";
-#ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-#endif
-    vvimDebug() << "2. setOverrideCursor";
-
-    QString SQLquery = "SELECT naam, straat, nr, bus, postcode, plaats, land FROM ophaalpunten WHERE kurk > 0 OR parafine > 0";
-    QSqlQuery query(SQLquery);
-
-    vvimDebug() << "3. SELECT query ready";
-    if(!query.exec())
-    {
-        if(!reConnectToDatabase(query.lastError(), SQLquery, QString("[%1]").arg(Q_FUNC_INFO)))
-        {
-            vvimDebug() << "unable to reconnect to DB, halting";
-            QMessageBox::information(this, tr("Fout bij verbinding met de databank ").arg(Q_FUNC_INFO), tr("De databank kon niet geraadpleegd worden, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
-            exit(-1);
-        }
-        query = QSqlQuery(SQLquery);
-        if(!query.exec())
-        {
-            vvimDebug() << "query failed after reconnecting to DB, halting" << SQLquery;
-            QMessageBox::information(this, tr("Fout bij verbinding met heruitvoeren query ").arg(Q_FUNC_INFO), tr("De query kon niet uitgevoerd worden na reconnectie met databank, probeer opnieuw. Als deze fout zich blijft voordoen, stuur het logbestand naar Wim of neem contact op met de systeembeheerder."));
-            exit(-1);
-        }
-    }
-
-    vvimDebug() << "4. no SQL query";
-    while (query.next()) {
-        QString naam	= query.value(0).toString();
-        QString straat	= query.value(1).toString();
-        QString nr	    = query.value(2).toString();
-        QString bus	    = query.value(3).toString();
-        QString postcode	= query.value(4).toString();
-        QString plaats	= query.value(5).toString();
-        QString land	= query.value(6).toString();
-        words << naam.append(", %1 %2, %3 %4, %5").arg(straat).arg(nr).arg(postcode).arg(plaats).arg(land);
-    }
-
-    vvimDebug() << "5. TOTAL of ophaalpunten loaded in completer : " << words.length();
-
-    vvimDebug() << "6. IF completer -> delete it, thank you" << completer;
-    vvimDebug() << "6. IF completer -> delete it, thank you - value:" << completer;
-    vvimDebug() << "!!! check in all classes if completer is set to NULL in constructor, thank you";
-
-    if(completer)
-    {
-        vvimDebug() << "7. - completer TRUE => delete completer";
-        delete completer;
-    }
-    else
-        vvimDebug() << "7. - completer FALSE, no need to delete it";
-
-
-
-    completer = new MyCompleter(words, this);
-    vvimDebug() << "8. new completer 'words'";
-    completer->setCaseSensitivity(Qt::CaseInsensitive);
-    vvimDebug() << "9. Case insensitive";
-
-    ui->lePostalAddress->setCompleter(completer);
-    vvimDebug() << "10. lePostalAddress";
-
-#ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
-#endif
-    vvimDebug() << "done, completer (re)loaded.";
 }
 
 void Form::on_showOphaalpunten_clicked()
@@ -1367,4 +1296,45 @@ void Form::on_testButton_clicked()
     ui->webView->setHtml(html);
     return;
 
+}
+
+void Form::on_pushButton_latlng_clicked()
+{
+    vvimDebug() << "toon bekende ophaalpunten!" << "inspiration: https://developers.google.com/maps/documentation/javascript/examples/marker-simple" << "and" << "https://developers.google.com/maps/documentation/javascript/markers";
+
+    vvimDebug() << "** [A] ** update the ophaalpunten without lat/lng - Google Maps API doesn't allow more than 15 queries in one go, maximum = 15";
+    vvimDebug() << "**     **  ??? -> rekening houden met wie lid is en wie niet?? Iedereen op de kaart zetten die een adres heeft?";
+    QSqlQuery query_no_lat_lng("SELECT * FROM t_deelnemers WHERE lat is NULL or lng is NULL LIMIT 15");
+    if(query_no_lat_lng.exec())
+        vvimDebug() << "query runs";
+    else
+        vvimDebug() << "query error:" << query_no_lat_lng.lastError();
+    QList<SOphaalpunt> * listOfOphaalpunten = new QList<SOphaalpunt>();
+    vvimDebug() << "QList aangemaakt";
+    while(query_no_lat_lng.next())
+    {
+        vvimDebug() << "inside resultlist of ophaalpunten without lat/lng";
+        vvimDebug() << "name of ophaalpunt:" << query_no_lat_lng.value(2).toString();
+        SOphaalpunt _ophaalpunt(
+                        query_no_lat_lng.value(2).toString(),                      //_naam
+                        query_no_lat_lng.value(4).toString(),                      //_street
+                        query_no_lat_lng.value(5).toString(),                      //_housenr
+                        query_no_lat_lng.value(6).toString(),                      //_busnr
+                        query_no_lat_lng.value(7).toString(),                      //_postalcode
+                        query_no_lat_lng.value(8).toString(),                      //_plaats
+                        "Belgium",                      //_country
+                        0,                      //_kg_kurk
+                        0,                      //_kg_kaarsresten
+                        0,                      //_zakken_kurk
+                        0,                      //_zakken_kaarsresten
+                        -1,                      //_aanmelding_id
+                        query_no_lat_lng.value(0).toInt(),                      //_ophaalpunt_id
+                        query_no_lat_lng.value(23).toString()                      //_opmerkingen
+                    );
+        listOfOphaalpunten->append(_ophaalpunt);
+
+        _ophaalpunt.PrintInformation();
+    }
+
+    m_geocodeDataManager.lookForCoordinatesToPutInDatabase(listOfOphaalpunten);
 }

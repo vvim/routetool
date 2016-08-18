@@ -36,6 +36,7 @@ signals:
 private:
     Ui::RouteTool *ui;
     Form* m_pForm;
+    /*
     NieuweAanmelding nieuweAanmeldingWidget;
     InfoOphaalpunt nieuwOphaalpuntWidget;
     Configuration configurationWidget;
@@ -43,8 +44,10 @@ private:
     Levering leveringWidget;
     ListOfOphaalpuntenToContact contactListWidget;
     OphaalpuntenWidget ophaalpuntenWidget;
+    */
 
 private slots:
+    /*
     void showNieuweAanmelding();
     void showNieuwOphaalpunt();
     void showConfiguration();
@@ -59,6 +62,7 @@ private slots:
     void showOphaalpuntInfo(int ophaalpunt_id);
     void showOphaalrondeAanpassen();
     void cleanMarkersAndOpenOldRoute();
+    */
 };
 
 #endif // ROUTETOOL_H

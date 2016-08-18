@@ -20,6 +20,10 @@ RouteTool::RouteTool(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    m_pForm = new Form(this);
+    setCentralWidget(m_pForm);
+
+    /***
     connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
     connect(ui->nieuweAanmeldingMenuButton, SIGNAL(triggered()), this, SLOT(showNieuweAanmelding()));
     connect(ui->nieuwOphaalpuntMenuButton, SIGNAL(triggered()), this, SLOT(showNieuwOphaalpunt()));
@@ -34,8 +38,6 @@ RouteTool::RouteTool(QWidget *parent) :
     connect(ui->actionExporteer_ophaalpunten, SIGNAL(triggered()), this, SLOT(showExportGegevensOphaalpunten()));
     connect(ui->actionOphaalronde_aanpassen, SIGNAL(triggered()), this, SLOT(showOphaalrondeAanpassen()));
 
-    m_pForm = new Form(this);
-    setCentralWidget(m_pForm);
 
     connect(&kiesOphaalpuntenWidget, SIGNAL(aanmelding_for_route(QList<SOphaalpunt> *)), m_pForm, SLOT(add_aanmeldingen(QList<SOphaalpunt>*)));
     connect(this, SIGNAL(aanmelding_for_route(QList<SOphaalpunt> *)), m_pForm, SLOT(add_aanmeldingen(QList<SOphaalpunt>*)));
@@ -65,6 +67,7 @@ RouteTool::RouteTool(QWidget *parent) :
 
     /// call cleanMarkersAndOpenOldRoute() when TransportationListWriter::print() is done and Boolean is set commit 89741718d8520aab7ddb21a1a9bc2b90b7f5ec2c https://github.com/vvim/routetool/commit/89741718d8520aab7ddb21a1a9bc2b90b7f5ec2c
     connect(m_pForm, SIGNAL(signalCleanMarkersAndOpenOldRoute()), this, SLOT(cleanMarkersAndOpenOldRoute()));
+    ***/
 }
 
 RouteTool::~RouteTool()
@@ -75,6 +78,7 @@ RouteTool::~RouteTool()
     vvimDebug() << "RouteTool() deconstructed";
 }
 
+/*
 void RouteTool::showNieuweAanmelding()
 {
     nieuweAanmeldingWidget.resetValues();
@@ -139,22 +143,6 @@ void RouteTool::showEffectiefOpgehaaldeHoeveelheden()
     }
     kgo->show();
 
-    /**
-      2. nieuw venster met daarin de QSqlWidgetMapper om elke locatie apart te bevestigen, in volgorde!
-
-                => select * from aanmelding where ophaalronde_datum = GEKOZEN_OPHAALRONDE_DATUM
-
-      3. dubbelen verwijderen? => zie select in 1.
-
-      ** insert into TABLE OPHAALHISTORIEK
-      ging dat ok? =>
-      ** delete from TABLE AANMELDING
-
-      ??? wat als we een bevestigde ophaling toch nog willen wijzigen ???
-
-      ??? wat als we een geplande ophaling willen annuleren ???
-        --> zie showAnnuleerIngegevenOphaalronde()
-    **/
 }
 
 void RouteTool::showAnnuleerIngegevenOphaalronde()
@@ -248,15 +236,6 @@ void RouteTool::showExportCollectionHistory()
 
 void RouteTool::showOphaalpuntInfo(int ophaalpunt_id)
 {
-    /** signal gets emited from Form::askMainProgramToShowOphaalpuntInfo(int ophaalpunt_id)
-        reason for being: when the user clicks on "on_showOphaalpunten_clicked()", the map
-        displays all known locations on the map (except those who were already in the route).
-
-        The locations with a known 'aanmelding' will be colored blue, the other ones are yellow.
-        Instead of making the distinction Blue/Yellow in the Javascript of "on_showOphaalpunten_clicked()",
-        we will make the distinction here. It is easier to query OphaalpuntenWidget than to write
-        an extensive Javascript.
-    **/
 
     if(ophaalpuntenWidget.OphaalpuntHasAanmeldingPresent(ophaalpunt_id))
     {
@@ -529,12 +508,7 @@ void RouteTool::showExportGegevensOphaalpunten()
                 case 3: // Kurk?
                 case 4: // Parafine?
                 case 21: // Attest nodig?
-/**                    if(query.value(c).toInt() == 1)
-                        strList <<  tr("\"ja\"");
-                    else
-                        strList <<  tr("\"nee\"");
-                    break;
-**/                    if(query.value(c).toBool())
+                    if(query.value(c).toBool())
                         strList <<  tr("\"ja\"");
                     else
                         strList <<  tr("\"nee\"");
@@ -560,10 +534,6 @@ void RouteTool::showExportGegevensOphaalpunten()
             }
         }
 
-        /** MS Excel from Geert treats fields that contain a \n as a new row.
-            This can be very confusing, therefore we add the call to "replace()"
-            as to change every \n by a white space.
-        **/
         data << strList.join( ";" ).replace("\n"," ")+EndOfLine;
 
         records++;
@@ -585,3 +555,4 @@ void RouteTool::showExportGegevensOphaalpunten()
 
     // RETURN TRUE
 }
+*/
