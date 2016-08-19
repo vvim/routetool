@@ -15,12 +15,13 @@ INCLUDEPATH += ../qjson/include
 linux* {
 INCLUDEPATH += /usr/include/cppconn
 
-LIBS += ../qjson/build/lib/libqjson.so
-LIBS += /usr/lib/libmysqlclient.so
-LIBS += /usr/lib/libmysqlcppconn.so
+###20160802 LIBS += ../qjson/build/lib/libqjson.so
+LIBS += /usr/lib/libqjson.so.0
+###20160802 LIBS += /usr/lib/libmysqlclient.so
+###20160802 LIBS += /usr/lib/libmysqlcppconn.so
 #LIBS += /usr/lib/qt4/plugins/sqldrivers/libqsqlmysql.so
 #LIBS += /home/wim/QtSDK/QtSources/4.7.3/src/plugins/sqldrivers/mysql-build-desktop-Desktop_Qt_4_7_3_for_GCC__Qt_SDK__Release/libqsqlmysql.so
-LIBS += /home/wim/QtSDK/QtSources/4.7.3/src/plugins/sqldrivers/mysql/libqsqlmysql.so
+###20160802 LIBS += /home/wim/QtSDK/QtSources/4.7.3/src/plugins/sqldrivers/mysql/libqsqlmysql.so
 }
 
 win32-g++ {

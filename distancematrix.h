@@ -5,6 +5,7 @@
 #include <QSettings>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include "globalfunctions.h"
 #include "smarker.h"
 
 #define DISTANCE_IN_METERS 1

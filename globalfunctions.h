@@ -23,6 +23,12 @@
 #include <QMessageBox>
 #include <QDateTime>
 
+#ifndef Q_OS_WIN
+// needed for [2] , the sleep-function
+    #include <time.h>
+    #include <errno.h>
+#endif
+
 // [0] define global variables: configuration-file 'settings' and logfile 'debuglogfile'
 
 extern QSettings settings;
@@ -33,8 +39,6 @@ extern FILE *debuglogfile;
 
 #define vvimDebug()\
     qDebug() << "[" << Q_FUNC_INFO << "]"
-
-
 
 void checkSettings();
 
