@@ -16,6 +16,8 @@
     #include <windows.h> // for Sleep
 #endif
 
+#define HTMLFILE "toon_kaart.html"
+
 Form::Form(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Form)
@@ -577,6 +579,39 @@ void Form::drawRoute()
 
         vvimDebug() << "complete HTML:" << html_top+html_bottom;
         ui->webView->setHtml(html_top+html_bottom);
+
+
+        /** 2017 Nov 23 - quick bugfix: on Windows systems, Google Maps in the QWebView does not show the markers anymore
+         *
+         *  Possible solutions:
+         *    1. make very simple dummy project in newest version of Qt and test QWebView with Google Maps behaviour for improvement?
+         *        -> help through StackOverflow?
+         *
+         *    2. research "QWebview markers Google Maps", p.e. http://www.qtcentre.org/threads/36640-QWebView-Problem-Drag-amp-Drop-Markers-in-Google-Maps
+         *
+         *  Current bugfix: write HTML to a separate file, and ask the user to open the HTML-file
+         *
+        **/
+
+        // write HTML to file HTMLFILE
+        QFile htmlfile(HTMLFILE);
+        if (htmlfile.open(QFile::WriteOnly | QFile::Text))
+        {
+            QTextStream stream(&htmlfile);
+            stream << html_top+html_bottom;
+            htmlfile.close();
+        }
+        else
+        {
+            // something went wrong
+            vvimDebug() << "whoops, cannot write to HTML-file";
+            QMessageBox messageBox;
+            messageBox.critical(0,"Fout",tr("Kan het kaartje niet tonen in het aparte bestand"));
+            messageBox.setFixedSize(500,200);
+            messageBox.show();
+            return;
+        }
+
     }
 
     if(!after_calculating_distance_matrix_continue_to_setTotalDistanceAndTotalTime)
