@@ -584,10 +584,13 @@ void Form::drawRoute()
         /** 2017 Nov 23 - quick bugfix: on Windows systems, Google Maps in the QWebView does not show the markers anymore
          *
          *  Possible solutions:
-         *    1. make very simple dummy project in newest version of Qt and test QWebView with Google Maps behaviour for improvement?
+         *    1. problem with the windows-laptop that I use for building routetool for Windows?
+         *        -> Maybe I need to freshly install Qt and re-compile the routetool from a fresh Windows-machine?
+         *
+         *    2. make very simple dummy project in newest version of Qt and test QWebView with Google Maps behaviour for improvement?
          *        -> help through StackOverflow?
          *
-         *    2. research "QWebview markers Google Maps", p.e. http://www.qtcentre.org/threads/36640-QWebView-Problem-Drag-amp-Drop-Markers-in-Google-Maps
+         *    3. research "QWebview markers Google Maps", p.e. http://www.qtcentre.org/threads/36640-QWebView-Problem-Drag-amp-Drop-Markers-in-Google-Maps
          *
          *  Current bugfix: write HTML to a separate file, and ask the user to open the HTML-file
          *
