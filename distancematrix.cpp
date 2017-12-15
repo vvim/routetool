@@ -8,6 +8,8 @@
 #define vvimDebug()\
     qDebug() << "[" << Q_FUNC_INFO << "]"
 
+#define GOOGLEMAPSOLDERVERSION "3.29"
+
 #include <QApplication>
 #include <QJson/Parser>
 #include <QDebug>
@@ -113,7 +115,7 @@ QString DistanceMatrix::buildQjsonUrl(QList <SMarker*> markers, int origins_star
     // <vvim> TODO: if QString.length() > 2000 => gebruik coordinaten ipv adres!
     vvimDebug() << "<vvim> TODO: if QString.length() > 2000 => gebruik coordinaten ipv adres!";
 
-    QString QjsonUrl = QString("https://maps.googleapis.com/maps/api/distancematrix/json?origins=%1&destinations=%2&key=%3&oe=utf8&sensor=false").arg(origins).arg(destinations).arg(settings.value("apiKey").toString());
+    QString QjsonUrl = QString("https://maps.googleapis.com/maps/api/distancematrix/json?v=%4&origins=%1&destinations=%2&key=%3&oe=utf8&sensor=false").arg(origins).arg(destinations).arg(settings.value("apiKey").toString()).arg(GOOGLEMAPSOLDERVERSION);
     vvimDebug() << "<vvim> QjsonUrl:" << QjsonUrl;
     if(QjsonUrl.length() > MAX_URL_LENGTH)
         vvimDebug() << "url is too long:" << QjsonUrl.length() << "exceeds the maximum of" << MAX_URL_LENGTH;
@@ -148,7 +150,7 @@ QString DistanceMatrix::buildQjsonUrl(QList <SMarker*> markers)
     // <vvim> TODO: if QString.length() > 2000 => gebruik coordinaten ipv adres!
     vvimDebug() << "<vvim> TODO: if QString.length() > 2000 => gebruik coordinaten ipv adres!";
 
-    QString QjsonUrl = QString("https://maps.googleapis.com/maps/api/distancematrix/json?origins=%1&destinations=%2&key=%3&oe=utf8&sensor=false").arg(origins).arg(destinations).arg(settings.value("apiKey").toString());
+    QString QjsonUrl = QString("https://maps.googleapis.com/maps/api/distancematrix/json?v=%4&origins=%1&destinations=%2&key=%3&oe=utf8&sensor=false").arg(origins).arg(destinations).arg(settings.value("apiKey").toString()).arg(GOOGLEMAPSOLDERVERSION);
     vvimDebug() << "<vvim> QjsonUrl:" << QjsonUrl;
     if(QjsonUrl.length() > MAX_URL_LENGTH)
         vvimDebug() << "url is too long:" << QjsonUrl.length() << "exceeds the maximum of" << MAX_URL_LENGTH;

@@ -7,6 +7,8 @@
 #define vvimDebug()\
     qDebug() << "[" << Q_FUNC_INFO << "]"
 
+#define GOOGLEMAPSOLDERVERSION "3.29"
+
 GeocodeDataManager::GeocodeDataManager(QObject *parent) :
     QObject(parent)
 {
@@ -30,7 +32,7 @@ void GeocodeDataManager::getCoordinates(const QString& address)
 
     QString address_encoded = name_of_marker;
     address_encoded.replace(" ","+");
-    QString url = QString("https://maps.googleapis.com/maps/api/geocode/json?address=%1&key=%2&oe=utf8&sensor=false").arg(address_encoded).arg(settings.value("apiKey").toString());
+    QString url = QString("https://maps.googleapis.com/maps/api/geocode/json?v=%3&address=%1&key=%2&oe=utf8&sensor=false").arg(address_encoded).arg(settings.value("apiKey").toString()).arg(GOOGLEMAPSOLDERVERSION);
 
 vvimDebug() << "<vvim>" << "would the distance matrix work if we would only put the NAME of the ophaalpunt here, and NOT the address? based on the coordinates???";
     m_pNetworkAccessManager->get(QNetworkRequest(QUrl(url)));
@@ -46,7 +48,7 @@ void GeocodeDataManager::getCoordinates(const QString& address, const QString& n
     address_encoded.replace("&","+");
     address_encoded.replace("\n",",");
     address_encoded.replace(" ","+");
-    QString url = QString("https://maps.googleapis.com/maps/api/geocode/json?address=%1&key=%2&oe=utf8&sensor=false").arg(address_encoded).arg(settings.value("apiKey").toString());
+    QString url = QString("https://maps.googleapis.com/maps/api/geocode/json?v=%3&address=%1&key=%2&oe=utf8&sensor=false").arg(address_encoded).arg(settings.value("apiKey").toString()).arg(GOOGLEMAPSOLDERVERSION);
 
     vvimDebug() << "issue #20, check:" << url;
 vvimDebug() << "<vvim>" << "would the distance matrix work if we would only put the NAME of the ophaalpunt here, and NOT the address? based on the coordinates???";
