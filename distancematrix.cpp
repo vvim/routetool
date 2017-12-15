@@ -5,6 +5,9 @@
     #include <windows.h> // for Sleep
 #endif
 
+#define vvimDebug()\
+    qDebug() << "[" << Q_FUNC_INFO << "]"
+
 #include <QApplication>
 #include <QJson/Parser>
 #include <QDebug>
@@ -312,7 +315,7 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
         #ifdef Q_OS_WIN
             Sleep(2000);
         #else
-            //sleep(2000);
+//            sleep(2);
         #endif
 
         distance_matrix_ready_to_process = DISTANCE_MATRIX_PART_B; // origins = [0, MAX[, destinations = [MAX, all]
@@ -398,7 +401,7 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
         #ifdef Q_OS_WIN
             Sleep(2000);
         #else
-            //sleep(2);
+//            sleep(2);
         #endif
 
         distance_matrix_ready_to_process = DISTANCE_MATRIX_PART_CC; // origins = [MAX, all], destinations = [0, MAX[
@@ -481,7 +484,7 @@ void DistanceMatrix::replyFinished(QNetworkReply* reply)
         #ifdef Q_OS_WIN
             Sleep(2000);
         #else
-            //sleep(2);
+//            sleep(2);
         #endif
         distance_matrix_ready_to_process = DISTANCE_MATRIX_PART_D; // origins = [MAX, all], destinations = [MAX, all]
         url = buildQjsonUrl(m_markers,MAX_NR_OF_CITIES+1, m_markers.length(), MAX_NR_OF_CITIES+1, m_markers.length());
